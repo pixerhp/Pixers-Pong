@@ -14,7 +14,6 @@ height = 16.0
 radial_segments = 4
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_llhxm"]
-radius = 8.0
 
 [node name="GameplayTopscene" type="Node2D" unique_id=297910401]
 
@@ -31,7 +30,7 @@ position = Vector2(-2.5, 0)
 shape = SubResource("CapsuleShape2D_llhxm")
 
 [node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
-position = Vector2(1032, 324)
+position = Vector2(1140, 324)
 
 [node name="RightPaddleMesh" type="MeshInstance2D" parent="RightPaddle" unique_id=610239775]
 mesh = SubResource("CapsuleMesh_llhxm")
@@ -43,7 +42,7 @@ position = Vector2(2.5, 0)
 shape = SubResource("CapsuleShape2D_llhxm")
 
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
-position = Vector2(576, 324)
+position = Vector2(630, 324)
 
 [node name="BallMesh" type="MeshInstance2D" parent="Ball" unique_id=151043058]
 mesh = SubResource("SphereMesh_llhxm")
