@@ -8,10 +8,20 @@ height = 216.0
 radius = 13.0
 height = 230.0
 
+[sub_resource type="SphereMesh" id="SphereMesh_llhxm"]
+radius = 8.0
+height = 16.0
+radial_segments = 4
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_llhxm"]
+radius = 8.0
+
 [node name="GameplayTopscene" type="Node2D" unique_id=297910401]
 
-[node name="LeftPaddle" type="MeshInstance2D" parent="." unique_id=1258549724]
+[node name="LeftPaddle" type="Node2D" parent="." unique_id=1689491174]
 position = Vector2(120, 324)
+
+[node name="LeftPaddleMesh" type="MeshInstance2D" parent="LeftPaddle" unique_id=1258549724]
 mesh = SubResource("CapsuleMesh_llhxm")
 
 [node name="LeftPaddleCollider" type="Area2D" parent="LeftPaddle" unique_id=1870354754]
@@ -20,12 +30,25 @@ mesh = SubResource("CapsuleMesh_llhxm")
 position = Vector2(-2.5, 0)
 shape = SubResource("CapsuleShape2D_llhxm")
 
-[node name="RightPaddle" type="MeshInstance2D" parent="." unique_id=610239775]
+[node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
 position = Vector2(1032, 324)
+
+[node name="RightPaddleMesh" type="MeshInstance2D" parent="RightPaddle" unique_id=610239775]
 mesh = SubResource("CapsuleMesh_llhxm")
 
-[node name="LeftPaddleCollider2" type="Area2D" parent="RightPaddle" unique_id=468999830]
+[node name="RightPaddleCollider" type="Area2D" parent="RightPaddle" unique_id=468999830]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPaddle/LeftPaddleCollider2" unique_id=131927358]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPaddle/RightPaddleCollider" unique_id=131927358]
 position = Vector2(2.5, 0)
 shape = SubResource("CapsuleShape2D_llhxm")
+
+[node name="Ball" type="Node2D" parent="." unique_id=2146992066]
+position = Vector2(576, 324)
+
+[node name="BallMesh" type="MeshInstance2D" parent="Ball" unique_id=151043058]
+mesh = SubResource("SphereMesh_llhxm")
+
+[node name="BallCollider" type="Area2D" parent="Ball" unique_id=1099658575]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ball/BallCollider" unique_id=2139779703]
+shape = SubResource("CircleShape2D_llhxm")
