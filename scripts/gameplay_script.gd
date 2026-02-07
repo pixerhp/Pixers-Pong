@@ -80,14 +80,14 @@ func handle_ball_movement(delta: float):
 		%Ball.position = get_viewport().get_visible_rect().size / 2.0
 
 
-func _on_left_paddle_collider_area_entered(area):
+func _on_left_paddle_collider_area_entered(_area):
 	if ball_velocity.x < 0.0:
 		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / ((%LeftPaddleMesh.mesh.height / 2.0)), 5)
 		var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
 
-func _on_right_paddle_collider_area_entered(area):
+func _on_right_paddle_collider_area_entered(_area):
 	if ball_velocity.x > 0.0:
 		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / ((%RightPaddleMesh.mesh.height / 2.0)), 5)
 		var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
