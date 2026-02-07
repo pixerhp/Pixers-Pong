@@ -1,3 +1,31 @@
 [gd_scene format=3 uid="uid://djf03i2v6xbtj"]
 
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_llhxm"]
+radius = 8.0
+height = 216.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_llhxm"]
+radius = 13.0
+height = 230.0
+
 [node name="GameplayTopscene" type="Node2D" unique_id=297910401]
+
+[node name="LeftPaddle" type="MeshInstance2D" parent="." unique_id=1258549724]
+position = Vector2(120, 324)
+mesh = SubResource("CapsuleMesh_llhxm")
+
+[node name="LeftPaddleCollider" type="Area2D" parent="LeftPaddle" unique_id=1870354754]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftPaddle/LeftPaddleCollider" unique_id=80613153]
+position = Vector2(-2.5, 0)
+shape = SubResource("CapsuleShape2D_llhxm")
+
+[node name="RightPaddle" type="MeshInstance2D" parent="." unique_id=610239775]
+position = Vector2(1032, 324)
+mesh = SubResource("CapsuleMesh_llhxm")
+
+[node name="LeftPaddleCollider2" type="Area2D" parent="RightPaddle" unique_id=468999830]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPaddle/LeftPaddleCollider2" unique_id=131927358]
+position = Vector2(2.5, 0)
+shape = SubResource("CapsuleShape2D_llhxm")
