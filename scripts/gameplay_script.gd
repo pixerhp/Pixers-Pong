@@ -15,7 +15,9 @@ var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 var left_paddle_velocity: float = 0.0
 var right_paddle_velocity: float = 0.0
 
-var ball_velocity: Vector2 = Vector2(-3 * 120, 0 * 120)
+var ball_velocity: Vector2 = Vector2(-0.1 * 120, 2 * 120)
+
+var ball_speedup_amount: float = 50
 
 func _process(delta: float):
 	handle_left_paddle_movement(delta)
@@ -81,11 +83,13 @@ func handle_ball_movement(delta: float):
 func _on_left_paddle_collider_area_entered(area):
 	if ball_velocity.x < 0.0:
 		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / ((%LeftPaddleMesh.mesh.height / 2.0)), 5)
-		var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.4)
-		ball_velocity = ball_velocity.length() * angle
+		var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.25)
+		ball_velocity = ball_velocity.bounce(angle)
+		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
 
 func _on_right_paddle_collider_area_entered(area):
 	if ball_velocity.x > 0.0:
 		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / ((%RightPaddleMesh.mesh.height / 2.0)), 5)
-		var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.4)
-		ball_velocity = ball_velocity.length() * angle
+		var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
+		ball_velocity = ball_velocity.bounce(angle)
+		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())

@@ -6,8 +6,16 @@
 radius = 8.0
 height = 200.0
 
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_n6iga"]
+radius = 4.0
+height = 120.0
+
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_llhxm"]
+radius = 16.0
 height = 200.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n6iga"]
+size = Vector2(89.01814, 31.436556)
 
 [sub_resource type="SphereMesh" id="SphereMesh_llhxm"]
 radius = 8.0
@@ -28,11 +36,35 @@ position = Vector2(120, 324)
 unique_name_in_owner = true
 mesh = SubResource("CapsuleMesh_llhxm")
 
+[node name="BackUpperMesh" type="MeshInstance2D" parent="LeftPaddle" unique_id=18410344]
+position = Vector2(-12.344362, -46.38957)
+rotation = 0.17453294
+scale = Vector2(0.99999994, 0.84109306)
+mesh = SubResource("CapsuleMesh_n6iga")
+
+[node name="BackLowerMesh" type="MeshInstance2D" parent="LeftPaddle" unique_id=528758697]
+position = Vector2(-12.344, 46.39)
+rotation = -0.17453292
+scale = Vector2(0.99999994, 0.84109306)
+mesh = SubResource("CapsuleMesh_n6iga")
+
 [node name="LeftPaddleCollider" type="Area2D" parent="LeftPaddle" unique_id=1870354754]
 unique_name_in_owner = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftPaddle/LeftPaddleCollider" unique_id=80613153]
+[node name="CollCapsule" type="CollisionShape2D" parent="LeftPaddle/LeftPaddleCollider" unique_id=80613153]
 shape = SubResource("CapsuleShape2D_llhxm")
+
+[node name="CollRectUpper" type="CollisionShape2D" parent="LeftPaddle/LeftPaddleCollider" unique_id=1224020905]
+position = Vector2(-8, -40.000008)
+rotation = -1.3962634
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_n6iga")
+
+[node name="CollRectLower" type="CollisionShape2D" parent="LeftPaddle/LeftPaddleCollider" unique_id=1235479968]
+position = Vector2(-7.770996, 40)
+rotation = 1.3962634
+scale = Vector2(0.9999996, 0.9999996)
+shape = SubResource("RectangleShape2D_n6iga")
 
 [node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
 unique_name_in_owner = true
@@ -42,11 +74,35 @@ position = Vector2(1140, 324)
 unique_name_in_owner = true
 mesh = SubResource("CapsuleMesh_llhxm")
 
+[node name="BackUpperMesh" type="MeshInstance2D" parent="RightPaddle" unique_id=1122277506]
+position = Vector2(12.344, -46.39)
+rotation = -0.17453292
+scale = Vector2(0.9999999, 0.84109306)
+mesh = SubResource("CapsuleMesh_n6iga")
+
+[node name="BackLowerMesh" type="MeshInstance2D" parent="RightPaddle" unique_id=1119387743]
+position = Vector2(12.344, 46.39)
+rotation = 0.17453292
+scale = Vector2(0.9999999, 0.84109306)
+mesh = SubResource("CapsuleMesh_n6iga")
+
 [node name="RightPaddleCollider" type="Area2D" parent="RightPaddle" unique_id=468999830]
 unique_name_in_owner = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPaddle/RightPaddleCollider" unique_id=131927358]
+[node name="CollCapsule" type="CollisionShape2D" parent="RightPaddle/RightPaddleCollider" unique_id=131927358]
 shape = SubResource("CapsuleShape2D_llhxm")
+
+[node name="CollRectUpper" type="CollisionShape2D" parent="RightPaddle/RightPaddleCollider" unique_id=886387887]
+position = Vector2(8, -40)
+rotation = -1.7453293
+scale = Vector2(0.9999996, 0.9999996)
+shape = SubResource("RectangleShape2D_n6iga")
+
+[node name="CollRectLower" type="CollisionShape2D" parent="RightPaddle/RightPaddleCollider" unique_id=1362012885]
+position = Vector2(8, 40)
+rotation = 1.7453293
+scale = Vector2(0.9999995, 0.9999995)
+shape = SubResource("RectangleShape2D_n6iga")
 
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
 unique_name_in_owner = true
