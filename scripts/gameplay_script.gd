@@ -1,5 +1,7 @@
 extends Node2D
 
+const BALLMESH_DIAMETER: float = 14
+
 var PADDLE_MOVEACCEL: float = 14400.0
 var PADDLE_MAXSPEED: float = 1440.0
 var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
@@ -8,14 +10,14 @@ var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 @onready var PADDLE_DOWN_LIMIT: float = (
 	get_viewport().get_visible_rect().size.y - (%LeftPaddleMesh.mesh.height / 2.0))
 @onready var BALL_UP_LIMIT: float = (
-	%BallMesh.mesh.height / 2.0)
+	BALLMESH_DIAMETER / 2.0)
 @onready var BALL_DOWN_LIMIT: float = (
-	get_viewport().get_visible_rect().size.y - (%BallMesh.mesh.height / 2.0))
+	get_viewport().get_visible_rect().size.y - (BALLMESH_DIAMETER / 2.0))
 
 var left_paddle_velocity: float = 0.0
 var right_paddle_velocity: float = 0.0
 
-var ball_velocity: Vector2 = Vector2(-0.1 * 120, 2 * 120)
+var ball_velocity: Vector2 = Vector2(-2 * 120, 0.5 * 120)
 
 var ball_speedup_amount: float = 50
 
