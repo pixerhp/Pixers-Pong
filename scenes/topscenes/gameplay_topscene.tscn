@@ -7,8 +7,7 @@ radius = 8.0
 height = 200.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_llhxm"]
-radius = 16.0
-height = 208.0
+height = 200.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_llhxm"]
 radius = 8.0
@@ -33,7 +32,6 @@ mesh = SubResource("CapsuleMesh_llhxm")
 unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftPaddle/LeftPaddleCollider" unique_id=80613153]
-position = Vector2(-6, 0)
 shape = SubResource("CapsuleShape2D_llhxm")
 
 [node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
@@ -48,7 +46,6 @@ mesh = SubResource("CapsuleMesh_llhxm")
 unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightPaddle/RightPaddleCollider" unique_id=131927358]
-position = Vector2(6, 0)
 shape = SubResource("CapsuleShape2D_llhxm")
 
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
@@ -64,3 +61,6 @@ unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ball/BallCollider" unique_id=2139779703]
 shape = SubResource("CircleShape2D_llhxm")
+
+[connection signal="area_entered" from="LeftPaddle/LeftPaddleCollider" to="." method="_on_left_paddle_collider_area_entered"]
+[connection signal="area_entered" from="RightPaddle/RightPaddleCollider" to="." method="_on_right_paddle_collider_area_entered"]
