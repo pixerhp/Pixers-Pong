@@ -1,0 +1,183 @@
+[gd_scene format=3 uid="uid://c782dk0hf6ul1"]
+
+[ext_resource type="Texture2D" uid="uid://co2oa2en7orgd" path="res://assets/art/paddle_char.png" id="1_isavg"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ewsv"]
+atlas = ExtResource("1_isavg")
+region = Rect2(560, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cmp63"]
+atlas = ExtResource("1_isavg")
+region = Rect2(0, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_twfkj"]
+atlas = ExtResource("1_isavg")
+region = Rect2(140, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2x6ri"]
+atlas = ExtResource("1_isavg")
+region = Rect2(840, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yvy6h"]
+atlas = ExtResource("1_isavg")
+region = Rect2(980, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jsee6"]
+atlas = ExtResource("1_isavg")
+region = Rect2(420, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lt08x"]
+atlas = ExtResource("1_isavg")
+region = Rect2(280, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1r6rk"]
+atlas = ExtResource("1_isavg")
+region = Rect2(700, 200, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cbdv4"]
+atlas = ExtResource("1_isavg")
+region = Rect2(560, 0, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pyq0w"]
+atlas = ExtResource("1_isavg")
+region = Rect2(0, 0, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ks65t"]
+atlas = ExtResource("1_isavg")
+region = Rect2(140, 0, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i613a"]
+atlas = ExtResource("1_isavg")
+region = Rect2(840, 0, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r2nhd"]
+atlas = ExtResource("1_isavg")
+region = Rect2(980, 0, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_isavg"]
+atlas = ExtResource("1_isavg")
+region = Rect2(420, 0, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oak74"]
+atlas = ExtResource("1_isavg")
+region = Rect2(280, 0, 140, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mo7va"]
+atlas = ExtResource("1_isavg")
+region = Rect2(700, 0, 140, 200)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hx5ms"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5ewsv")
+}],
+"loop": true,
+"name": &"bot_close_call",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cmp63")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_twfkj")
+}],
+"loop": true,
+"name": &"bot_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2x6ri")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yvy6h")
+}],
+"loop": true,
+"name": &"bot_lose",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jsee6")
+}],
+"loop": true,
+"name": &"bot_move_down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lt08x")
+}],
+"loop": true,
+"name": &"bot_move_up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1r6rk")
+}],
+"loop": true,
+"name": &"bot_win",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cbdv4")
+}],
+"loop": true,
+"name": &"plr_close_call",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pyq0w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ks65t")
+}],
+"loop": true,
+"name": &"plr_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i613a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r2nhd")
+}],
+"loop": true,
+"name": &"plr_lose",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_isavg")
+}],
+"loop": true,
+"name": &"plr_move_down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oak74")
+}],
+"loop": true,
+"name": &"plr_move_up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mo7va")
+}],
+"loop": true,
+"name": &"plr_win",
+"speed": 5.0
+}]
+
+[node name="PaddleChar" type="AnimatedSprite2D" unique_id=1333835360]
+sprite_frames = SubResource("SpriteFrames_hx5ms")
+animation = &"plr_idle"
+autoplay = "plr_idle"

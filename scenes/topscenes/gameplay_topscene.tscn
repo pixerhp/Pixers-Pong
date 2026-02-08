@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://uo8drfr51v6o" path="res://scripts/gameplay_script.gd" id="1_n6iga"]
 [ext_resource type="ArrayMesh" uid="uid://dhcyjins7o86k" path="res://assets/models/ball_torus.obj" id="2_rncwu"]
-[ext_resource type="Texture2D" uid="uid://bie0m53vfstm2" path="res://assets/art/paddle_player_test.png" id="2_u55sw"]
+[ext_resource type="PackedScene" uid="uid://c782dk0hf6ul1" path="res://scenes/topscenes/paddle_char.tscn" id="2_u55sw"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_llhxm"]
 radius = 8.0
@@ -69,9 +69,8 @@ rotation = 1.3962634
 scale = Vector2(0.9999996, 0.9999996)
 shape = SubResource("RectangleShape2D_n6iga")
 
-[node name="LeftPaddleChar" type="Sprite2D" parent="LeftPaddle" unique_id=2028482819]
+[node name="PaddleChar" parent="LeftPaddle" unique_id=1333835360 instance=ExtResource("2_u55sw")]
 position = Vector2(-60, 0)
-texture = ExtResource("2_u55sw")
 
 [node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
 unique_name_in_owner = true
