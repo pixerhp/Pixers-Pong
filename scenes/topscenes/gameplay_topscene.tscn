@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://djf03i2v6xbtj"]
 
 [ext_resource type="Script" uid="uid://uo8drfr51v6o" path="res://scripts/gameplay_script.gd" id="1_n6iga"]
+[ext_resource type="Texture2D" uid="uid://bmx6cx37pior3" path="res://assets/art/play_area.png" id="2_pyq0w"]
 [ext_resource type="ArrayMesh" uid="uid://dhcyjins7o86k" path="res://assets/models/ball_torus.obj" id="2_rncwu"]
 [ext_resource type="PackedScene" uid="uid://c782dk0hf6ul1" path="res://scenes/topscenes/paddle_char.tscn" id="2_u55sw"]
 
@@ -25,11 +26,9 @@ radius = 7.0
 [node name="GameplayTopscene" type="Node2D" unique_id=297910401]
 script = ExtResource("1_n6iga")
 
-[node name="BackgroundColor" type="ColorRect" parent="." unique_id=1153635322]
-custom_minimum_size = Vector2(1260, 648)
-offset_right = 1260.0
-offset_bottom = 648.0
-color = Color(0.099985994, 0.099985994, 0.099985994, 1)
+[node name="BackgroundColor" type="Sprite2D" parent="." unique_id=479692831]
+position = Vector2(630, 324)
+texture = ExtResource("2_pyq0w")
 
 [node name="LeftPaddle" type="Node2D" parent="." unique_id=1689491174]
 unique_name_in_owner = true
