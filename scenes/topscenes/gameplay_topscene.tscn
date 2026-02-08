@@ -70,7 +70,7 @@ scale = Vector2(0.9999996, 0.9999996)
 shape = SubResource("RectangleShape2D_n6iga")
 
 [node name="PaddleChar" parent="LeftPaddle" unique_id=1333835360 instance=ExtResource("2_u55sw")]
-position = Vector2(-60, 0)
+position = Vector2(-70, 0)
 
 [node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
 unique_name_in_owner = true
