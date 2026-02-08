@@ -20,6 +20,10 @@ height = 200.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_n6iga"]
 size = Vector2(89.01814, 31.436556)
 
+[sub_resource type="Curve" id="Curve_pyq0w"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_llhxm"]
 radius = 7.0
 
@@ -112,6 +116,12 @@ shape = SubResource("RectangleShape2D_n6iga")
 [node name="PaddleChar" parent="RightPaddle" unique_id=1607460780 instance=ExtResource("2_u55sw")]
 position = Vector2(70, 0)
 scale = Vector2(-1, 1)
+
+[node name="BallTrailLine" type="Line2D" parent="." unique_id=1365490242]
+unique_name_in_owner = true
+width = 8.0
+width_curve = SubResource("Curve_pyq0w")
+default_color = Color(0.65, 0.65, 0.65, 1)
 
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
 unique_name_in_owner = true

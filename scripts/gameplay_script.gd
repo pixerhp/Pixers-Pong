@@ -14,17 +14,21 @@ var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 @onready var BALL_DOWN_LIMIT: float = (
 	Globals.PLAY_AREA_DIMENSIONS.y - (BALLMESH_DIAMETER / 2.0))
 
+var ball_speedup_amount: float = 50
+
 var left_paddle_velocity: float = 0.0
 var right_paddle_velocity: float = 0.0
-
 var ball_velocity: Vector2 = Vector2(-2 * 120, 0.5 * 120)
 
-var ball_speedup_amount: float = 50
+var ball_trail_ms_duration: float = 250
+var ball_trail_positions: PackedVector2Array = []
+var ball_trail_times: PackedInt64Array = []
 
 func _process(delta: float):
 	handle_left_paddle_movement(delta)
 	handle_right_paddle_movement(delta)
 	handle_ball_movement(delta)
+	handle_ball_trail()
 
 func handle_left_paddle_movement(delta: float):
 	if Input.is_action_pressed("plr1_up") and not Input.is_action_pressed("plr1_down"):
@@ -80,6 +84,25 @@ func handle_ball_movement(delta: float):
 	if ((%Ball.position.x < (-1.0 * BALL_UP_LIMIT)) or 
 	(%Ball.position.x > (Globals.PLAY_AREA_DIMENSIONS.x + BALL_UP_LIMIT))):
 		%Ball.position = Globals.PLAY_AREA_DIMENSIONS / 2.0
+
+func handle_ball_trail():
+	# Remove outdated trail data:
+	var deletion_up_bound: int = -1
+	for i in range(ball_trail_times.size()):
+		if (Time.get_ticks_msec() - ball_trail_times[i]) > ball_trail_ms_duration:
+			deletion_up_bound = i
+		else:
+			break
+	if deletion_up_bound > -1:
+		ball_trail_positions = ball_trail_positions.slice(deletion_up_bound + 1)
+		ball_trail_times = ball_trail_times.slice(deletion_up_bound + 1)
+	
+	# Add new trail data:
+	ball_trail_positions.append(%Ball.position)
+	ball_trail_times.append(Time.get_ticks_msec())
+	
+	# Update trail Line2D node's internal array.
+	%BallTrailLine.points = ball_trail_positions
 
 
 func _on_left_paddle_collider_area_entered(_area):
