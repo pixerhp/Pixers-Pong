@@ -110,6 +110,10 @@ rotation = 1.7453293
 scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_n6iga")
 
+[node name="PaddleChar" parent="RightPaddle" unique_id=1607460780 instance=ExtResource("2_u55sw")]
+position = Vector2(70, 0)
+scale = Vector2(-1, 1)
+
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
 unique_name_in_owner = true
 position = Vector2(630, 324)
