@@ -1,5 +1,7 @@
 extends Node
 
+const PLAY_AREA_DIMENSIONS: Vector2 = Vector2(1260, 648)
+
 func _process(_delta):
 	if Input.is_action_pressed("pause_escape"):
 		get_tree().quit()

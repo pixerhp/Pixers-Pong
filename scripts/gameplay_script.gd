@@ -8,11 +8,11 @@ var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 @onready var PADDLE_UP_LIMIT: float = (
 	%LeftPaddleMesh.mesh.height / 2.0)
 @onready var PADDLE_DOWN_LIMIT: float = (
-	get_viewport().get_visible_rect().size.y - (%LeftPaddleMesh.mesh.height / 2.0))
+	Globals.PLAY_AREA_DIMENSIONS.y - (%LeftPaddleMesh.mesh.height / 2.0))
 @onready var BALL_UP_LIMIT: float = (
 	BALLMESH_DIAMETER / 2.0)
 @onready var BALL_DOWN_LIMIT: float = (
-	get_viewport().get_visible_rect().size.y - (BALLMESH_DIAMETER / 2.0))
+	Globals.PLAY_AREA_DIMENSIONS.y - (BALLMESH_DIAMETER / 2.0))
 
 var left_paddle_velocity: float = 0.0
 var right_paddle_velocity: float = 0.0
@@ -78,8 +78,8 @@ func handle_ball_movement(delta: float):
 		ball_velocity.y = minf(ball_velocity.y, ball_velocity.y * -1.0)
 	
 	if ((%Ball.position.x < (-1.0 * BALL_UP_LIMIT)) or 
-	(%Ball.position.x > (get_viewport().get_visible_rect().size.x + BALL_UP_LIMIT))):
-		%Ball.position = get_viewport().get_visible_rect().size / 2.0
+	(%Ball.position.x > (Globals.PLAY_AREA_DIMENSIONS.x + BALL_UP_LIMIT))):
+		%Ball.position = Globals.PLAY_AREA_DIMENSIONS / 2.0
 
 
 func _on_left_paddle_collider_area_entered(_area):
