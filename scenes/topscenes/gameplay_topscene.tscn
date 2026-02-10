@@ -39,28 +39,28 @@ unique_name_in_owner = true
 position = Vector2(120, 324)
 metadata/velocity = 0.0
 
-[node name="LeftPaddleMesh" type="Node2D" parent="LeftPaddle" unique_id=1814027095]
+[node name="LeftPadMeshContainer" type="Node2D" parent="LeftPaddle" unique_id=1814027095]
 unique_name_in_owner = true
 metadata/knockback_oomf = 0.0
 metadata/knockback_time = 0
 
-[node name="LeftMainBarMesh" type="MeshInstance2D" parent="LeftPaddle/LeftPaddleMesh" unique_id=1258549724]
+[node name="LeftPadBarMesh" type="MeshInstance2D" parent="LeftPaddle/LeftPadMeshContainer" unique_id=1258549724]
 unique_name_in_owner = true
 mesh = SubResource("CapsuleMesh_llhxm")
 
-[node name="BackUpperMesh" type="MeshInstance2D" parent="LeftPaddle/LeftPaddleMesh/LeftMainBarMesh" unique_id=18410344]
+[node name="BackUpperMesh" type="MeshInstance2D" parent="LeftPaddle/LeftPadMeshContainer/LeftPadBarMesh" unique_id=18410344]
 position = Vector2(-12.34436, -46.389557)
 rotation = 0.17453294
 scale = Vector2(0.9999999, 0.84109306)
 mesh = SubResource("CapsuleMesh_n6iga")
 
-[node name="BackLowerMesh" type="MeshInstance2D" parent="LeftPaddle/LeftPaddleMesh/LeftMainBarMesh" unique_id=528758697]
+[node name="BackLowerMesh" type="MeshInstance2D" parent="LeftPaddle/LeftPadMeshContainer/LeftPadBarMesh" unique_id=528758697]
 position = Vector2(-12.344002, 46.390015)
 rotation = -0.17453292
 scale = Vector2(0.9999999, 0.84109306)
 mesh = SubResource("CapsuleMesh_n6iga")
 
-[node name="LeftPaddleChar" parent="LeftPaddle/LeftPaddleMesh" unique_id=1333835360 instance=ExtResource("2_u55sw")]
+[node name="LeftPaddleChar" parent="LeftPaddle/LeftPadMeshContainer" unique_id=1333835360 instance=ExtResource("2_u55sw")]
 unique_name_in_owner = true
 position = Vector2(-70, 0)
 
@@ -87,28 +87,28 @@ unique_name_in_owner = true
 position = Vector2(1140, 324)
 metadata/velocity = 0.0
 
-[node name="RightPaddleMesh" type="Node2D" parent="RightPaddle" unique_id=937432599]
+[node name="RightPadMeshContainer" type="Node2D" parent="RightPaddle" unique_id=937432599]
 unique_name_in_owner = true
 metadata/knockback_oomf = 0.0
 metadata/knockback_time = 0
 
-[node name="RightMainBarMesh" type="MeshInstance2D" parent="RightPaddle/RightPaddleMesh" unique_id=610239775]
+[node name="RightPadBarMesh" type="MeshInstance2D" parent="RightPaddle/RightPadMeshContainer" unique_id=610239775]
 unique_name_in_owner = true
 mesh = SubResource("CapsuleMesh_llhxm")
 
-[node name="BackUpperMesh" type="MeshInstance2D" parent="RightPaddle/RightPaddleMesh/RightMainBarMesh" unique_id=1122277506]
+[node name="BackUpperMesh" type="MeshInstance2D" parent="RightPaddle/RightPadMeshContainer/RightPadBarMesh" unique_id=1122277506]
 position = Vector2(12.343994, -46.390015)
 rotation = -0.17453294
 scale = Vector2(0.9999998, 0.84109306)
 mesh = SubResource("CapsuleMesh_n6iga")
 
-[node name="BackLowerMesh" type="MeshInstance2D" parent="RightPaddle/RightPaddleMesh/RightMainBarMesh" unique_id=1119387743]
+[node name="BackLowerMesh" type="MeshInstance2D" parent="RightPaddle/RightPadMeshContainer/RightPadBarMesh" unique_id=1119387743]
 position = Vector2(12.343994, 46.390015)
 rotation = 0.17453294
 scale = Vector2(0.9999998, 0.84109306)
 mesh = SubResource("CapsuleMesh_n6iga")
 
-[node name="RightPaddleChar" parent="RightPaddle/RightPaddleMesh" unique_id=1607460780 instance=ExtResource("2_u55sw")]
+[node name="RightPaddleChar" parent="RightPaddle/RightPadMeshContainer" unique_id=1607460780 instance=ExtResource("2_u55sw")]
 unique_name_in_owner = true
 position = Vector2(70, 0)
 rotation = -3.1415925

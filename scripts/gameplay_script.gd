@@ -5,8 +5,8 @@ const BALLMESH_DIAMETER: float = 14
 var PADDLE_MOVEACCEL: float = 14400.0
 var PADDLE_MAXSPEED: float = 1250.0
 var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
-@onready var PADDLE_UP_LIMIT: float = %LeftMainBarMesh.mesh.height / 2.0
-@onready var PADDLE_DOWN_LIMIT: float = Globals.PLAY_AREA_DIMENSIONS.y - (%LeftMainBarMesh.mesh.height / 2.0)
+@onready var PADDLE_UP_LIMIT: float = %LeftPadBarMesh.mesh.height / 2.0
+@onready var PADDLE_DOWN_LIMIT: float = Globals.PLAY_AREA_DIMENSIONS.y - (%LeftPadBarMesh.mesh.height / 2.0)
 @onready var BALL_UP_LIMIT: float = BALLMESH_DIAMETER / 2.0
 @onready var BALL_DOWN_LIMIT: float = Globals.PLAY_AREA_DIMENSIONS.y - (BALLMESH_DIAMETER / 2.0)
 
@@ -57,8 +57,8 @@ func check_do_player_ai():
 func handle_paddle_movement(is_plr1: bool, delta: float):
 	# Player-specific setup:
 	var paddle_noderef: Node2D = (%LeftPaddle if is_plr1 else %RightPaddle)
-	#var paddlemesh_noderef: Node2D = (%LeftPaddleMesh if is_plr1 else %RightPaddleMesh)
-	var paddlemesh_bars_noderef: MeshInstance2D = (%LeftMainBarMesh if is_plr1 else %RightMainBarMesh)
+	#var paddlemesh_noderef: Node2D = (%LeftPadMeshContainer if is_plr1 else %RightPadMeshContainer)
+	var paddlemesh_bars_noderef: MeshInstance2D = (%LeftPadBarMesh if is_plr1 else %RightPadBarMesh)
 	var padchar_noderef: AnimatedSprite2D = (%LeftPaddleChar if is_plr1 else %RightPaddleChar)
 	var plr_prefix: String = ("plr1_" if is_plr1 else "plr2_")
 	# General setup:
@@ -134,13 +134,13 @@ func handle_ball_trail():
 
 func handle_paddle_knockback_animation(is_plr1: bool):
 	# < 450 is no time, 2000+ is max at ~400ms?
-	const MIN_OOMF: float = 100
-	const MAX_OOMF: float = 2000
-	const MIN_ANIM_LENGTH: int = 50
+	const MIN_OOMF: float = 50
+	const MAX_OOMF: float = 2250
+	const MIN_ANIM_LENGTH: int = 40
 	const MAX_ANIM_LENGTH: int = 100
 	const OOMF_LURCH_RATIO: float = 0.005
 	
-	var mesh_noderef: Node2D = (%LeftPaddleMesh if is_plr1 else %RightPaddleMesh)
+	var mesh_noderef: Node2D = (%LeftPadMeshContainer if is_plr1 else %RightPadMeshContainer)
 	
 	var oomf: float = min(mesh_noderef.get_meta("knockback_oomf"), MAX_OOMF)
 	var start_time: int = mesh_noderef.get_meta("knockback_time")
@@ -161,9 +161,9 @@ func handle_paddle_knockback_animation(is_plr1: bool):
 
 func _on_left_paddle_collider_area_entered(_area):
 	if ball_velocity.x < 0.0:
-		%LeftPaddleMesh.set_meta("knockback_oomf", abs(ball_velocity.x))
-		%LeftPaddleMesh.set_meta("knockback_time", Time.get_ticks_msec())
-		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / (((%LeftMainBarMesh.mesh.height + 5) / 2.0)), 5)
+		%LeftPadMeshContainer.set_meta("knockback_oomf", abs(ball_velocity.x))
+		%LeftPadMeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
+		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / (((%LeftPadBarMesh.mesh.height + 5) / 2.0)), 5)
 		var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
@@ -172,12 +172,14 @@ func _on_left_paddle_collider_area_entered(_area):
 
 func _on_right_paddle_collider_area_entered(_area):
 	if ball_velocity.x > 0.0:
-		print(ball_velocity)
-		%RightPaddleMesh.set_meta("knockback_oomf", abs(ball_velocity.x))
-		%RightPaddleMesh.set_meta("knockback_time", Time.get_ticks_msec())
-		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightMainBarMesh.mesh.height + 5) / 2.0)), 5)
+		%RightPadMeshContainer.set_meta("knockback_oomf", abs(ball_velocity.x))
+		%RightPadMeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
+		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightPadBarMesh.mesh.height + 5) / 2.0)), 5)
 		var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
 		if ball_velocity.length() > BALL_MAX_SPEED:
 			ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
+
+#func process_ball_paddle_hit(is_plr1: bool):
+	
