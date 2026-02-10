@@ -72,7 +72,8 @@ rotation = 1.3962634
 scale = Vector2(0.9999996, 0.9999996)
 shape = SubResource("RectangleShape2D_n6iga")
 
-[node name="PaddleChar" parent="LeftPaddle" unique_id=1333835360 instance=ExtResource("2_u55sw")]
+[node name="LeftPaddleChar" parent="LeftPaddle" unique_id=1333835360 instance=ExtResource("2_u55sw")]
+unique_name_in_owner = true
 position = Vector2(-70, 0)
 
 [node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
@@ -113,7 +114,8 @@ rotation = 1.7453293
 scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_n6iga")
 
-[node name="PaddleChar" parent="RightPaddle" unique_id=1607460780 instance=ExtResource("2_u55sw")]
+[node name="RightPaddleChar" parent="RightPaddle" unique_id=1607460780 instance=ExtResource("2_u55sw")]
+unique_name_in_owner = true
 position = Vector2(70, 0)
 scale = Vector2(-1, 1)
 

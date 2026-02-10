@@ -181,3 +181,4 @@ animations = [{
 sprite_frames = SubResource("SpriteFrames_hx5ms")
 animation = &"bot_surprised"
 autoplay = "plr_idle"
+frame_progress = 0.65233225

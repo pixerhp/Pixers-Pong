@@ -32,6 +32,11 @@ func _process(delta: float):
 	handle_ball_trail()
 
 func check_do_player_ai():
+	#var test_event = InputEventAction.new()
+	#test_event.action = "plr2_up"
+	#test_event.pressed = true
+	#Input.parse_input_event(test_event)
+	
 	match Globals.plr1_ai_mode:
 		Globals.AI_MODES.OFF:
 			pass
@@ -53,42 +58,57 @@ func check_do_player_ai():
 			pass
 
 func handle_left_paddle_movement(delta: float):
+	var slow_effect: float = (0.25 if Input.is_action_pressed("plr1_slow") else 1.0)
+	
 	if Input.is_action_pressed("plr1_up") and not Input.is_action_pressed("plr1_down"):
+		%LeftPaddleChar.animation = "plr_move_up"
 		if left_paddle_velocity > 0.0: 
 			left_paddle_velocity = 0.0
-		left_paddle_velocity -= PADDLE_MOVEACCEL * delta
+		left_paddle_velocity -= PADDLE_MOVEACCEL * slow_effect * delta
 	elif Input.is_action_pressed("plr1_down") and not Input.is_action_pressed("plr1_up"):
+		%LeftPaddleChar.animation = "plr_move_down"
 		if left_paddle_velocity < 0.0: 
 			left_paddle_velocity = 0.0
-		left_paddle_velocity += PADDLE_MOVEACCEL * delta
+		left_paddle_velocity += PADDLE_MOVEACCEL * slow_effect * delta
 	else:
+		%LeftPaddleChar.animation = "plr_idle"
 		left_paddle_velocity *= pow(PADDLE_SLOWFACTOR, delta * 10)
 		if abs(left_paddle_velocity) < 0.1:
 			left_paddle_velocity = 0.0
-	left_paddle_velocity = clampf(left_paddle_velocity, -1 * PADDLE_MAXSPEED, PADDLE_MAXSPEED)
 	
-	%LeftPaddle.position.y = clamp(%LeftPaddle.position.y + (left_paddle_velocity * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT)
+	left_paddle_velocity = clampf(
+		left_paddle_velocity, -1 * slow_effect * PADDLE_MAXSPEED, slow_effect * PADDLE_MAXSPEED,)
+	
+	%LeftPaddle.position.y = clamp(
+		%LeftPaddle.position.y + (left_paddle_velocity * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT,)
 	if (%LeftPaddle.position.y == PADDLE_UP_LIMIT) and (left_paddle_velocity < 0.0):
 		left_paddle_velocity = 0.0
 	if (%LeftPaddle.position.y == PADDLE_DOWN_LIMIT) and (left_paddle_velocity > 0.0):
 		left_paddle_velocity = 0.0
 
 func handle_right_paddle_movement(delta: float):
+	var slow_effect: float = (0.25 if Input.is_action_pressed("plr2_slow") else 1.0)
+	
 	if Input.is_action_pressed("plr2_up") and not Input.is_action_pressed("plr2_down"):
+		%RightPaddleChar.animation = "plr_move_up"
 		if right_paddle_velocity > 0.0: 
 			right_paddle_velocity = 0.0
-		right_paddle_velocity -= PADDLE_MOVEACCEL * delta
+		right_paddle_velocity -= PADDLE_MOVEACCEL * slow_effect * delta
 	elif Input.is_action_pressed("plr2_down") and not Input.is_action_pressed("plr2_up"):
+		%RightPaddleChar.animation = "plr_move_down"
 		if right_paddle_velocity < 0.0: 
 			right_paddle_velocity = 0.0
-		right_paddle_velocity += PADDLE_MOVEACCEL * delta
+		right_paddle_velocity += PADDLE_MOVEACCEL * slow_effect * delta
 	else:
+		%RightPaddleChar.animation = "plr_idle"
 		right_paddle_velocity *= pow(PADDLE_SLOWFACTOR, delta * 10)
 		if abs(right_paddle_velocity) < 0.1:
 			right_paddle_velocity = 0.0
-	right_paddle_velocity = clampf(right_paddle_velocity, -1 * PADDLE_MAXSPEED, PADDLE_MAXSPEED)
+	right_paddle_velocity = clampf(
+		right_paddle_velocity, -1 * slow_effect * PADDLE_MAXSPEED, slow_effect * PADDLE_MAXSPEED,)
 	
-	%RightPaddle.position.y = clamp(%RightPaddle.position.y + (right_paddle_velocity * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT)
+	%RightPaddle.position.y = clamp(
+		%RightPaddle.position.y + (right_paddle_velocity * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT,)
 	if (%RightPaddle.position.y == PADDLE_UP_LIMIT) and (right_paddle_velocity < 0.0):
 		right_paddle_velocity = 0.0
 	if (%RightPaddle.position.y == PADDLE_DOWN_LIMIT) and (right_paddle_velocity > 0.0):
@@ -127,16 +147,17 @@ func handle_ball_trail():
 	%BallTrailLine.points = ball_trail_positions
 
 
+
 func _on_left_paddle_collider_area_entered(_area):
 	if ball_velocity.x < 0.0:
-		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / ((%LeftPaddleMesh.mesh.height / 2.0)), 5)
+		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / (((%LeftPaddleMesh.mesh.height + 5) / 2.0)), 5)
 		var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
 
 func _on_right_paddle_collider_area_entered(_area):
 	if ball_velocity.x > 0.0:
-		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / ((%RightPaddleMesh.mesh.height / 2.0)), 5)
+		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightPaddleMesh.mesh.height + 5) / 2.0)), 5)
 		var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
