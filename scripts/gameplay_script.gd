@@ -6,9 +6,9 @@ var PADDLE_MOVEACCEL: float = 14400.0
 var PADDLE_MAXSPEED: float = 1440.0
 var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 @onready var PADDLE_UP_LIMIT: float = (
-	%LeftPaddleMesh.mesh.height / 2.0)
+	%LeftMainBarMesh.mesh.height / 2.0)
 @onready var PADDLE_DOWN_LIMIT: float = (
-	Globals.PLAY_AREA_DIMENSIONS.y - (%LeftPaddleMesh.mesh.height / 2.0))
+	Globals.PLAY_AREA_DIMENSIONS.y - (%LeftMainBarMesh.mesh.height / 2.0))
 @onready var BALL_UP_LIMIT: float = (
 	BALLMESH_DIAMETER / 2.0)
 @onready var BALL_DOWN_LIMIT: float = (
@@ -60,11 +60,17 @@ func check_do_player_ai():
 func handle_paddle_movement(is_plr1: bool, delta: float):
 	# Player-specific setup:
 	var paddle_noderef: Node2D = (%LeftPaddle if is_plr1 else %RightPaddle)
+	#var paddlemesh_noderef: Node2D = (%LeftPaddleMesh if is_plr1 else %RightPaddleMesh)
+	var paddlemesh_bars_noderef: MeshInstance2D = (%LeftMainBarMesh if is_plr1 else %RightMainBarMesh)
 	var padchar_noderef: AnimatedSprite2D = (%LeftPaddleChar if is_plr1 else %RightPaddleChar)
 	var plr_prefix: String = ("plr1_" if is_plr1 else "plr2_")
 	# General setup:
-	var slow_effect: float = (0.25 if Input.is_action_pressed(plr_prefix + "slow") else 1.0)
 	var pad_vel: float = paddle_noderef.get_meta("velocity")
+	var slow_effect: float = (0.25 if Input.is_action_pressed(plr_prefix + "slow") else 1.0)
+	if slow_effect == 1.0:
+		paddlemesh_bars_noderef.modulate = Color.WHITE
+	else:
+		paddlemesh_bars_noderef.modulate = Color.LIGHT_GRAY
 	
 	# Process up/down movement inputs (or lack thereof):
 	if Input.is_action_pressed(plr_prefix + "up") and not Input.is_action_pressed(plr_prefix + "down"):
@@ -160,7 +166,7 @@ func _on_left_paddle_collider_area_entered(_area):
 	if ball_velocity.x < 0.0:
 		%LeftPaddleMesh.set_meta("knockback_oomf", abs(ball_velocity.x))
 		%LeftPaddleMesh.set_meta("knockback_time", Time.get_ticks_msec())
-		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / (((%LeftPaddleMesh.mesh.height + 5) / 2.0)), 5)
+		var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / (((%LeftMainBarMesh.mesh.height + 5) / 2.0)), 5)
 		var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
@@ -169,7 +175,7 @@ func _on_right_paddle_collider_area_entered(_area):
 	if ball_velocity.x > 0.0:
 		%RightPaddleMesh.set_meta("knockback_oomf", abs(ball_velocity.x))
 		%RightPaddleMesh.set_meta("knockback_time", Time.get_ticks_msec())
-		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightPaddleMesh.mesh.height + 5) / 2.0)), 5)
+		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightMainBarMesh.mesh.height + 5) / 2.0)), 5)
 		var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
