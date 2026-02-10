@@ -16,8 +16,6 @@ var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 
 var ball_speedup_amount: float = 50
 
-var left_paddle_velocity: float = 0.0
-var right_paddle_velocity: float = 0.0
 var ball_velocity: Vector2 = Vector2(-2 * 120, 0.5 * 120)
 
 var ball_trail_ms_duration: float = 250
@@ -58,10 +56,11 @@ func check_do_player_ai():
 			pass
 
 func handle_paddle_movement(is_plr1: bool, delta: float):
+	# Player-specific setup:
 	var paddle_noderef: Node2D = (%LeftPaddle if is_plr1 else %RightPaddle)
 	var padchar_noderef: AnimatedSprite2D = (%LeftPaddleChar if is_plr1 else %RightPaddleChar)
 	var plr_prefix: String = ("plr1_" if is_plr1 else "plr2_")
-	
+	# General setup:
 	var slow_effect: float = (0.25 if Input.is_action_pressed(plr_prefix + "slow") else 1.0)
 	var pad_vel: float = paddle_noderef.get_meta("velocity")
 	
