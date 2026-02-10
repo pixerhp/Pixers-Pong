@@ -131,7 +131,7 @@ func handle_ball_trail():
 
 func handle_paddle_knockback_animation(is_plr1: bool):
 	# < 450 is no time, 2000+ is max at ~400ms?
-	const MIN_OOMF: float = 200
+	const MIN_OOMF: float = 100
 	const MAX_OOMF: float = 2000
 	const MIN_ANIM_LENGTH: int = 50
 	const MAX_ANIM_LENGTH: int = 100
