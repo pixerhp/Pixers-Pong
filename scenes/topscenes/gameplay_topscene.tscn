@@ -37,6 +37,7 @@ texture = ExtResource("2_pyq0w")
 [node name="LeftPaddle" type="Node2D" parent="." unique_id=1689491174]
 unique_name_in_owner = true
 position = Vector2(120, 324)
+metadata/velocity = 0.0
 
 [node name="LeftPaddleMesh" type="MeshInstance2D" parent="LeftPaddle" unique_id=1258549724]
 unique_name_in_owner = true
@@ -79,6 +80,7 @@ position = Vector2(-70, 0)
 [node name="RightPaddle" type="Node2D" parent="." unique_id=1901165476]
 unique_name_in_owner = true
 position = Vector2(1140, 324)
+metadata/velocity = 0.0
 
 [node name="RightPaddleMesh" type="MeshInstance2D" parent="RightPaddle" unique_id=610239775]
 unique_name_in_owner = true

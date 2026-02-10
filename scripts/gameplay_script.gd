@@ -26,8 +26,8 @@ var ball_trail_times: PackedInt64Array = []
 
 func _process(delta: float):
 	check_do_player_ai()
-	handle_left_paddle_movement(delta)
-	handle_right_paddle_movement(delta)
+	handle_paddle_movement(true, delta)
+	handle_paddle_movement(false, delta)
 	handle_ball_movement(delta)
 	handle_ball_trail()
 
@@ -57,62 +57,44 @@ func check_do_player_ai():
 		Globals.AI_MODES.LVL3:
 			pass
 
-func handle_left_paddle_movement(delta: float):
-	var slow_effect: float = (0.25 if Input.is_action_pressed("plr1_slow") else 1.0)
+func handle_paddle_movement(is_plr1: bool, delta: float):
+	var paddle_noderef: Node2D = (%LeftPaddle if is_plr1 else %RightPaddle)
+	var padchar_noderef: AnimatedSprite2D = (%LeftPaddleChar if is_plr1 else %RightPaddleChar)
+	var plr_prefix: String = ("plr1_" if is_plr1 else "plr2_")
 	
-	if Input.is_action_pressed("plr1_up") and not Input.is_action_pressed("plr1_down"):
-		%LeftPaddleChar.animation = "plr_move_up"
-		if left_paddle_velocity > 0.0: 
-			left_paddle_velocity = 0.0
-		left_paddle_velocity -= PADDLE_MOVEACCEL * slow_effect * delta
-	elif Input.is_action_pressed("plr1_down") and not Input.is_action_pressed("plr1_up"):
-		%LeftPaddleChar.animation = "plr_move_down"
-		if left_paddle_velocity < 0.0: 
-			left_paddle_velocity = 0.0
-		left_paddle_velocity += PADDLE_MOVEACCEL * slow_effect * delta
+	var slow_effect: float = (0.25 if Input.is_action_pressed(plr_prefix + "slow") else 1.0)
+	var pad_vel: float = paddle_noderef.get_meta("velocity")
+	
+	# Process up/down movement inputs (or lack thereof):
+	if Input.is_action_pressed(plr_prefix + "up") and not Input.is_action_pressed(plr_prefix + "down"):
+		padchar_noderef.animation = "plr_move_up"
+		if pad_vel > 0.0: 
+			pad_vel = 0.0;
+		pad_vel -= PADDLE_MOVEACCEL * slow_effect * delta
+	elif Input.is_action_pressed(plr_prefix + "down") and not Input.is_action_pressed(plr_prefix + "up"):
+		padchar_noderef.animation = "plr_move_down"
+		if pad_vel < 0.0: 
+			pad_vel = 0.0;
+		pad_vel += PADDLE_MOVEACCEL * slow_effect * delta
 	else:
-		%LeftPaddleChar.animation = "plr_idle"
-		left_paddle_velocity *= pow(PADDLE_SLOWFACTOR, delta * 10)
-		if abs(left_paddle_velocity) < 0.1:
-			left_paddle_velocity = 0.0
+		padchar_noderef.animation = "plr_idle"
+		pad_vel *= pow(PADDLE_SLOWFACTOR, delta * 10)
+		if abs(pad_vel) < 0.1:
+			pad_vel = 0.0
 	
-	left_paddle_velocity = clampf(
-		left_paddle_velocity, -1 * slow_effect * PADDLE_MAXSPEED, slow_effect * PADDLE_MAXSPEED,)
+	# Limit paddle velocity:
+	pad_vel = clampf(pad_vel, -1 * slow_effect * PADDLE_MAXSPEED, slow_effect * PADDLE_MAXSPEED,)
 	
-	%LeftPaddle.position.y = clamp(
-		%LeftPaddle.position.y + (left_paddle_velocity * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT,)
-	if (%LeftPaddle.position.y == PADDLE_UP_LIMIT) and (left_paddle_velocity < 0.0):
-		left_paddle_velocity = 0.0
-	if (%LeftPaddle.position.y == PADDLE_DOWN_LIMIT) and (left_paddle_velocity > 0.0):
-		left_paddle_velocity = 0.0
-
-func handle_right_paddle_movement(delta: float):
-	var slow_effect: float = (0.25 if Input.is_action_pressed("plr2_slow") else 1.0)
+	# Move paddle by velocity and limit position:
+	paddle_noderef.position.y = clamp(
+		paddle_noderef.position.y + (pad_vel * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT,)
+	if (paddle_noderef.position.y == PADDLE_UP_LIMIT) and (pad_vel < 0.0):
+		pad_vel = 0.0
+	if (paddle_noderef.position.y == PADDLE_DOWN_LIMIT) and (pad_vel > 0.0):
+		pad_vel = 0.0
 	
-	if Input.is_action_pressed("plr2_up") and not Input.is_action_pressed("plr2_down"):
-		%RightPaddleChar.animation = "plr_move_up"
-		if right_paddle_velocity > 0.0: 
-			right_paddle_velocity = 0.0
-		right_paddle_velocity -= PADDLE_MOVEACCEL * slow_effect * delta
-	elif Input.is_action_pressed("plr2_down") and not Input.is_action_pressed("plr2_up"):
-		%RightPaddleChar.animation = "plr_move_down"
-		if right_paddle_velocity < 0.0: 
-			right_paddle_velocity = 0.0
-		right_paddle_velocity += PADDLE_MOVEACCEL * slow_effect * delta
-	else:
-		%RightPaddleChar.animation = "plr_idle"
-		right_paddle_velocity *= pow(PADDLE_SLOWFACTOR, delta * 10)
-		if abs(right_paddle_velocity) < 0.1:
-			right_paddle_velocity = 0.0
-	right_paddle_velocity = clampf(
-		right_paddle_velocity, -1 * slow_effect * PADDLE_MAXSPEED, slow_effect * PADDLE_MAXSPEED,)
-	
-	%RightPaddle.position.y = clamp(
-		%RightPaddle.position.y + (right_paddle_velocity * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT,)
-	if (%RightPaddle.position.y == PADDLE_UP_LIMIT) and (right_paddle_velocity < 0.0):
-		right_paddle_velocity = 0.0
-	if (%RightPaddle.position.y == PADDLE_DOWN_LIMIT) and (right_paddle_velocity > 0.0):
-		right_paddle_velocity = 0.0
+	# Update metadata for next cycle:
+	paddle_noderef.set_meta("velocity", pad_vel)
 
 func handle_ball_movement(delta: float):
 	%Ball.position += ball_velocity * delta
