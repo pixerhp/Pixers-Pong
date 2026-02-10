@@ -5,18 +5,15 @@ const BALLMESH_DIAMETER: float = 14
 var PADDLE_MOVEACCEL: float = 14400.0
 var PADDLE_MAXSPEED: float = 1250.0
 var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
-@onready var PADDLE_UP_LIMIT: float = (
-	%LeftMainBarMesh.mesh.height / 2.0)
-@onready var PADDLE_DOWN_LIMIT: float = (
-	Globals.PLAY_AREA_DIMENSIONS.y - (%LeftMainBarMesh.mesh.height / 2.0))
-@onready var BALL_UP_LIMIT: float = (
-	BALLMESH_DIAMETER / 2.0)
-@onready var BALL_DOWN_LIMIT: float = (
-	Globals.PLAY_AREA_DIMENSIONS.y - (BALLMESH_DIAMETER / 2.0))
+@onready var PADDLE_UP_LIMIT: float = %LeftMainBarMesh.mesh.height / 2.0
+@onready var PADDLE_DOWN_LIMIT: float = Globals.PLAY_AREA_DIMENSIONS.y - (%LeftMainBarMesh.mesh.height / 2.0)
+@onready var BALL_UP_LIMIT: float = BALLMESH_DIAMETER / 2.0
+@onready var BALL_DOWN_LIMIT: float = Globals.PLAY_AREA_DIMENSIONS.y - (BALLMESH_DIAMETER / 2.0)
 
 var ball_speedup_amount: float = 50
 
 var ball_velocity: Vector2 = Vector2(-4 * 120, 0 * 120)
+const BALL_MAX_SPEED: float = 3000
 
 var ball_trail_ms_duration: float = 250
 var ball_trail_positions: PackedVector2Array = []
@@ -170,12 +167,17 @@ func _on_left_paddle_collider_area_entered(_area):
 		var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
+		if ball_velocity.length() > BALL_MAX_SPEED:
+			ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
 
 func _on_right_paddle_collider_area_entered(_area):
 	if ball_velocity.x > 0.0:
+		print(ball_velocity)
 		%RightPaddleMesh.set_meta("knockback_oomf", abs(ball_velocity.x))
 		%RightPaddleMesh.set_meta("knockback_time", Time.get_ticks_msec())
 		var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightMainBarMesh.mesh.height + 5) / 2.0)), 5)
 		var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
 		ball_velocity = ball_velocity.bounce(angle)
 		ball_velocity *= ((ball_velocity.length() + ball_speedup_amount) / ball_velocity.length())
+		if ball_velocity.length() > BALL_MAX_SPEED:
+			ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
