@@ -146,7 +146,6 @@ func handle_paddle_knockback_animation(is_plr1: bool):
 		mesh_noderef.position.x = 0.0
 		return
 	
-	
 	var anim_duration: int = int(((oomf - MIN_OOMF) / (MAX_OOMF - MIN_OOMF)) * float(MAX_ANIM_LENGTH))
 	if (time_since > anim_duration) or (anim_duration < MIN_ANIM_LENGTH):
 		mesh_noderef.position.x = 0.0
@@ -155,9 +154,6 @@ func handle_paddle_knockback_animation(is_plr1: bool):
 	var anim_weight: float = 1 - pow(((2 * anim_progress_percent) - 1), 2)
 	
 	mesh_noderef.position.x = anim_weight * oomf * OOMF_LURCH_RATIO * (-1.0 if is_plr1 else 1.0)
-	
-	if is_plr1:
-		print(anim_progress_percent)
 
 
 func _on_left_paddle_collider_area_entered(_area):
