@@ -3,7 +3,7 @@ extends Node2D
 const BALLMESH_DIAMETER: float = 14
 
 var PADDLE_MOVEACCEL: float = 14400.0
-var PADDLE_MAXSPEED: float = 1440.0
+var PADDLE_MAXSPEED: float = 1250.0
 var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 @onready var PADDLE_UP_LIMIT: float = (
 	%LeftMainBarMesh.mesh.height / 2.0)
@@ -66,7 +66,7 @@ func handle_paddle_movement(is_plr1: bool, delta: float):
 	var plr_prefix: String = ("plr1_" if is_plr1 else "plr2_")
 	# General setup:
 	var pad_vel: float = paddle_noderef.get_meta("velocity")
-	var slow_effect: float = (0.25 if Input.is_action_pressed(plr_prefix + "slow") else 1.0)
+	var slow_effect: float = (0.3 if Input.is_action_pressed(plr_prefix + "slow") else 1.0)
 	if slow_effect == 1.0:
 		paddlemesh_bars_noderef.modulate = Color.WHITE
 	else:
