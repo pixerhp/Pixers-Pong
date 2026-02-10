@@ -25,10 +25,32 @@ var ball_trail_positions: PackedVector2Array = []
 var ball_trail_times: PackedInt64Array = []
 
 func _process(delta: float):
+	check_do_player_ai()
 	handle_left_paddle_movement(delta)
 	handle_right_paddle_movement(delta)
 	handle_ball_movement(delta)
 	handle_ball_trail()
+
+func check_do_player_ai():
+	match Globals.plr1_ai_mode:
+		Globals.AI_MODES.OFF:
+			pass
+		Globals.AI_MODES.LVL1:
+			pass
+		Globals.AI_MODES.LVL2:
+			pass
+		Globals.AI_MODES.LVL3:
+			pass
+	
+	match Globals.plr2_ai_mode:
+		Globals.AI_MODES.OFF:
+			pass
+		Globals.AI_MODES.LVL1:
+			pass
+		Globals.AI_MODES.LVL2:
+			pass
+		Globals.AI_MODES.LVL3:
+			pass
 
 func handle_left_paddle_movement(delta: float):
 	if Input.is_action_pressed("plr1_up") and not Input.is_action_pressed("plr1_down"):
