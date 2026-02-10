@@ -2,10 +2,6 @@
 
 [ext_resource type="Texture2D" uid="uid://co2oa2en7orgd" path="res://assets/art/paddle_char.png" id="1_isavg"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_5ewsv"]
-atlas = ExtResource("1_isavg")
-region = Rect2(560, 200, 140, 200)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_cmp63"]
 atlas = ExtResource("1_isavg")
 region = Rect2(0, 200, 140, 200)
@@ -30,13 +26,13 @@ region = Rect2(420, 200, 140, 200)
 atlas = ExtResource("1_isavg")
 region = Rect2(280, 200, 140, 200)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ewsv"]
+atlas = ExtResource("1_isavg")
+region = Rect2(560, 200, 140, 200)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_1r6rk"]
 atlas = ExtResource("1_isavg")
 region = Rect2(700, 200, 140, 200)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_cbdv4"]
-atlas = ExtResource("1_isavg")
-region = Rect2(560, 0, 140, 200)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pyq0w"]
 atlas = ExtResource("1_isavg")
@@ -62,20 +58,16 @@ region = Rect2(420, 0, 140, 200)
 atlas = ExtResource("1_isavg")
 region = Rect2(280, 0, 140, 200)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_cbdv4"]
+atlas = ExtResource("1_isavg")
+region = Rect2(560, 0, 140, 200)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_mo7va"]
 atlas = ExtResource("1_isavg")
 region = Rect2(700, 0, 140, 200)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_hx5ms"]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5ewsv")
-}],
-"loop": true,
-"name": &"bot_close_call",
-"speed": 5.0
-}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_cmp63")
@@ -116,18 +108,18 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_1r6rk")
+"texture": SubResource("AtlasTexture_5ewsv")
 }],
 "loop": true,
-"name": &"bot_win",
+"name": &"bot_surprised",
 "speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_cbdv4")
+"texture": SubResource("AtlasTexture_1r6rk")
 }],
 "loop": true,
-"name": &"plr_close_call",
+"name": &"bot_win",
 "speed": 5.0
 }, {
 "frames": [{
@@ -170,6 +162,14 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_cbdv4")
+}],
+"loop": true,
+"name": &"plr_surprised",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_mo7va")
 }],
 "loop": true,
@@ -179,5 +179,5 @@ animations = [{
 
 [node name="PaddleChar" type="AnimatedSprite2D" unique_id=1333835360]
 sprite_frames = SubResource("SpriteFrames_hx5ms")
-animation = &"plr_idle"
+animation = &"bot_surprised"
 autoplay = "plr_idle"
