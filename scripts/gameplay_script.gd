@@ -13,7 +13,7 @@ var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
 var ball_speedup_amount: float = 50
 
 var ball_velocity: Vector2 = Vector2(-4 * 120, 0 * 120)
-const BALL_MAX_SPEED: float = 3000
+const BALL_MAX_SPEED: float = 2500
 
 var ball_trail_ms_duration: float = 250
 var ball_trail_positions: PackedVector2Array = []
@@ -35,23 +35,11 @@ func check_do_player_ai():
 	#Input.parse_input_event(test_event)
 	
 	match Globals.plr1_ai_mode:
-		Globals.AI_MODES.OFF:
-			pass
-		Globals.AI_MODES.LVL1:
-			pass
-		Globals.AI_MODES.LVL2:
-			pass
-		Globals.AI_MODES.LVL3:
+		Globals.AI_MODES.NO_AI:
 			pass
 	
 	match Globals.plr2_ai_mode:
-		Globals.AI_MODES.OFF:
-			pass
-		Globals.AI_MODES.LVL1:
-			pass
-		Globals.AI_MODES.LVL2:
-			pass
-		Globals.AI_MODES.LVL3:
+		Globals.AI_MODES.NO_AI:
 			pass
 
 func handle_paddle_movement(is_plr1: bool, delta: float):
@@ -134,27 +122,33 @@ func handle_ball_trail():
 
 func handle_paddle_knockback_animation(is_plr1: bool):
 	# < 450 is no time, 2000+ is max at ~400ms?
-	const MIN_OOMF: float = 50
-	const MAX_OOMF: float = 2250
-	const MIN_ANIM_LENGTH: int = 40
-	const MAX_ANIM_LENGTH: int = 100
-	const OOMF_LURCH_RATIO: float = 0.005
+	const MIN_OOMF: float = 0
+	const MAX_OOMF: float = BALL_MAX_SPEED
+	#const MIN_ANIM_LENGTH: int = 0
+	#const MAX_ANIM_LENGTH: int = 200 #100
+	const OOMF_LURCH_RATIO: float = 0.0025 #0.005
 	
 	var mesh_noderef: Node2D = (%LeftPadMeshContainer if is_plr1 else %RightPadMeshContainer)
 	
 	var oomf: float = min(mesh_noderef.get_meta("knockback_oomf"), MAX_OOMF)
 	var start_time: int = mesh_noderef.get_meta("knockback_time")
 	var time_since: int = Time.get_ticks_msec() - start_time
-	if (oomf < MIN_OOMF) or (time_since > MAX_ANIM_LENGTH):
+	#if (oomf < MIN_OOMF) or (time_since > MAX_ANIM_LENGTH):
+	if (oomf < MIN_OOMF) or (time_since > 100):
 		mesh_noderef.position.x = 0.0
 		return
 	
-	var anim_duration: int = int(((oomf - MIN_OOMF) / (MAX_OOMF - MIN_OOMF)) * float(MAX_ANIM_LENGTH))
-	if (time_since > anim_duration) or (anim_duration < MIN_ANIM_LENGTH):
+	#var anim_duration: int = int(((oomf - MIN_OOMF) / (MAX_OOMF - MIN_OOMF)) * float(MAX_ANIM_LENGTH))
+	var anim_duration: int = 100
+	#if (time_since > anim_duration) or (anim_duration < MIN_ANIM_LENGTH):
+	if (time_since > anim_duration) or (anim_duration < 100):
 		mesh_noderef.position.x = 0.0
 		return
 	var anim_progress_percent: float = (float(time_since) / float(anim_duration))
+	
 	var anim_weight: float = 1 - pow(((2 * anim_progress_percent) - 1), 2)
+	#var anim_weight: float = pow(anim_progress_percent * (4 - (4 * anim_progress_percent)), 0.5)
+	#var anim_weight: float = 3.07920197588 * pow(1 - anim_progress_percent, 1.5) * pow(anim_progress_percent, 0.5)
 	
 	mesh_noderef.position.x = anim_weight * oomf * OOMF_LURCH_RATIO * (-1.0 if is_plr1 else 1.0)
 
