@@ -1,19 +1,21 @@
 extends Node2D
 
-
-
 func _ready():
 	reset_gameobject_positions()
 
 func reset_gameobject_positions():
-	
 	%BackgroundColorRect.custom_minimum_size = Globals.GAME_SIZE
 	
-	%Centerline1.position = Globals.GAME_SIZE / 2.0
+	%CornerStripTL.position = Vector2(140, 72)
+	%CornerStripTR.position = Vector2(Globals.GAME_SIZE.x - 140, 72)
+	%CornerStripBL.position = Vector2(140, Globals.GAME_SIZE.y - 72)
+	%CornerStripBR.position = Vector2(Globals.GAME_SIZE.x - 140, Globals.GAME_SIZE.y - 72)
+	
+	%Centerline1.position = (Globals.GAME_SIZE / 2.0) + Vector2(-105, 0)
+	%Centerline2.position = (Globals.GAME_SIZE / 2.0) + Vector2(-35, 0)
+	%Centerline3.position = (Globals.GAME_SIZE / 2.0) + Vector2(35, 0)
+	%Centerline4.position = (Globals.GAME_SIZE / 2.0) + Vector2(105, 0)
 	%Centerline1.mesh.size.y = Globals.GAME_SIZE.y
-	%Centerline2.mesh.size.y = Globals.GAME_SIZE.y
-	%Centerline3.mesh.size.y = Globals.GAME_SIZE.y
-	%Centerline4.mesh.size.y = Globals.GAME_SIZE.y
 	
 	%LeftRailOuter.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightRailOuter.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)

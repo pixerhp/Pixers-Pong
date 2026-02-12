@@ -4,17 +4,15 @@
 [ext_resource type="ArrayMesh" uid="uid://dhcyjins7o86k" path="res://assets/models/ball_torus.obj" id="2_rncwu"]
 [ext_resource type="PackedScene" uid="uid://vis13u150xqs" path="res://scenes/paddle.tscn" id="3_ks65t"]
 
-[sub_resource type="QuadMesh" id="QuadMesh_ks65t"]
-size = Vector2(252, 648)
-
-[sub_resource type="QuadMesh" id="QuadMesh_hx5ms"]
-size = Vector2(168, 648)
+[sub_resource type="QuadMesh" id="QuadMesh_emnkm"]
+size = Vector2(350, 31.5)
 
 [sub_resource type="QuadMesh" id="QuadMesh_u55sw"]
-size = Vector2(112, 648)
+size = Vector2(42, 648)
 
-[sub_resource type="QuadMesh" id="QuadMesh_pyq0w"]
-size = Vector2(28, 648)
+[sub_resource type="SphereMesh" id="SphereMesh_u55sw"]
+radius = 20.0
+height = 40.0
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_pyq0w"]
 radius = 16.0
@@ -34,52 +32,99 @@ radius = 7.0
 [node name="GameplayTopscene" type="Node2D" unique_id=297910401]
 script = ExtResource("1_n6iga")
 
-[node name="BackgroundColorRect" type="ColorRect" parent="." unique_id=357506674]
+[node name="DecorationsContainer" type="Node2D" parent="." unique_id=324449397]
+
+[node name="BackgroundColorRect" type="ColorRect" parent="DecorationsContainer" unique_id=357506674]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(1260, 648)
 offset_right = 1260.0
 offset_bottom = 648.0
 color = Color(0.0595, 0.0651, 0.07, 1)
 
-[node name="Centerline1" type="MeshInstance2D" parent="." unique_id=1529662606]
+[node name="CornerStripTL" type="MeshInstance2D" parent="DecorationsContainer" unique_id=15007037]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
-position = Vector2(630, 324)
-mesh = SubResource("QuadMesh_ks65t")
+position = Vector2(140, 72)
+rotation = -0.5235988
+mesh = SubResource("QuadMesh_emnkm")
 
-[node name="Centerline2" type="MeshInstance2D" parent="Centerline1" unique_id=1439390228]
-unique_name_in_owner = true
-self_modulate = Color(0.05882353, 0.06666667, 0.07058824, 1)
-mesh = SubResource("QuadMesh_hx5ms")
-
-[node name="Centerline3" type="MeshInstance2D" parent="Centerline1/Centerline2" unique_id=1506464240]
+[node name="CornerStripTR" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1513567981]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(1120, 72)
+rotation = 0.5235988
+mesh = SubResource("QuadMesh_emnkm")
+
+[node name="CornerStripBL" type="MeshInstance2D" parent="DecorationsContainer" unique_id=57345611]
+unique_name_in_owner = true
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(140, 576)
+rotation = 0.5235988
+mesh = SubResource("QuadMesh_emnkm")
+
+[node name="CornerStripBR" type="MeshInstance2D" parent="DecorationsContainer" unique_id=25645161]
+unique_name_in_owner = true
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(1120, 576)
+rotation = -0.5235988
+mesh = SubResource("QuadMesh_emnkm")
+
+[node name="Centerline1" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1616997012]
+unique_name_in_owner = true
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(525, 324)
 mesh = SubResource("QuadMesh_u55sw")
 
-[node name="Centerline4" type="MeshInstance2D" parent="Centerline1/Centerline2/Centerline3" unique_id=535857456]
+[node name="Centerline2" type="MeshInstance2D" parent="DecorationsContainer" unique_id=59382275]
 unique_name_in_owner = true
-self_modulate = Color(0.05882353, 0.06666667, 0.07058824, 1)
-mesh = SubResource("QuadMesh_pyq0w")
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(595, 324)
+mesh = SubResource("QuadMesh_u55sw")
 
-[node name="LeftRailOuter" type="MeshInstance2D" parent="." unique_id=966295476]
+[node name="Centerline3" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1483719762]
+unique_name_in_owner = true
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(665, 324)
+mesh = SubResource("QuadMesh_u55sw")
+
+[node name="Centerline4" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1201154186]
+unique_name_in_owner = true
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(735, 324)
+mesh = SubResource("QuadMesh_u55sw")
+
+[node name="CentercircleOuter" type="MeshInstance2D" parent="DecorationsContainer" unique_id=2056381829]
+unique_name_in_owner = true
+visible = false
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
+position = Vector2(417, 115.00001)
+scale = Vector2(420, 420)
+mesh = ExtResource("2_rncwu")
+
+[node name="CentercircleInner" type="MeshInstance2D" parent="DecorationsContainer/CentercircleOuter" unique_id=1211374549]
+unique_name_in_owner = true
+visible = false
+self_modulate = Color(0.05882353, 0.06666667, 0.07058824, 1)
+mesh = SubResource("SphereMesh_u55sw")
+
+[node name="LeftRailOuter" type="MeshInstance2D" parent="DecorationsContainer" unique_id=966295476]
 unique_name_in_owner = true
 self_modulate = Color(0.11439999, 0.12636, 0.13, 1)
 position = Vector2(120, 324)
 mesh = SubResource("CapsuleMesh_pyq0w")
 
-[node name="LeftRailInner" type="MeshInstance2D" parent="LeftRailOuter" unique_id=2030413950]
+[node name="LeftRailInner" type="MeshInstance2D" parent="DecorationsContainer/LeftRailOuter" unique_id=2030413950]
 unique_name_in_owner = true
 self_modulate = Color(0.0465, 0.05, 0.05, 1)
 mesh = SubResource("CapsuleMesh_u55sw")
 
-[node name="RightRailOuter" type="MeshInstance2D" parent="." unique_id=1312472268]
+[node name="RightRailOuter" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1312472268]
 unique_name_in_owner = true
 self_modulate = Color(0.11372549, 0.1254902, 0.12941177, 1)
 position = Vector2(1140, 324)
 mesh = SubResource("CapsuleMesh_pyq0w")
 
-[node name="RightRailInner" type="MeshInstance2D" parent="RightRailOuter" unique_id=559996426]
+[node name="RightRailInner" type="MeshInstance2D" parent="DecorationsContainer/RightRailOuter" unique_id=559996426]
 unique_name_in_owner = true
 self_modulate = Color(0.047058824, 0.050980393, 0.050980393, 1)
 mesh = SubResource("CapsuleMesh_u55sw")
@@ -110,6 +155,7 @@ scale = Vector2(14, 14)
 mesh = ExtResource("2_rncwu")
 
 [node name="BallShapeCast" type="ShapeCast2D" parent="." unique_id=515139131]
+visible = false
 shape = SubResource("CircleShape2D_hx5ms")
 target_position = Vector2(2000, 648)
 collide_with_areas = true
