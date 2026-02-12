@@ -20,6 +20,12 @@ var ball_trail_positions: PackedVector2Array = []
 var ball_trail_times: PackedInt64Array = []
 
 func _process(delta: float):
+	
+	# Temporary knockback testing
+	if Input.is_action_just_pressed("plr1_bump_left"):
+		%LeftPaddle/%MeshContainer.set_meta("knockback_oomf", 2000.0)
+		%LeftPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
+	
 	check_do_player_ai()
 	handle_paddle_movement(true, delta)
 	handle_paddle_movement(false, delta)
