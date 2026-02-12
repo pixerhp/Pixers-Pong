@@ -80,7 +80,7 @@ func handle_paddle_movement(is_plr1: bool, delta: float):
 	# Player-specific setup:
 	var paddle_noderef: Node2D = (%LeftPaddle if is_plr1 else %RightPaddle)
 	#var paddlemesh_noderef: Node2D = (%LeftPaddle/%MeshContainer if is_plr1 else %RightPaddle/%MeshContainer)
-	var paddlemesh_bars_noderef: MeshInstance2D = (%LeftPaddle/%FrontBar if is_plr1 else %RightPaddle/%FrontBar)
+	var paddlemesh_bars_noderef: Node2D = (%LeftPaddle/%BarsContainer if is_plr1 else %RightPaddle/%BarsContainer)
 	var padchar_noderef: AnimatedSprite2D = (%LeftPaddle/%AnimChar if is_plr1 else %RightPaddle/%AnimChar)
 	var plr_prefix: String = ("plr1_" if is_plr1 else "plr2_")
 	# General setup:
