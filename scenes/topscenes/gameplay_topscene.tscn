@@ -26,6 +26,10 @@ height = 588.0
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
+[sub_resource type="SphereMesh" id="SphereMesh_pyq0w"]
+radius = 5.0
+height = 10.0
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_hx5ms"]
 radius = 7.0
 
@@ -148,7 +152,11 @@ default_color = Color(1, 1, 1, 0.19607843)
 unique_name_in_owner = true
 position = Vector2(630, 324)
 
-[node name="BallMesh" type="MeshInstance2D" parent="Ball" unique_id=151043058]
+[node name="BallMeshInner" type="MeshInstance2D" parent="Ball" unique_id=1691678160]
+self_modulate = Color(0.16470589, 0.28627452, 0.30588236, 1)
+mesh = SubResource("SphereMesh_pyq0w")
+
+[node name="BallMeshOuter" type="MeshInstance2D" parent="Ball" unique_id=151043058]
 self_modulate = Color(0.95, 0.95, 0.95, 1)
 position = Vector2(-6.9999995, -6.9999995)
 scale = Vector2(14, 14)
