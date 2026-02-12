@@ -1,6 +1,8 @@
 extends Node
 
-const PLAY_AREA_DIMENSIONS: Vector2 = Vector2(1260, 648)
+var GAME_SIZE: Vector2 = Vector2(
+	ProjectSettings.get_setting("display/window/size/viewport_width"),
+	ProjectSettings.get_setting("display/window/size/viewport_height"),)
 
 enum AI_MODES {
 	NO_AI, 

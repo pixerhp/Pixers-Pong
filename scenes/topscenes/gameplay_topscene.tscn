@@ -15,7 +15,15 @@ radius = 7.0
 [node name="GameplayTopscene" type="Node2D" unique_id=297910401]
 script = ExtResource("1_n6iga")
 
+[node name="BackgroundColorRect" type="ColorRect" parent="." unique_id=357506674]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1260, 648)
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0.101960786, 0.101960786, 0.101960786, 1)
+
 [node name="Background" type="Sprite2D" parent="." unique_id=479692831]
+visible = false
 position = Vector2(630, 324)
 texture = ExtResource("2_pyq0w")
 
@@ -39,13 +47,11 @@ unique_name_in_owner = true
 position = Vector2(630, 324)
 
 [node name="BallMesh" type="MeshInstance2D" parent="Ball" unique_id=151043058]
-unique_name_in_owner = true
 position = Vector2(-6.9999995, -6.9999995)
 scale = Vector2(14, 14)
 mesh = ExtResource("2_rncwu")
 
 [node name="BallShapeCast" type="ShapeCast2D" parent="." unique_id=515139131]
-visible = false
 shape = SubResource("CircleShape2D_hx5ms")
 target_position = Vector2(2000, 648)
 collide_with_areas = true

@@ -1,14 +1,26 @@
 extends Node2D
 
-const BALLMESH_DIAMETER: float = 14
 
-var PADDLE_MOVEACCEL: float = 14400.0
-var PADDLE_MAXSPEED: float = 1250.0
-var PADDLE_SLOWFACTOR: float = 0.05 # (lower numbers = higher friction)
-@onready var PADDLE_UP_LIMIT: float = %LeftPaddle/%FrontBar.mesh.height / 2.0
-@onready var PADDLE_DOWN_LIMIT: float = Globals.PLAY_AREA_DIMENSIONS.y - (%LeftPaddle/%FrontBar.mesh.height / 2.0)
+
+func _ready():
+	reset_gameobject_positions()
+
+func reset_gameobject_positions():
+	%BackgroundColorRect.custom_minimum_size = Globals.GAME_SIZE
+	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
+	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
+
+# Constants associated with paddle movement:
+const PAD_MOVEACCEL: float = 14400.0
+const PAD_MAXSPEED: float = 1250.0
+const PAD_SLOWDOWN: float = 0.05 # Note: Values closer to 0 correlate with higher friction.
+@onready var PAD_Y_TOPLIMIT: float = %LeftPaddle/%FrontBar.mesh.height / 2.0
+@onready var PAD_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - (%LeftPaddle/%FrontBar.mesh.height / 2.0)
+
+
+const BALLMESH_DIAMETER: float = 14
 @onready var BALL_UP_LIMIT: float = BALLMESH_DIAMETER / 2.0
-@onready var BALL_DOWN_LIMIT: float = Globals.PLAY_AREA_DIMENSIONS.y - (BALLMESH_DIAMETER / 2.0)
+@onready var BALL_DOWN_LIMIT: float = Globals.GAME_SIZE.y - (BALLMESH_DIAMETER / 2.0)
 
 var ball_speedup_amount: float = 50
 
@@ -71,27 +83,27 @@ func handle_paddle_movement(is_plr1: bool, delta: float):
 		padchar_noderef.animation = "plr_move_up"
 		if pad_vel > 0.0: 
 			pad_vel = 0.0;
-		pad_vel -= PADDLE_MOVEACCEL * slow_effect * delta
+		pad_vel -= PAD_MOVEACCEL * slow_effect * delta
 	elif Input.is_action_pressed(plr_prefix + "down") and not Input.is_action_pressed(plr_prefix + "up"):
 		padchar_noderef.animation = "plr_move_down"
 		if pad_vel < 0.0: 
 			pad_vel = 0.0;
-		pad_vel += PADDLE_MOVEACCEL * slow_effect * delta
+		pad_vel += PAD_MOVEACCEL * slow_effect * delta
 	else:
 		padchar_noderef.animation = "plr_idle"
-		pad_vel *= pow(PADDLE_SLOWFACTOR, delta * 10)
+		pad_vel *= pow(PAD_SLOWDOWN, delta * 10)
 		if abs(pad_vel) < 0.1:
 			pad_vel = 0.0
 	
 	# Limit paddle velocity:
-	pad_vel = clampf(pad_vel, -1 * slow_effect * PADDLE_MAXSPEED, slow_effect * PADDLE_MAXSPEED,)
+	pad_vel = clampf(pad_vel, -1 * slow_effect * PAD_MAXSPEED, slow_effect * PAD_MAXSPEED,)
 	
 	# Move paddle by velocity, limit position, and break velocity when hitting walls:
 	paddle_noderef.position.y = clamp(
-		paddle_noderef.position.y + (pad_vel * delta), PADDLE_UP_LIMIT, PADDLE_DOWN_LIMIT,)
-	if (paddle_noderef.position.y <= PADDLE_UP_LIMIT) and (pad_vel < 0.0):
+		paddle_noderef.position.y + (pad_vel * delta), PAD_Y_TOPLIMIT, PAD_Y_BOTTOMLIMIT,)
+	if (paddle_noderef.position.y <= PAD_Y_TOPLIMIT) and (pad_vel < 0.0):
 		pad_vel = 0.0
-	if (paddle_noderef.position.y >= PADDLE_DOWN_LIMIT) and (pad_vel > 0.0):
+	if (paddle_noderef.position.y >= PAD_Y_BOTTOMLIMIT) and (pad_vel > 0.0):
 		pad_vel = 0.0
 	
 	# Update metadata for next cycle:
@@ -107,8 +119,8 @@ func handle_ball_movement(delta: float):
 		ball_velocity.y = minf(ball_velocity.y, ball_velocity.y * -1.0)
 	
 	if ((%Ball.position.x < (-1.0 * BALL_UP_LIMIT)) or 
-	(%Ball.position.x > (Globals.PLAY_AREA_DIMENSIONS.x + BALL_UP_LIMIT))):
-		%Ball.position = Globals.PLAY_AREA_DIMENSIONS / 2.0
+	(%Ball.position.x > (Globals.GAME_SIZE.x + BALL_UP_LIMIT))):
+		%Ball.position = Globals.GAME_SIZE / 2.0
 
 func handle_ball_trail():
 	# Remove outdated trail data:
