@@ -65,7 +65,7 @@ mesh = SubResource("CapsuleMesh_llhxm")
 unique_name_in_owner = true
 position = Vector2(-70, 0)
 animation = &"plr_idle"
-frame_progress = 0.39820766
+frame_progress = 0.9012822
 
 [node name="AreaCollider" type="Area2D" parent="." unique_id=905259053]
 unique_name_in_owner = true

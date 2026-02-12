@@ -1,6 +1,6 @@
 extends Node
 
-var GAME_SIZE: Vector2 = Vector2(
+var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
 	ProjectSettings.get_setting("display/window/size/viewport_width"),
 	ProjectSettings.get_setting("display/window/size/viewport_height"),)
 

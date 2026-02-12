@@ -1,9 +1,28 @@
 [gd_scene format=3 uid="uid://djf03i2v6xbtj"]
 
 [ext_resource type="Script" uid="uid://uo8drfr51v6o" path="res://scripts/gameplay_script.gd" id="1_n6iga"]
-[ext_resource type="Texture2D" uid="uid://bmx6cx37pior3" path="res://assets/art/play_area.png" id="2_pyq0w"]
 [ext_resource type="ArrayMesh" uid="uid://dhcyjins7o86k" path="res://assets/models/ball_torus.obj" id="2_rncwu"]
 [ext_resource type="PackedScene" uid="uid://vis13u150xqs" path="res://scenes/paddle.tscn" id="3_ks65t"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_ks65t"]
+size = Vector2(252, 648)
+
+[sub_resource type="QuadMesh" id="QuadMesh_hx5ms"]
+size = Vector2(168, 648)
+
+[sub_resource type="QuadMesh" id="QuadMesh_pyq0w"]
+size = Vector2(112, 648)
+
+[sub_resource type="QuadMesh" id="QuadMesh_u55sw"]
+size = Vector2(28, 648)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_pyq0w"]
+radius = 16.0
+height = 618.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_u55sw"]
+radius = 6.0
+height = 588.0
 
 [sub_resource type="Curve" id="Curve_pyq0w"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -20,12 +39,50 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(1260, 648)
 offset_right = 40.0
 offset_bottom = 40.0
-color = Color(0.101960786, 0.101960786, 0.101960786, 1)
+color = Color(0.08, 0.08, 0.08, 1)
 
-[node name="Background" type="Sprite2D" parent="." unique_id=479692831]
-visible = false
+[node name="Centerline1" type="MeshInstance2D" parent="." unique_id=1529662606]
+unique_name_in_owner = true
+self_modulate = Color(0.10980392, 0.10980392, 0.10980392, 1)
 position = Vector2(630, 324)
-texture = ExtResource("2_pyq0w")
+mesh = SubResource("QuadMesh_ks65t")
+
+[node name="Centerline2" type="MeshInstance2D" parent="Centerline1" unique_id=1439390228]
+unique_name_in_owner = true
+self_modulate = Color(0.078431375, 0.078431375, 0.078431375, 1)
+mesh = SubResource("QuadMesh_hx5ms")
+
+[node name="Centerline3" type="MeshInstance2D" parent="Centerline1/Centerline2" unique_id=1182626183]
+unique_name_in_owner = true
+self_modulate = Color(0.11, 0.11, 0.11, 1)
+mesh = SubResource("QuadMesh_pyq0w")
+
+[node name="Centerline4" type="MeshInstance2D" parent="Centerline1/Centerline2/Centerline3" unique_id=511908044]
+unique_name_in_owner = true
+self_modulate = Color(0.078431375, 0.078431375, 0.078431375, 1)
+mesh = SubResource("QuadMesh_u55sw")
+
+[node name="LeftRailOuter" type="MeshInstance2D" parent="." unique_id=966295476]
+unique_name_in_owner = true
+self_modulate = Color(0.11, 0.11, 0.11, 1)
+position = Vector2(120, 324)
+mesh = SubResource("CapsuleMesh_pyq0w")
+
+[node name="LeftRailInner" type="MeshInstance2D" parent="LeftRailOuter" unique_id=2030413950]
+unique_name_in_owner = true
+self_modulate = Color(0.04, 0.04, 0.04, 1)
+mesh = SubResource("CapsuleMesh_u55sw")
+
+[node name="RightRailOuter" type="MeshInstance2D" parent="." unique_id=1312472268]
+unique_name_in_owner = true
+self_modulate = Color(0.11, 0.11, 0.11, 1)
+position = Vector2(1140, 324)
+mesh = SubResource("CapsuleMesh_pyq0w")
+
+[node name="RightRailInner" type="MeshInstance2D" parent="RightRailOuter" unique_id=559996426]
+unique_name_in_owner = true
+self_modulate = Color(0.04, 0.04, 0.04, 1)
+mesh = SubResource("CapsuleMesh_u55sw")
 
 [node name="LeftPaddle" parent="." unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
@@ -38,6 +95,7 @@ scale = Vector2(-1, 1)
 
 [node name="BallTrail" type="Line2D" parent="." unique_id=1365490242]
 unique_name_in_owner = true
+visible = false
 width = 8.0
 width_curve = SubResource("Curve_pyq0w")
 default_color = Color(1, 1, 1, 0.19607843)
