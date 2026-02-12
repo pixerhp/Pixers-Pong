@@ -13,7 +13,8 @@ config_version=5
 config/name="Pixer's Pong"
 run/main_scene="uid://djf03i2v6xbtj"
 config/features=PackedStringArray("4.6", "GL Compatibility")
-config/icon="res://icon.svg"
+boot_splash/image="uid://c8njw4gkdiofe"
+config/icon="uid://c8njw4gkdiofe"
 
 [autoload]
 
