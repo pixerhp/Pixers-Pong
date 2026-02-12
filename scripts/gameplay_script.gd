@@ -59,8 +59,8 @@ func _process(delta: float):
 	handle_paddle_movement(false, delta)
 	handle_ball_movement(delta)
 	handle_ball_trail()
-	handle_paddle_knockback_animation(true)
-	handle_paddle_knockback_animation(false)
+	handle_paddle_knockback(true)
+	handle_paddle_knockback(false)
 
 func check_do_player_ai():
 	#var test_event = InputEventAction.new()
@@ -154,37 +154,23 @@ func handle_ball_trail():
 	# Update trail Line2D node's internal array.
 	%BallTrail.points = ball_trail_positions
 
-func handle_paddle_knockback_animation(is_plr1: bool):
-	# < 450 is no time, 2000+ is max at ~400ms?
-	const MIN_OOMF: float = 0
-	const MAX_OOMF: float = BALL_MAX_SPEED
-	#const MIN_ANIM_LENGTH: int = 0
-	#const MAX_ANIM_LENGTH: int = 200 #100
-	const OOMF_LURCH_RATIO: float = 0.0025 #0.005
+func handle_paddle_knockback(is_plr1: bool):
+	const OOMF_LURCH_RATIO: float = 0.0035
+	const KNOCKBACK_ANIM_DURATION: int = 120
 	
-	var mesh_noderef: Node2D = (%LeftPaddle/%MeshContainer if is_plr1 else %RightPaddle/%MeshContainer)
+	var pad_mesh_container_ref: Node2D = (%LeftPaddle/%MeshContainer if is_plr1 else %RightPaddle/%MeshContainer)
 	
-	var oomf: float = min(mesh_noderef.get_meta("knockback_oomf"), MAX_OOMF)
-	var start_time: int = mesh_noderef.get_meta("knockback_time")
-	var time_since: int = Time.get_ticks_msec() - start_time
-	#if (oomf < MIN_OOMF) or (time_since > MAX_ANIM_LENGTH):
-	if (oomf < MIN_OOMF) or (time_since > 100):
-		mesh_noderef.position.x = 0.0
+	var oomf: float = pad_mesh_container_ref.get_meta("knockback_oomf")
+	var time_since: int = Time.get_ticks_msec() - pad_mesh_container_ref.get_meta("knockback_time")
+	if time_since > KNOCKBACK_ANIM_DURATION:
+		pad_mesh_container_ref.position.x = 0.0
 		return
 	
-	#var anim_duration: int = int(((oomf - MIN_OOMF) / (MAX_OOMF - MIN_OOMF)) * float(MAX_ANIM_LENGTH))
-	var anim_duration: int = 100
-	#if (time_since > anim_duration) or (anim_duration < MIN_ANIM_LENGTH):
-	if (time_since > anim_duration) or (anim_duration < 100):
-		mesh_noderef.position.x = 0.0
-		return
-	var anim_progress_percent: float = (float(time_since) / float(anim_duration))
-	
-	var anim_weight: float = 1 - pow(((2 * anim_progress_percent) - 1), 2)
-	#var anim_weight: float = pow(anim_progress_percent * (4 - (4 * anim_progress_percent)), 0.5)
-	#var anim_weight: float = 3.07920197588 * pow(1 - anim_progress_percent, 1.5) * pow(anim_progress_percent, 0.5)
-	
-	mesh_noderef.position.x = anim_weight * oomf * OOMF_LURCH_RATIO * -1.0
+	pad_mesh_container_ref.position.x = (-1.0 * oomf * OOMF_LURCH_RATIO *
+		clampf(get_parabola_animation_weight(time_since, KNOCKBACK_ANIM_DURATION), 0.0, 1.0))
+
+func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> float:
+	return 1.0 - pow(((2.0 * ((float(time_since) / float(anim_time_length)))) - 1.0), 2.0)
 
 
 func _on_left_paddle_collider_area_entered(_area):
