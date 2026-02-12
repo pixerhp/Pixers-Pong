@@ -25,6 +25,9 @@ func _process(delta: float):
 	if Input.is_action_just_pressed("plr1_bump_left"):
 		%LeftPaddle/%MeshContainer.set_meta("knockback_oomf", 2000.0)
 		%LeftPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
+	if Input.is_action_just_pressed("plr2_bump_right"):
+		%RightPaddle/%MeshContainer.set_meta("knockback_oomf", 2000.0)
+		%RightPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
 	
 	check_do_player_ai()
 	handle_paddle_movement(true, delta)
@@ -156,7 +159,7 @@ func handle_paddle_knockback_animation(is_plr1: bool):
 	#var anim_weight: float = pow(anim_progress_percent * (4 - (4 * anim_progress_percent)), 0.5)
 	#var anim_weight: float = 3.07920197588 * pow(1 - anim_progress_percent, 1.5) * pow(anim_progress_percent, 0.5)
 	
-	mesh_noderef.position.x = anim_weight * oomf * OOMF_LURCH_RATIO * (-1.0 if is_plr1 else 1.0)
+	mesh_noderef.position.x = anim_weight * oomf * OOMF_LURCH_RATIO * -1.0
 
 
 func _on_left_paddle_collider_area_entered(_area):
