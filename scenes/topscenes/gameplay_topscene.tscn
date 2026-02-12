@@ -10,10 +10,10 @@ size = Vector2(252, 648)
 [sub_resource type="QuadMesh" id="QuadMesh_hx5ms"]
 size = Vector2(168, 648)
 
-[sub_resource type="QuadMesh" id="QuadMesh_pyq0w"]
+[sub_resource type="QuadMesh" id="QuadMesh_u55sw"]
 size = Vector2(112, 648)
 
-[sub_resource type="QuadMesh" id="QuadMesh_u55sw"]
+[sub_resource type="QuadMesh" id="QuadMesh_pyq0w"]
 size = Vector2(28, 648)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_pyq0w"]
@@ -37,51 +37,51 @@ script = ExtResource("1_n6iga")
 [node name="BackgroundColorRect" type="ColorRect" parent="." unique_id=357506674]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(1260, 648)
-offset_right = 40.0
-offset_bottom = 40.0
-color = Color(0.08, 0.08, 0.08, 1)
+offset_right = 1260.0
+offset_bottom = 648.0
+color = Color(0.0595, 0.0651, 0.07, 1)
 
 [node name="Centerline1" type="MeshInstance2D" parent="." unique_id=1529662606]
 unique_name_in_owner = true
-self_modulate = Color(0.10980392, 0.10980392, 0.10980392, 1)
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(630, 324)
 mesh = SubResource("QuadMesh_ks65t")
 
 [node name="Centerline2" type="MeshInstance2D" parent="Centerline1" unique_id=1439390228]
 unique_name_in_owner = true
-self_modulate = Color(0.078431375, 0.078431375, 0.078431375, 1)
+self_modulate = Color(0.05882353, 0.06666667, 0.07058824, 1)
 mesh = SubResource("QuadMesh_hx5ms")
 
-[node name="Centerline3" type="MeshInstance2D" parent="Centerline1/Centerline2" unique_id=1182626183]
+[node name="Centerline3" type="MeshInstance2D" parent="Centerline1/Centerline2" unique_id=1506464240]
 unique_name_in_owner = true
-self_modulate = Color(0.11, 0.11, 0.11, 1)
-mesh = SubResource("QuadMesh_pyq0w")
-
-[node name="Centerline4" type="MeshInstance2D" parent="Centerline1/Centerline2/Centerline3" unique_id=511908044]
-unique_name_in_owner = true
-self_modulate = Color(0.078431375, 0.078431375, 0.078431375, 1)
+self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 mesh = SubResource("QuadMesh_u55sw")
+
+[node name="Centerline4" type="MeshInstance2D" parent="Centerline1/Centerline2/Centerline3" unique_id=535857456]
+unique_name_in_owner = true
+self_modulate = Color(0.05882353, 0.06666667, 0.07058824, 1)
+mesh = SubResource("QuadMesh_pyq0w")
 
 [node name="LeftRailOuter" type="MeshInstance2D" parent="." unique_id=966295476]
 unique_name_in_owner = true
-self_modulate = Color(0.11, 0.11, 0.11, 1)
+self_modulate = Color(0.11439999, 0.12636, 0.13, 1)
 position = Vector2(120, 324)
 mesh = SubResource("CapsuleMesh_pyq0w")
 
 [node name="LeftRailInner" type="MeshInstance2D" parent="LeftRailOuter" unique_id=2030413950]
 unique_name_in_owner = true
-self_modulate = Color(0.04, 0.04, 0.04, 1)
+self_modulate = Color(0.0465, 0.05, 0.05, 1)
 mesh = SubResource("CapsuleMesh_u55sw")
 
 [node name="RightRailOuter" type="MeshInstance2D" parent="." unique_id=1312472268]
 unique_name_in_owner = true
-self_modulate = Color(0.11, 0.11, 0.11, 1)
+self_modulate = Color(0.11372549, 0.1254902, 0.12941177, 1)
 position = Vector2(1140, 324)
 mesh = SubResource("CapsuleMesh_pyq0w")
 
 [node name="RightRailInner" type="MeshInstance2D" parent="RightRailOuter" unique_id=559996426]
 unique_name_in_owner = true
-self_modulate = Color(0.04, 0.04, 0.04, 1)
+self_modulate = Color(0.047058824, 0.050980393, 0.050980393, 1)
 mesh = SubResource("CapsuleMesh_u55sw")
 
 [node name="LeftPaddle" parent="." unique_id=340420252 instance=ExtResource("3_ks65t")]
@@ -95,7 +95,6 @@ scale = Vector2(-1, 1)
 
 [node name="BallTrail" type="Line2D" parent="." unique_id=1365490242]
 unique_name_in_owner = true
-visible = false
 width = 8.0
 width_curve = SubResource("Curve_pyq0w")
 default_color = Color(1, 1, 1, 0.19607843)
@@ -105,6 +104,7 @@ unique_name_in_owner = true
 position = Vector2(630, 324)
 
 [node name="BallMesh" type="MeshInstance2D" parent="Ball" unique_id=151043058]
+self_modulate = Color(0.95, 0.95, 0.95, 1)
 position = Vector2(-6.9999995, -6.9999995)
 scale = Vector2(14, 14)
 mesh = ExtResource("2_rncwu")

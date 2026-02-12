@@ -22,6 +22,7 @@ radius = 8.0
 height = 200.0
 
 [node name="Paddle" type="Node2D" unique_id=340420252]
+modulate = Color(0.95, 0.95, 0.95, 1)
 metadata/velocity = 0.0
 
 [node name="MeshContainer" type="Node2D" parent="." unique_id=24952529]
@@ -65,7 +66,7 @@ mesh = SubResource("CapsuleMesh_llhxm")
 unique_name_in_owner = true
 position = Vector2(-70, 0)
 animation = &"plr_idle"
-frame_progress = 0.9012822
+frame_progress = 0.38499087
 
 [node name="AreaCollider" type="Area2D" parent="." unique_id=905259053]
 unique_name_in_owner = true
