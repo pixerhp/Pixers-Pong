@@ -1,0 +1,77 @@
+[gd_scene format=3 uid="uid://vis13u150xqs"]
+
+[ext_resource type="PackedScene" uid="uid://c782dk0hf6ul1" path="res://scenes/paddle_char.tscn" id="1_3xiby"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_3xiby"]
+size = Vector2(5, 25)
+
+[sub_resource type="QuadMesh" id="QuadMesh_y7wee"]
+size = Vector2(10, 50)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_n6iga"]
+radius = 4.0
+height = 102.315
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_llhxm"]
+radius = 8.0
+height = 200.0
+rings = 5
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_llhxm"]
+radius = 8.0
+height = 200.0
+
+[node name="Paddle" type="Node2D" unique_id=340420252]
+metadata/velocity = 0.0
+
+[node name="MeshContainer" type="Node2D" parent="." unique_id=24952529]
+unique_name_in_owner = true
+metadata/knockback_oomf = 0.0
+metadata/knockback_time = 0
+
+[node name="BarsContainer" type="Node2D" parent="MeshContainer" unique_id=269865022]
+unique_name_in_owner = true
+
+[node name="InnerUpper" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=610021394]
+self_modulate = Color(0.25, 0.25, 0.25, 1)
+position = Vector2(-10, -37)
+mesh = SubResource("QuadMesh_3xiby")
+
+[node name="InnerLower" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=1339138705]
+self_modulate = Color(0.25, 0.25, 0.25, 1)
+position = Vector2(-10, 37)
+mesh = SubResource("QuadMesh_3xiby")
+
+[node name="InnerCenter" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=342667255]
+self_modulate = Color(0.25, 0.25, 0.25, 1)
+position = Vector2(-12, 0)
+mesh = SubResource("QuadMesh_y7wee")
+
+[node name="BackUpper" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=1896809190]
+position = Vector2(-12.07638, -46.473915)
+rotation = 0.17453295
+mesh = SubResource("CapsuleMesh_n6iga")
+
+[node name="BackLower" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=1216480032]
+position = Vector2(-12.076, 46.474)
+rotation = -0.17453294
+mesh = SubResource("CapsuleMesh_n6iga")
+
+[node name="FrontBar" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=1340913314]
+unique_name_in_owner = true
+mesh = SubResource("CapsuleMesh_llhxm")
+
+[node name="AnimChar" parent="MeshContainer" unique_id=1333835360 instance=ExtResource("1_3xiby")]
+unique_name_in_owner = true
+position = Vector2(-70, 0)
+animation = &"plr_idle"
+frame_progress = 0.30526453
+
+[node name="AreaCollider" type="Area2D" parent="." unique_id=905259053]
+unique_name_in_owner = true
+
+[node name="FrontCapsule" type="CollisionShape2D" parent="AreaCollider" unique_id=375941652]
+shape = SubResource("CapsuleShape2D_llhxm")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="AreaCollider" unique_id=1465389828]
+polygon = PackedVector2Array(-24.33, 0, -7.745, -94.075, -7.745, 94.075)
