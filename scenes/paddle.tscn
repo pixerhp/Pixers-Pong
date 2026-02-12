@@ -34,17 +34,17 @@ metadata/knockback_time = 0
 unique_name_in_owner = true
 
 [node name="InnerUpper" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=610021394]
-self_modulate = Color(0.25, 0.25, 0.25, 1)
+self_modulate = Color(0.17279999, 0.30037335, 0.32, 1)
 position = Vector2(-10, -37)
 mesh = SubResource("QuadMesh_3xiby")
 
 [node name="InnerLower" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=1339138705]
-self_modulate = Color(0.25, 0.25, 0.25, 1)
+self_modulate = Color(0.17279999, 0.30037335, 0.32, 1)
 position = Vector2(-10, 37)
 mesh = SubResource("QuadMesh_3xiby")
 
 [node name="InnerCenter" type="MeshInstance2D" parent="MeshContainer/BarsContainer" unique_id=342667255]
-self_modulate = Color(0.25, 0.25, 0.25, 1)
+self_modulate = Color(0.17279999, 0.30037335, 0.32, 1)
 position = Vector2(-12, 0)
 mesh = SubResource("QuadMesh_y7wee")
 
@@ -66,10 +66,11 @@ mesh = SubResource("CapsuleMesh_llhxm")
 unique_name_in_owner = true
 position = Vector2(-70, 0)
 animation = &"plr_idle"
-frame_progress = 0.38499087
+frame_progress = 0.19078404
 
 [node name="AreaCollider" type="Area2D" parent="." unique_id=905259053]
 unique_name_in_owner = true
+visible = false
 
 [node name="FrontCapsule" type="CollisionShape2D" parent="AreaCollider" unique_id=375941652]
 shape = SubResource("CapsuleShape2D_llhxm")
