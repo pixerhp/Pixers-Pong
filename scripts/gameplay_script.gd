@@ -29,6 +29,20 @@ func reset_gameobject_positions():
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
 
+# !!! (currently placeholder)
+func reserve_ball():
+	
+	%Ball.position = Globals.GAME_SIZE / 2.0
+	%Ball.set_meta("velocity", Vector2(-400, 0))
+	
+	balltrail_positions.clear()
+	balltrail_times.clear()
+	%BallTrail.points = []
+	
+	ballshapecast_current_exceptions.clear()
+	%BallShapeCast.clear_exceptions()
+	
+
 func _process(delta: float):
 	# !!! Temporary knockback testing
 	if Input.is_action_just_pressed("plr1_bump_left"):
@@ -212,10 +226,10 @@ func handle_ball_collision_movement(delta: float):
 	
 	# !!! temporary teleport to center if ball goes too far to the left/right:
 	if abs(ball_curr_position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + 20):
-		ball_curr_position = Globals.GAME_SIZE / 2.0
-	
-	%Ball.position = ball_curr_position
-	%Ball.set_meta("velocity", ball_velocity)
+		reserve_ball()
+	else:
+		%Ball.position = ball_curr_position
+		%Ball.set_meta("velocity", ball_velocity)
 
 var ballshapecast_current_exceptions: Array[Area2D] = []
 func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D):
