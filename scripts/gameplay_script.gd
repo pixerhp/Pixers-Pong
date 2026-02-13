@@ -133,13 +133,67 @@ func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> fl
 @onready var BALL_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
 const BALL_PADHIT_SPEEDUP: float = 50
 const BALL_MAX_SPEED: float = 2500
+const BALL_MAX_BOUNCE_LOOPS: int = 100
 # Constants and variables associated with the ball's trail:
 const BALLTRAIL_DURATION: float = 250
 var balltrail_positions: PackedVector2Array = []
 var balltrail_times: PackedInt64Array = []
 
 func handle_ball_movement_and_trail(delta: float):
-	pass
+	var ball_curr_position: Vector2 = Vector2()
+	var ball_new_position: Vector2 = %Ball.position
+	var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+	if ball_velocity == Vector2(0,0):
+		return
+	var move_fraction_remaining: float = 1.0
+	var safe_fraction: float = 0.0
+	var unsafe_fraction: float = 0.0
+	
+	var left_paddle_collider: Area2D = %LeftPaddle/AreaCollider
+	var right_paddle_collider: Area2D = %RightPaddle/AreaCollider
+	
+	for loop: int in range(BALL_MAX_BOUNCE_LOOPS):
+		ball_curr_position = ball_new_position
+		
+		# Shapecast from where the ball is to the full length of where it wants to go:
+		%BallShapeCast.position = ball_curr_position
+		ball_new_position = ball_curr_position + (move_fraction_remaining * ball_velocity * delta)
+		%BallShapeCast.target_position = ball_new_position - ball_curr_position
+		%BallShapeCast.force_shapecast_update()
+		# Get how far the ball can go before colliding:
+		safe_fraction = %BallShapeCast.get_closest_collision_safe_fraction()
+		unsafe_fraction = %BallShapeCast.get_closest_collision_unsafe_fraction()
+		# Move the ball to just before its first collision, and make its new position be just after:
+		ball_new_position = ball_curr_position + (unsafe_fraction * move_fraction_remaining * ball_velocity * delta)
+		ball_curr_position = ball_curr_position + (move_fraction_remaining * safe_fraction * ball_velocity * delta)
+		# Subtract from the movement fraction remaining, and add to the ball trail:
+		move_fraction_remaining -= move_fraction_remaining * safe_fraction
+		balltrail_positions.append(ball_curr_position)
+		balltrail_times.append(Time.get_ticks_msec())
+		
+		# If the ball couldn't go all the way it wanted to:
+		if not (ball_new_position == ball_curr_position):
+			# Shapecast the small distance between where it is and a step further into collision:
+			%BallShapeCast.position = ball_curr_position
+			%BallShapeCast.target_position = ball_new_position - ball_curr_position
+			%BallShapeCast.force_shapecast_update()
+			# Change the ball's velocity based on its collisions:
+			for coll_index: int in range(%BallShapeCast.get_collision_count()):
+				match %BallShapeCast.get_collider(coll_index):
+					left_paddle_collider:
+						ball_velocity.x = abs(ball_velocity.x)
+					right_paddle_collider:
+						ball_velocity.x = -1.0 * abs(ball_velocity.x)
+		
+		if (move_fraction_remaining <= 0.0):
+			break
+	
+	# !!! temporary teleport to center if ball goes too far to the left/right:
+	if abs(ball_curr_position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + 20):
+		ball_curr_position = Globals.GAME_SIZE / 2.0
+	
+	%Ball.position = ball_curr_position
+	%Ball.set_meta("velocity", ball_velocity)
 
 func handle_ball_movement(delta: float):
 	var ball_velocity: Vector2 = %Ball.get_meta("velocity")

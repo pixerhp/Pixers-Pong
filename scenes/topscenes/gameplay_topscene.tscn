@@ -151,7 +151,7 @@ default_color = Color(1, 1, 1, 0.19607843)
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
 unique_name_in_owner = true
 position = Vector2(630, 324)
-metadata/velocity = Vector2(0, 0)
+metadata/velocity = Vector2(-400, 0)
 
 [node name="BallMeshInner" type="MeshInstance2D" parent="Ball" unique_id=1691678160]
 self_modulate = Color(0.16470589, 0.28627452, 0.30588236, 1)
@@ -163,8 +163,10 @@ position = Vector2(-6.9999995, -6.9999995)
 scale = Vector2(14, 14)
 mesh = ExtResource("2_rncwu")
 
-[node name="BallShapeCast" type="ShapeCast2D" parent="Ball" unique_id=515139131]
+[node name="BallShapeCast" type="ShapeCast2D" parent="." unique_id=515139131]
 unique_name_in_owner = true
+position = Vector2(630, 324)
+enabled = false
 shape = SubResource("CircleShape2D_hx5ms")
 target_position = Vector2(0, 0)
 collide_with_areas = true
