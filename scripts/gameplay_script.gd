@@ -37,8 +37,8 @@ func _process(delta: float):
 	check_do_paddle_ai()
 	handle_paddle_controls(false, delta)
 	handle_paddle_controls(true, delta)
-	handle_ball_movement_and_trail(delta)
-	#handle_ball_trail()
+	handle_ball_collision_movement(delta)
+	update_ball_trail()
 	handle_paddle_knockback_anim(false)
 	handle_paddle_knockback_anim(true)
 
@@ -139,7 +139,7 @@ const BALLTRAIL_DURATION: float = 250
 var balltrail_positions: PackedVector2Array = []
 var balltrail_times: PackedInt64Array = []
 
-func handle_ball_movement_and_trail(delta: float):
+func handle_ball_collision_movement(delta: float):
 	var ball_curr_position: Vector2 = Vector2()
 	var ball_new_position: Vector2 = %Ball.position
 	var ball_velocity: Vector2 = %Ball.get_meta("velocity")
@@ -212,7 +212,7 @@ func handle_ball_movement(delta: float):
 	
 	%Ball.set_meta("velocity", ball_velocity)
 
-func handle_ball_trail():
+func update_ball_trail():
 	# Remove outdated trail data:
 	var deletion_up_bound: int = -1
 	for i in range(balltrail_times.size()):
@@ -224,14 +224,10 @@ func handle_ball_trail():
 		balltrail_positions = balltrail_positions.slice(deletion_up_bound + 1)
 		balltrail_times = balltrail_times.slice(deletion_up_bound + 1)
 	
-	# Add new trail data:
-	balltrail_positions.append(%Ball.position)
-	balltrail_times.append(Time.get_ticks_msec())
-	
-	# Update trail Line2D node's internal array.
+	# Update ball-trail node's internal array.
 	%BallTrail.points = balltrail_positions
 
-
+# !!! OLD FUNCTIONS DELETE LATER, currently kept for use as reference:
 func _on_left_paddle_collider_area_entered(_area):
 	pass
 	#if ball_velocity.x < 0.0:
@@ -243,7 +239,6 @@ func _on_left_paddle_collider_area_entered(_area):
 		#ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length())
 		#if ball_velocity.length() > BALL_MAX_SPEED:
 			#ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
-
 func _on_right_paddle_collider_area_entered(_area):
 	pass
 	#if ball_velocity.x > 0.0:
