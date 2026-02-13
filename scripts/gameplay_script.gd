@@ -80,6 +80,10 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			set_input(act_prefix + "slow", Input.is_action_pressed(alt_act_prefix + "slow"))
 			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_left"))
 			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_right"))
+		#Globals.AI_MODES.RANDOM_MOVEMENT:
+			#set_input(act_prefix + "up", ((randi() % 2) == 0))
+			#set_input(act_prefix + "down", ((randi() % 2) == 0))
+			#set_input(act_prefix + "slow", ((randi() % 2) == 0))
 		Globals.AI_MODES.ZIGZAGGER_SLOW:
 			handle_paddle_ai(is_plr_2, Globals.AI_MODES.ZIGZAGGER)
 			set_input(act_prefix + "slow", true)
