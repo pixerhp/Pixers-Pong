@@ -66,6 +66,7 @@ func _process(delta: float):
 func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	var paddle_noderef: Node2D = %RightPaddle if is_plr_2 else %LeftPaddle
 	var act_prefix: String = "plr2_" if is_plr_2 else "plr1_"
+	var alt_act_prefix: String = "plr1_" if is_plr_2 else "plr2_"
 	#input_event.action = "plr2_up"
 	#input_event.pressed = true
 	#Input.parse_input_event(input_event)
@@ -73,6 +74,12 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	match ai_mode:
 		Globals.AI_MODES.NO_AI:
 			return
+		Globals.AI_MODES.COPYCAT:
+			set_input(act_prefix + "up", Input.is_action_pressed(alt_act_prefix + "up"))
+			set_input(act_prefix + "down", Input.is_action_pressed(alt_act_prefix + "down"))
+			set_input(act_prefix + "slow", Input.is_action_pressed(alt_act_prefix + "slow"))
+			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_left"))
+			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_right"))
 		Globals.AI_MODES.ZIGZAGGER_SLOW:
 			handle_paddle_ai(is_plr_2, Globals.AI_MODES.ZIGZAGGER)
 			set_input(act_prefix + "slow", true)

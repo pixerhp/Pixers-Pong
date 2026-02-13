@@ -11,17 +11,21 @@ enum AI_MODES {
 	ZIGZAGGER_SLOW,
 	ZIGZAGGER,
 	CHASER_SLOW, 
-	CHASER,
-	SIMPLE_PREDICTOR_SLOW,
-	SIMPLE_PREDICTOR,
-	DEEP_PREDICTOR_SLOW,
-	DEEP_PREDICTOR,
+	CHASER, # Simply chases the ball's position, ignoring its velocity or anything to do with bounces.
+	PREDICTOR_LV1_SLOW,
+	PREDICTOR_LV1, # Tries to move to where the ball will be if it reaches the paddle x on it's current trajectory.
+	PREDICTOR_LV2_SLOW,
+	PREDICTOR_LV2, # like previous but waits in the center if the ball's current trajectory goes beyond the floor/ceiling
+	PREDICTOR_LV3_SLOW,
+	PREDICTOR_LV3, # Accounts for up to one bounce, waits in the center if there will be multiple.
+	PREDICTOR_LV4_SLOW,
+	PREDICTOR_LV4, # like previous, but accounts for arbirarily many bounces, so no waiting in center.
 	MASTER_SLOW,
-	MASTER,
+	MASTER, # like previous, but aggressively tries to aim the ball to where the other player isn't with its paddle hits.
 }
 
 var plr1_ai_mode: int = AI_MODES.NO_AI
-var plr2_ai_mode: int = AI_MODES.ZIGZAGGER_SLOW
+var plr2_ai_mode: int = AI_MODES.COPYCAT
 
 func _process(_delta):
 	if Input.is_action_pressed("pause_escape"):
