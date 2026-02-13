@@ -152,7 +152,7 @@ func handle_ball_collision_movement(delta: float):
 	var move_fraction_remaining: float = 1.0
 	var safe_fraction: float = 0.0
 	#var unsafe_fraction: float = 0.0
-	var shapecast_stepback_margin: float = 100.0
+	var shapecast_stepback_margin: float = 40.0
 	var shapecast_stepback: Vector2 = Vector2()
 	
 	for loop: int in range(BALL_MAX_BOUNCE_LOOPS):
