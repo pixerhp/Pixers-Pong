@@ -22,6 +22,9 @@ height = 618.0
 radius = 6.0
 height = 588.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u55sw"]
+size = Vector2(1260, 20000)
+
 [sub_resource type="Curve" id="Curve_pyq0w"]
 _data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
@@ -133,6 +136,22 @@ unique_name_in_owner = true
 self_modulate = Color(0.047058824, 0.050980393, 0.050980393, 1)
 mesh = SubResource("CapsuleMesh_u55sw")
 
+[node name="CeilingCollider" type="Area2D" parent="." unique_id=1188319716]
+unique_name_in_owner = true
+
+[node name="CeilingCollisionShape" type="CollisionShape2D" parent="CeilingCollider" unique_id=1305783784]
+unique_name_in_owner = true
+position = Vector2(630, -10000)
+shape = SubResource("RectangleShape2D_u55sw")
+
+[node name="FloorCollider" type="Area2D" parent="." unique_id=375607716]
+unique_name_in_owner = true
+
+[node name="FloorCollisionShape" type="CollisionShape2D" parent="FloorCollider" unique_id=1405641867]
+unique_name_in_owner = true
+position = Vector2(630, 10648)
+shape = SubResource("RectangleShape2D_u55sw")
+
 [node name="LeftPaddle" parent="." unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(120, 324)
@@ -151,7 +170,7 @@ default_color = Color(1, 1, 1, 0.19607843)
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
 unique_name_in_owner = true
 position = Vector2(630, 324)
-metadata/velocity = Vector2(-400, 0)
+metadata/velocity = Vector2(-400, 200)
 
 [node name="BallMeshInner" type="MeshInstance2D" parent="Ball" unique_id=1691678160]
 self_modulate = Color(0.16470589, 0.28627452, 0.30588236, 1)

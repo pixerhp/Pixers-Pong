@@ -22,6 +22,10 @@ func reset_gameobject_positions():
 	%LeftRailOuter.mesh.height = Globals.GAME_SIZE.y - 25
 	%LeftRailInner.mesh.height = Globals.GAME_SIZE.y - 35
 	
+	%CeilingCollisionShape.shape.size.x =  Globals.GAME_SIZE.x
+	%CeilingCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, -10000)
+	%FloorCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, Globals.GAME_SIZE.y + 10000)
+	
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
 
@@ -147,10 +151,7 @@ func handle_ball_collision_movement(delta: float):
 		return
 	var move_fraction_remaining: float = 1.0
 	var safe_fraction: float = 0.0
-	var unsafe_fraction: float = 0.0
-	
-	var left_paddle_collider: Area2D = %LeftPaddle/AreaCollider
-	var right_paddle_collider: Area2D = %RightPaddle/AreaCollider
+	#var unsafe_fraction: float = 0.0
 	
 	for loop: int in range(BALL_MAX_BOUNCE_LOOPS):
 		ball_curr_position = ball_new_position
@@ -162,9 +163,9 @@ func handle_ball_collision_movement(delta: float):
 		%BallShapeCast.force_shapecast_update()
 		# Get how far the ball can go before colliding:
 		safe_fraction = %BallShapeCast.get_closest_collision_safe_fraction()
-		unsafe_fraction = %BallShapeCast.get_closest_collision_unsafe_fraction()
+		#unsafe_fraction = %BallShapeCast.get_closest_collision_unsafe_fraction()
 		# Move the ball to just before its first collision, and make its new position be just after:
-		ball_new_position = ball_curr_position + (unsafe_fraction * move_fraction_remaining * ball_velocity * delta)
+		#ball_new_position = ball_curr_position + (unsafe_fraction * move_fraction_remaining * ball_velocity * delta)
 		ball_curr_position = ball_curr_position + (move_fraction_remaining * safe_fraction * ball_velocity * delta)
 		# Subtract from the movement fraction remaining, and add to the ball trail:
 		move_fraction_remaining -= move_fraction_remaining * safe_fraction
@@ -173,17 +174,23 @@ func handle_ball_collision_movement(delta: float):
 		
 		# If the ball couldn't go all the way it wanted to:
 		if not (ball_new_position == ball_curr_position):
-			# Shapecast the small distance between where it is and a step further into collision:
-			%BallShapeCast.position = ball_curr_position
-			%BallShapeCast.target_position = ball_new_position - ball_curr_position
-			%BallShapeCast.force_shapecast_update()
+			## Shapecast the small distance between where it is and a step further into collision:
+			#%BallShapeCast.position = ball_curr_position
+			#%BallShapeCast.target_position = ball_new_position - ball_curr_position
+			#%BallShapeCast.force_shapecast_update()
+			
 			# Change the ball's velocity based on its collisions:
+			var collider: Object
 			for coll_index: int in range(%BallShapeCast.get_collision_count()):
-				match %BallShapeCast.get_collider(coll_index):
-					left_paddle_collider:
-						ball_velocity.x = abs(ball_velocity.x)
-					right_paddle_collider:
-						ball_velocity.x = -1.0 * abs(ball_velocity.x)
+				collider = %BallShapeCast.get_collider(coll_index)
+				if collider == %LeftPaddle/AreaCollider:
+					ball_velocity.x = abs(ball_velocity.x)
+				elif collider == %RightPaddle/AreaCollider:
+					ball_velocity.x = -1.0 * abs(ball_velocity.x)
+				elif collider == %CeilingCollider:
+					ball_velocity.y = abs(ball_velocity.y)
+				elif collider == %FloorCollider:
+					ball_velocity.y = -1.0 * abs(ball_velocity.y)
 		
 		if (move_fraction_remaining <= 0.0):
 			break
