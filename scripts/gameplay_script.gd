@@ -152,15 +152,21 @@ func handle_ball_collision_movement(delta: float):
 	var move_fraction_remaining: float = 1.0
 	var safe_fraction: float = 0.0
 	#var unsafe_fraction: float = 0.0
+	var shapecast_stepback_margin: float = 100.0
+	var shapecast_stepback: Vector2 = Vector2()
 	
 	for loop: int in range(BALL_MAX_BOUNCE_LOOPS):
+		
 		ball_curr_position = ball_new_position
 		
-		# Shapecast from where the ball is to the full length of where it wants to go:
-		%BallShapeCast.position = ball_curr_position
+		# Shapecast from a margin before the ball to where the ball may move too:
 		ball_new_position = ball_curr_position + (move_fraction_remaining * ball_velocity * delta)
-		%BallShapeCast.target_position = ball_new_position - ball_curr_position
+		shapecast_stepback = (ball_new_position - ball_curr_position).normalized() * shapecast_stepback_margin
+		%BallShapeCast.position = ball_curr_position - shapecast_stepback
+		%BallShapeCast.target_position = (ball_new_position - ball_curr_position) + shapecast_stepback
 		%BallShapeCast.force_shapecast_update()
+		
+		
 		# Get how far the ball can go before colliding:
 		safe_fraction = %BallShapeCast.get_closest_collision_safe_fraction()
 		#unsafe_fraction = %BallShapeCast.get_closest_collision_unsafe_fraction()
@@ -184,13 +190,22 @@ func handle_ball_collision_movement(delta: float):
 			for coll_index: int in range(%BallShapeCast.get_collision_count()):
 				collider = %BallShapeCast.get_collider(coll_index)
 				if collider == %LeftPaddle/AreaCollider:
+					rem_add_ballshapecast_coll_exceptions(
+						%RightPaddle/AreaCollider, %LeftPaddle/AreaCollider)
 					ball_velocity.x = abs(ball_velocity.x)
 				elif collider == %RightPaddle/AreaCollider:
+					rem_add_ballshapecast_coll_exceptions(
+						%LeftPaddle/AreaCollider, %RightPaddle/AreaCollider)
 					ball_velocity.x = -1.0 * abs(ball_velocity.x)
 				elif collider == %CeilingCollider:
+					rem_add_ballshapecast_coll_exceptions(
+						%CeilingCollider, %FloorCollider)
 					ball_velocity.y = abs(ball_velocity.y)
 				elif collider == %FloorCollider:
+					rem_add_ballshapecast_coll_exceptions(
+						%FloorCollider, %CeilingCollider)
 					ball_velocity.y = -1.0 * abs(ball_velocity.y)
+			
 		
 		if (move_fraction_remaining <= 0.0):
 			break
@@ -202,6 +217,16 @@ func handle_ball_collision_movement(delta: float):
 	%Ball.position = ball_curr_position
 	%Ball.set_meta("velocity", ball_velocity)
 
+var ballshapecast_current_exceptions: Array[Area2D] = []
+func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D):
+	ballshapecast_current_exceptions.erase(to_remove)
+	ballshapecast_current_exceptions.append(to_add)
+	%BallShapeCast.clear_exceptions()
+	for i in range(ballshapecast_current_exceptions.size()):
+		%BallShapeCast.add_exception(ballshapecast_current_exceptions[i])
+	
+
+# !! OLD FUNCTION, DELETE LATER
 func handle_ball_movement(delta: float):
 	var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 	

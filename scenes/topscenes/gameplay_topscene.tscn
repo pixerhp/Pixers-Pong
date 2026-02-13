@@ -169,8 +169,8 @@ default_color = Color(1, 1, 1, 0.19607843)
 
 [node name="Ball" type="Node2D" parent="." unique_id=2146992066]
 unique_name_in_owner = true
-position = Vector2(630, 324)
-metadata/velocity = Vector2(-400, 200)
+position = Vector2(614, 317)
+metadata/velocity = Vector2(-400, 0)
 
 [node name="BallMeshInner" type="MeshInstance2D" parent="Ball" unique_id=1691678160]
 self_modulate = Color(0.16470589, 0.28627452, 0.30588236, 1)
