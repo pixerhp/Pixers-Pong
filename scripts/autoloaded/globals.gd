@@ -6,18 +6,22 @@ var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
 
 enum AI_MODES {
 	NO_AI, 
-	RANDOM,
 	COPYCAT,
-	ZIGZAG,
-	SLOW_CHASE, 
-	CHASE,
-	SLOW_PREDICTOR,
-	PREDICTOR,
+	RANDOM_INPUTS,
+	ZIGZAGGER_SLOW,
+	ZIGZAGGER,
+	CHASER_SLOW, 
+	CHASER,
+	SIMPLE_PREDICTOR_SLOW,
+	SIMPLE_PREDICTOR,
+	DEEP_PREDICTOR_SLOW,
+	DEEP_PREDICTOR,
+	MASTER_SLOW,
 	MASTER,
 }
 
 var plr1_ai_mode: int = AI_MODES.NO_AI
-var plr2_ai_mode: int = AI_MODES.NO_AI
+var plr2_ai_mode: int = AI_MODES.ZIGZAGGER_SLOW
 
 func _process(_delta):
 	if Input.is_action_pressed("pause_escape"):

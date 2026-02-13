@@ -2,6 +2,8 @@ extends Node2D
 
 func _ready():
 	reset_gameobject_positions()
+	reset_ai_inputs(false)
+	reset_ai_inputs(true)
 
 func reset_gameobject_positions():
 	%BackgroundColorRect.custom_minimum_size = Globals.GAME_SIZE
@@ -52,7 +54,8 @@ func _process(delta: float):
 		%RightPaddle/%MeshContainer.set_meta("knockback_oomf", 2000.0)
 		%RightPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
 	
-	check_do_paddle_ai()
+	handle_paddle_ai(false, Globals.plr1_ai_mode)
+	handle_paddle_ai(true, Globals.plr2_ai_mode)
 	handle_paddle_controls(false, delta)
 	handle_paddle_controls(true, delta)
 	handle_ball_collision_movement(delta)
@@ -60,19 +63,47 @@ func _process(delta: float):
 	handle_paddle_knockback_anim(false)
 	handle_paddle_knockback_anim(true)
 
-func check_do_paddle_ai():
-	#var test_event = InputEventAction.new()
-	#test_event.action = "plr2_up"
-	#test_event.pressed = true
-	#Input.parse_input_event(test_event)
+func handle_paddle_ai(is_plr_2: bool, ai_mode):
+	var paddle_noderef: Node2D = %RightPaddle if is_plr_2 else %LeftPaddle
+	var act_prefix: String = "plr2_" if is_plr_2 else "plr1_"
+	#input_event.action = "plr2_up"
+	#input_event.pressed = true
+	#Input.parse_input_event(input_event)
 	
-	match Globals.plr1_ai_mode:
+	match ai_mode:
 		Globals.AI_MODES.NO_AI:
-			pass
-	
-	match Globals.plr2_ai_mode:
-		Globals.AI_MODES.NO_AI:
-			pass
+			return
+		Globals.AI_MODES.ZIGZAGGER_SLOW:
+			handle_paddle_ai(is_plr_2, Globals.AI_MODES.ZIGZAGGER)
+			set_input(act_prefix + "slow", true)
+		Globals.AI_MODES.ZIGZAGGER:
+			if paddle_noderef.get_meta("velocity") == 0.0:
+				if paddle_noderef.position.y < Globals.GAME_SIZE.y / 2.0:
+					set_input(act_prefix + "down", true)
+					set_input(act_prefix + "up", false)
+				else:
+					set_input(act_prefix + "up", true)
+					set_input(act_prefix + "down", false)
+
+func reset_ai_inputs(is_plr_2: bool):
+	if is_plr_2:
+		set_input("plr2_up", false)
+		set_input("plr2_down", false)
+		set_input("plr2_slow", false)
+		set_input("plr2_bump_left", false)
+		set_input("plr2_bump_right", false)
+	else:
+		set_input("plr1_up", false)
+		set_input("plr1_down", false)
+		set_input("plr1_slow", false)
+		set_input("plr1_bump_left", false)
+		set_input("plr1_bump_right", false)
+
+func set_input(action_name: String, state: bool):
+	var input_event = InputEventAction.new()
+	input_event.action = action_name
+	input_event.pressed = state
+	Input.parse_input_event(input_event)
 
 # Constants associated with paddle movement:
 const PAD_MOVEACCEL: float = 14400.0
@@ -81,13 +112,14 @@ const PAD_SLOWDOWN: float = 0.05 # Note: Values closer to 0 correlate with highe
 @onready var PAD_Y_TOPLIMIT: float = %LeftPaddle/%FrontBar.mesh.height / 2.0
 @onready var PAD_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - (%LeftPaddle/%FrontBar.mesh.height / 2.0)
 
-func handle_paddle_controls(on_right: bool, delta: float):
+func handle_paddle_controls(is_plr_2: bool, delta: float):
 	# Player-specific setup:
-	var paddle_noderef: Node2D = (%RightPaddle if on_right else %LeftPaddle)
-	#var paddlemesh_noderef: Node2D = (%RightPaddle/%MeshContainer if on_right else %LeftPaddle/%MeshContainer)
-	var paddlemesh_bars_noderef: Node2D = (%RightPaddle/%BarsContainer if on_right else %LeftPaddle/%BarsContainer)
-	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if on_right else %LeftPaddle/%AnimChar)
-	var plr_prefix: String = ("plr2_" if on_right else "plr1_")
+	var paddle_noderef: Node2D = (%RightPaddle if is_plr_2 else %LeftPaddle)
+	#var paddlemesh_noderef: Node2D = (%RightPaddle/%MeshContainer if is_plr_2 else %LeftPaddle/%MeshContainer)
+	var paddlemesh_bars_noderef: Node2D = (%RightPaddle/%BarsContainer if is_plr_2 else %LeftPaddle/%BarsContainer)
+	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar)
+	var padchar_anim_prefix: String = "plr_" if ((Globals.plr2_ai_mode if is_plr_2 else Globals.plr1_ai_mode) == Globals.AI_MODES.NO_AI) else "bot_"
+	var plr_prefix: String = ("plr2_" if is_plr_2 else "plr1_")
 	# General setup:
 	var pad_vel: float = paddle_noderef.get_meta("velocity")
 	var slow_effect: float = (0.3 if Input.is_action_pressed(plr_prefix + "slow") else 1.0)
@@ -98,17 +130,17 @@ func handle_paddle_controls(on_right: bool, delta: float):
 	
 	# Process up/down movement inputs (or lack thereof):
 	if Input.is_action_pressed(plr_prefix + "up") and not Input.is_action_pressed(plr_prefix + "down"):
-		padchar_noderef.animation = "plr_move_up"
+		padchar_noderef.animation = padchar_anim_prefix + "move_up"
 		if pad_vel > 0.0: 
 			pad_vel = 0.0;
 		pad_vel -= PAD_MOVEACCEL * slow_effect * delta
 	elif Input.is_action_pressed(plr_prefix + "down") and not Input.is_action_pressed(plr_prefix + "up"):
-		padchar_noderef.animation = "plr_move_down"
+		padchar_noderef.animation = padchar_anim_prefix + "move_down"
 		if pad_vel < 0.0: 
 			pad_vel = 0.0;
 		pad_vel += PAD_MOVEACCEL * slow_effect * delta
 	else:
-		padchar_noderef.animation = "plr_idle"
+		padchar_noderef.animation = padchar_anim_prefix + "idle"
 		pad_vel *= pow(PAD_SLOWDOWN, delta * 10) # (The '* 10' is so that PAD_SLOWDOWN doesn't have to be as small.)
 		if abs(pad_vel) < 0.1:
 			pad_vel = 0.0
@@ -127,11 +159,11 @@ func handle_paddle_controls(on_right: bool, delta: float):
 	# Update metadata for next cycle:
 	paddle_noderef.set_meta("velocity", pad_vel)
 
-func handle_paddle_knockback_anim(on_right: bool):
+func handle_paddle_knockback_anim(is_plr_2: bool):
 	const OOMF_LURCH_RATIO: float = 0.0035
 	const KNOCKBACK_ANIM_DURATION: int = 120
 	
-	var pad_mesh_container_ref: Node2D = (%RightPaddle/%MeshContainer if on_right else %LeftPaddle/%MeshContainer)
+	var pad_mesh_container_ref: Node2D = (%RightPaddle/%MeshContainer if is_plr_2 else %LeftPaddle/%MeshContainer)
 	
 	var oomf: float = pad_mesh_container_ref.get_meta("knockback_oomf")
 	var time_since: int = Time.get_ticks_msec() - pad_mesh_container_ref.get_meta("knockback_time")
@@ -207,19 +239,21 @@ func handle_ball_collision_movement(delta: float):
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/AreaCollider, %LeftPaddle/AreaCollider)
 					ball_velocity.x = abs(ball_velocity.x)
+				
 				elif collider == %RightPaddle/AreaCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/AreaCollider, %RightPaddle/AreaCollider)
 					ball_velocity.x = -1.0 * abs(ball_velocity.x)
+				
 				elif collider == %CeilingCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%CeilingCollider, %FloorCollider)
 					ball_velocity.y = abs(ball_velocity.y)
+				
 				elif collider == %FloorCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%FloorCollider, %CeilingCollider)
 					ball_velocity.y = -1.0 * abs(ball_velocity.y)
-			
 		
 		if (move_fraction_remaining <= 0.0):
 			break
@@ -285,7 +319,7 @@ func _on_left_paddle_collider_area_entered(_area):
 		#ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length())
 		#if ball_velocity.length() > BALL_MAX_SPEED:
 			#ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
-func _on_right_paddle_collider_area_entered(_area):
+func _is_plr_2_paddle_collider_area_entered(_area):
 	pass
 	#if ball_velocity.x > 0.0:
 		#%RightPaddle/%MeshContainer.set_meta("knockback_oomf", abs(ball_velocity.x))
