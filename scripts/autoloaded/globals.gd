@@ -26,7 +26,7 @@ enum AI_MODES {
 }
 
 var plr1_ai_mode: int = AI_MODES.NO_AI
-var plr2_ai_mode: int = AI_MODES.ZIGZAGGER_SLOW
+var plr2_ai_mode: int = AI_MODES.COPYCAT
 
 func _process(_delta):
 	if Input.is_action_pressed("pause_escape"):

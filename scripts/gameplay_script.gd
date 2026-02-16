@@ -231,18 +231,18 @@ func handle_ball_collision_movement(delta: float):
 				if collider == %LeftPaddle/AreaCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/AreaCollider, %LeftPaddle/AreaCollider)
-					ball_velocity.x = abs(ball_velocity.x)
+					ball_velocity = calc_paddlehit_bounce(ball_curr_position, ball_velocity, false)
 				elif collider == %RightPaddle/AreaCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/AreaCollider, %RightPaddle/AreaCollider)
-					ball_velocity.x = -1.0 * abs(ball_velocity.x)
+					ball_velocity = calc_paddlehit_bounce(ball_curr_position, ball_velocity, true)
 				elif collider == %CeilingCollider:
 					rem_add_ballshapecast_coll_exceptions(
-						%CeilingCollider, %FloorCollider)
+						%FloorCollider, %CeilingCollider)
 					ball_velocity.y = abs(ball_velocity.y)
 				elif collider == %FloorCollider:
 					rem_add_ballshapecast_coll_exceptions(
-						%FloorCollider, %CeilingCollider)
+						%CeilingCollider, %FloorCollider)
 					ball_velocity.y = -1.0 * abs(ball_velocity.y)
 		
 		# If the ball is done moving:
@@ -266,13 +266,19 @@ func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D):
 	for i in range(ballshapecast_current_exceptions.size()):
 		%BallShapeCast.add_exception(ballshapecast_current_exceptions[i])
 
-# Output ranges from -1.0 to 1.0, representing where the ball hit the paddle with 0.0 as the center.
-func get_paddlehit_centeredness(on_right: bool) -> float:
+func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr_2: bool) -> Vector2:
+	var paddle_noderef: Node2D = (%RightPaddle if is_plr_2 else %LeftPaddle)
+	# Hit region ranges from -1.0 (hit the very top of the paddle) to 1.0 (hit the very bottom):
+	var paddle_hit_region: float = ((paddle_noderef.position.y - ball_hit_pos.y) if is_plr_2 else (ball_hit_pos.y - paddle_noderef.position.y)) / (PAD_Y_TOPLIMIT + BALL_Y_TOPLIMIT)
+	paddle_hit_region = pow(paddle_hit_region, 5) # (Intensify angle near edges.)
+	var bounce_angle: Vector2 = (Vector2.LEFT if is_plr_2 else Vector2.RIGHT).rotated(PI * 0.3 * paddle_hit_region)
+	ball_velocity = ball_velocity.bounce(bounce_angle)
 	
-	# !!!
-	pass
+	ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length()) # (Speedup)
+	if ball_velocity.length() > BALL_MAX_SPEED:
+		ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
 	
-	return 0.0
+	return ball_velocity
 
 # Constants and variables associated with the ball's trail:
 const BALLTRAIL_DURATION: float = 250 # (Time in ms.)
@@ -297,11 +303,11 @@ func update_ball_trail():
 # !!! OLD FUNCTIONS DELETE LATER, currently kept for use as reference:
 func _on_left_paddle_collider_area_entered(_area):
 	pass
-	#if ball_velocity.x < 0.0:
-		#%LeftPaddle/%MeshContainer.set_meta("knockback_oomf", abs(ball_velocity.x))
-		#%LeftPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
-		#var pad_hit_offset: float = pow((%Ball.position.y - %LeftPaddle.position.y) / (((%LeftPaddle/%FrontBar.mesh.height + 5) / 2.0)), 5)
-		#var angle: Vector2 = Vector2.RIGHT.rotated(PI * pad_hit_offset * 0.25)
+	#if ball_velocity.x > 0.0:
+		#%RightPaddle/%MeshContainer.set_meta("knockback_oomf", abs(ball_velocity.x))
+		#%RightPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
+		#var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightPaddle/%FrontBar.mesh.height + 5) / 2.0)), 5)
+		#var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
 		#ball_velocity = ball_velocity.bounce(angle)
 		#ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length())
 		#if ball_velocity.length() > BALL_MAX_SPEED:
