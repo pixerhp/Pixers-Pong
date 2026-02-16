@@ -251,6 +251,11 @@ func handle_ball_collision_movement(delta: float):
 		else:
 			ball_curr_position = ball_new_position
 	
+	# Renable the floor/ceiling collisions once the ball is done moving,
+	# as they may get hit mutliple times in a row due to angled paddle hits.
+	rem_add_ballshapecast_coll_exceptions(%CeilingCollider)
+	rem_add_ballshapecast_coll_exceptions(%FloorCollider)
+	
 	# Re-serve the ball if it goes out-of-bounds, else update its data.
 	if abs(ball_curr_position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + 20):
 		reserve_ball()
@@ -259,9 +264,10 @@ func handle_ball_collision_movement(delta: float):
 		%Ball.set_meta("velocity", ball_velocity)
 
 var ballshapecast_current_exceptions: Array[Area2D] = []
-func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D):
+func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D = null):
 	ballshapecast_current_exceptions.erase(to_remove)
-	ballshapecast_current_exceptions.append(to_add)
+	if not to_add == null:
+		ballshapecast_current_exceptions.append(to_add)
 	%BallShapeCast.clear_exceptions()
 	for i in range(ballshapecast_current_exceptions.size()):
 		%BallShapeCast.add_exception(ballshapecast_current_exceptions[i])
