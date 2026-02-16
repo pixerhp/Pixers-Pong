@@ -80,10 +80,10 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			set_input(act_prefix + "slow", Input.is_action_pressed(alt_act_prefix + "slow"))
 			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_left"))
 			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_right"))
-		#Globals.AI_MODES.RANDOM_MOVEMENT:
-			#set_input(act_prefix + "up", ((randi() % 2) == 0))
-			#set_input(act_prefix + "down", ((randi() % 2) == 0))
-			#set_input(act_prefix + "slow", ((randi() % 2) == 0))
+		Globals.AI_MODES.RANDOM_MASH:
+			set_input(act_prefix + "up", ((randi() % 2) == 0))
+			set_input(act_prefix + "down", ((randi() % 2) == 0))
+			set_input(act_prefix + "slow", ((randi() % 2) == 0))
 		Globals.AI_MODES.ZIGZAGGER_SLOW:
 			handle_paddle_ai(is_plr_2, Globals.AI_MODES.ZIGZAGGER)
 			set_input(act_prefix + "slow", true)
@@ -195,27 +195,18 @@ func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> fl
 const BALL_PADHIT_SPEEDUP: float = 50
 const BALL_MAX_SPEED: float = 2500
 const BALL_MAX_BOUNCE_LOOPS: int = 100
-# Constants and variables associated with the ball's trail:
-const BALLTRAIL_DURATION: float = 250
-var balltrail_positions: PackedVector2Array = []
-var balltrail_times: PackedInt64Array = []
 
 func handle_ball_collision_movement(delta: float):
-	var ball_curr_position: Vector2 = Vector2()
-	var ball_new_position: Vector2 = %Ball.position
+	var ball_curr_position: Vector2 = %Ball.position
+	var ball_new_position: Vector2 = Vector2()
 	var ball_velocity: Vector2 = %Ball.get_meta("velocity")
-	if ball_velocity == Vector2(0,0):
-		return
+	if ball_velocity == Vector2(0,0): return # (Crash prevention.)
 	var move_fraction_remaining: float = 1.0
 	var safe_fraction: float = 0.0
-	#var unsafe_fraction: float = 0.0
 	var shapecast_stepback_margin: float = 40.0
 	var shapecast_stepback: Vector2 = Vector2()
 	
 	for loop: int in range(BALL_MAX_BOUNCE_LOOPS):
-		
-		ball_curr_position = ball_new_position
-		
 		# Shapecast from a margin before the ball to where the ball may move too:
 		ball_new_position = ball_curr_position + (move_fraction_remaining * ball_velocity * delta)
 		shapecast_stepback = (ball_new_position - ball_curr_position).normalized() * shapecast_stepback_margin
@@ -224,25 +215,16 @@ func handle_ball_collision_movement(delta: float):
 		%BallShapeCast.force_shapecast_update()
 		
 		
-		# Get how far the ball can go before colliding:
+		# Move the ball (either all the way or up until its first collision):
 		safe_fraction = %BallShapeCast.get_closest_collision_safe_fraction()
-		#unsafe_fraction = %BallShapeCast.get_closest_collision_unsafe_fraction()
-		# Move the ball to just before its first collision, and make its new position be just after:
-		#ball_new_position = ball_curr_position + (unsafe_fraction * move_fraction_remaining * ball_velocity * delta)
-		ball_curr_position = ball_curr_position + (move_fraction_remaining * safe_fraction * ball_velocity * delta)
-		# Subtract from the movement fraction remaining, and add to the ball trail:
+		ball_curr_position += (move_fraction_remaining * safe_fraction * ball_velocity * delta)
+		# Subtract the previous step from the remaining movement available, and update the ball trail:
 		move_fraction_remaining -= move_fraction_remaining * safe_fraction
 		balltrail_positions.append(ball_curr_position)
 		balltrail_times.append(Time.get_ticks_msec())
 		
-		# If the ball couldn't go all the way it wanted to:
+		# If the ball stopped at a collision:
 		if not (ball_new_position == ball_curr_position):
-			## Shapecast the small distance between where it is and a step further into collision:
-			#%BallShapeCast.position = ball_curr_position
-			#%BallShapeCast.target_position = ball_new_position - ball_curr_position
-			#%BallShapeCast.force_shapecast_update()
-			
-			# Change the ball's velocity based on its collisions:
 			var collider: Object
 			for coll_index: int in range(%BallShapeCast.get_collision_count()):
 				collider = %BallShapeCast.get_collider(coll_index)
@@ -250,26 +232,26 @@ func handle_ball_collision_movement(delta: float):
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/AreaCollider, %LeftPaddle/AreaCollider)
 					ball_velocity.x = abs(ball_velocity.x)
-				
 				elif collider == %RightPaddle/AreaCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/AreaCollider, %RightPaddle/AreaCollider)
 					ball_velocity.x = -1.0 * abs(ball_velocity.x)
-				
 				elif collider == %CeilingCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%CeilingCollider, %FloorCollider)
 					ball_velocity.y = abs(ball_velocity.y)
-				
 				elif collider == %FloorCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%FloorCollider, %CeilingCollider)
 					ball_velocity.y = -1.0 * abs(ball_velocity.y)
 		
+		# If the ball is done moving:
 		if (move_fraction_remaining <= 0.0):
 			break
+		else:
+			ball_curr_position = ball_new_position
 	
-	# !!! temporary teleport to center if ball goes too far to the left/right:
+	# Re-serve the ball if it goes out-of-bounds, else update its data.
 	if abs(ball_curr_position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + 20):
 		reserve_ball()
 	else:
@@ -283,25 +265,19 @@ func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D):
 	%BallShapeCast.clear_exceptions()
 	for i in range(ballshapecast_current_exceptions.size()):
 		%BallShapeCast.add_exception(ballshapecast_current_exceptions[i])
-	
 
-# !! OLD FUNCTION, DELETE LATER
-func handle_ball_movement(delta: float):
-	var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+# Output ranges from -1.0 to 1.0, representing where the ball hit the paddle with 0.0 as the center.
+func get_paddlehit_centeredness(on_right: bool) -> float:
 	
-	%Ball.position += ball_velocity * delta
-	if %Ball.position.y < BALL_Y_TOPLIMIT:
-		%Ball.position.y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - %Ball.position.y)
-		ball_velocity.y = maxf(ball_velocity.y, ball_velocity.y * -1.0)
-	elif %Ball.position.y > BALL_Y_BOTTOMLIMIT:
-		%Ball.position.y = BALL_Y_BOTTOMLIMIT - (%Ball.position.y - BALL_Y_BOTTOMLIMIT)
-		ball_velocity.y = minf(ball_velocity.y, ball_velocity.y * -1.0)
+	# !!!
+	pass
 	
-	if ((%Ball.position.x < (-1.0 * BALL_Y_TOPLIMIT)) or 
-	(%Ball.position.x > (Globals.GAME_SIZE.x + BALL_Y_TOPLIMIT))):
-		%Ball.position = Globals.GAME_SIZE / 2.0
-	
-	%Ball.set_meta("velocity", ball_velocity)
+	return 0.0
+
+# Constants and variables associated with the ball's trail:
+const BALLTRAIL_DURATION: float = 250 # (Time in ms.)
+var balltrail_positions: PackedVector2Array = []
+var balltrail_times: PackedInt64Array = []
 
 func update_ball_trail():
 	# Remove outdated trail data:
