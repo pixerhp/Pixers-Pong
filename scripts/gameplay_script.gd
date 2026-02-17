@@ -191,11 +191,10 @@ func handle_paddle_knockback_anim(is_plr_2: bool):
 func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> float:
 	return 1.0 - pow(((2.0 * ((float(time_since) / float(anim_time_length)))) - 1.0), 2.0)
 
-
 # Constants associated with the ball's movement:
 @onready var BALL_Y_TOPLIMIT: float = %BallShapeCast.shape.radius
 @onready var BALL_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
-const BALL_PADHIT_SPEEDUP: float = 50
+const BALL_PADHIT_SPEEDUP: float = 35
 const BALL_MAX_SPEED: float = 4000
 const BALL_MAX_BOUNCE_LOOPS: int = 100
 
