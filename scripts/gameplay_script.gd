@@ -46,14 +46,6 @@ func reserve_ball():
 	
 
 func _process(delta: float):
-	# !!! Temporary knockback testing
-	if Input.is_action_just_pressed("plr1_bump_left"):
-		%LeftPaddle/%MeshContainer.set_meta("knockback_oomf", 2000.0)
-		%LeftPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
-	if Input.is_action_just_pressed("plr2_bump_right"):
-		%RightPaddle/%MeshContainer.set_meta("knockback_oomf", 2000.0)
-		%RightPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
-	
 	handle_paddle_ai(false, Globals.plr1_ai_mode)
 	handle_paddle_ai(true, Globals.plr2_ai_mode)
 	handle_paddle_controls(false, delta)
@@ -181,10 +173,13 @@ func handle_paddle_controls(is_plr_2: bool, delta: float):
 func handle_paddle_knockback_anim(is_plr_2: bool):
 	const OOMF_LURCH_RATIO: float = 0.0035
 	const KNOCKBACK_ANIM_DURATION: int = 120
+	const MIN_OOMF_CUTOFF: float = 700.0
 	
 	var pad_mesh_container_ref: Node2D = (%RightPaddle/%MeshContainer if is_plr_2 else %LeftPaddle/%MeshContainer)
 	
 	var oomf: float = pad_mesh_container_ref.get_meta("knockback_oomf")
+	if abs(oomf) < MIN_OOMF_CUTOFF:
+		return
 	var time_since: int = Time.get_ticks_msec() - pad_mesh_container_ref.get_meta("knockback_time")
 	if time_since > KNOCKBACK_ANIM_DURATION:
 		pad_mesh_container_ref.position.x = 0.0
@@ -282,6 +277,7 @@ func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D = n
 
 func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr_2: bool) -> Vector2:
 	var paddle_noderef: Node2D = (%RightPaddle if is_plr_2 else %LeftPaddle)
+	var padmeshcont_noderef: Node2D = (%RightPaddle/%MeshContainer if is_plr_2 else %LeftPaddle/%MeshContainer)
 	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar)
 	# Hit region ranges from -1.0 (hit the very top of the paddle) to 1.0 (hit the very bottom):
 	var paddle_hit_region: float = ((paddle_noderef.position.y - ball_hit_pos.y) if is_plr_2 else (ball_hit_pos.y - paddle_noderef.position.y)) / (PAD_Y_TOPLIMIT + BALL_Y_TOPLIMIT)
@@ -293,6 +289,9 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	if ball_velocity.length() > BALL_MAX_SPEED:
 		ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
 	
+	# Do paddle knockback animation, paddle character surprised expression: 
+	padmeshcont_noderef.set_meta("knockback_oomf", ball_velocity.x)
+	padmeshcont_noderef.set_meta("knockback_time", Time.get_ticks_msec())
 	if  (ball_hit_pos.x - paddle_noderef.position.x) * (1.0 if is_plr_2 else -1.0) > 0.0:
 		padchar_noderef.set_meta("time_surprised", Time.get_ticks_msec())
 	
