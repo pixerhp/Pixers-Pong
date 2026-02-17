@@ -122,6 +122,9 @@ const PAD_MAXSPEED: float = 1250.0
 const PAD_SLOWDOWN: float = 0.05 # Note: Values closer to 0 correlate with higher friction.
 @onready var PAD_Y_TOPLIMIT: float = %LeftPaddle/%FrontBar.mesh.height / 2.0
 @onready var PAD_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - (%LeftPaddle/%FrontBar.mesh.height / 2.0)
+const SURP_EXPR_VARIATION: float = 750.0
+const SURP_EXPR_BASE: float = 250.0
+const SURP_EXPR_FALLOFF: float = 750.0
 
 func handle_paddle_controls(is_plr_2: bool, delta: float):
 	# Player-specific setup:
@@ -169,6 +172,11 @@ func handle_paddle_controls(is_plr_2: bool, delta: float):
 	
 	# Update metadata for next cycle:
 	paddle_noderef.set_meta("velocity", pad_vel)
+	
+	# Situationally override whatever expression the paddle character has with being surprised. 
+	if (float(Time.get_ticks_msec() - padchar_noderef.get_meta("time_surprised")) < 
+	((SURP_EXPR_VARIATION / (1.0 + (%Ball.get_meta("velocity").length() / SURP_EXPR_FALLOFF))) + SURP_EXPR_BASE)):
+		padchar_noderef.animation = padchar_anim_prefix + "surprised"
 
 func handle_paddle_knockback_anim(is_plr_2: bool):
 	const OOMF_LURCH_RATIO: float = 0.0035
@@ -193,7 +201,7 @@ func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> fl
 @onready var BALL_Y_TOPLIMIT: float = %BallShapeCast.shape.radius
 @onready var BALL_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
 const BALL_PADHIT_SPEEDUP: float = 50
-const BALL_MAX_SPEED: float = 2500
+const BALL_MAX_SPEED: float = 4000
 const BALL_MAX_BOUNCE_LOOPS: int = 100
 
 func handle_ball_collision_movement(delta: float):
@@ -274,15 +282,19 @@ func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D = n
 
 func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr_2: bool) -> Vector2:
 	var paddle_noderef: Node2D = (%RightPaddle if is_plr_2 else %LeftPaddle)
+	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar)
 	# Hit region ranges from -1.0 (hit the very top of the paddle) to 1.0 (hit the very bottom):
 	var paddle_hit_region: float = ((paddle_noderef.position.y - ball_hit_pos.y) if is_plr_2 else (ball_hit_pos.y - paddle_noderef.position.y)) / (PAD_Y_TOPLIMIT + BALL_Y_TOPLIMIT)
 	paddle_hit_region = pow(paddle_hit_region, 5) # (Intensify angle near edges.)
-	var bounce_angle: Vector2 = (Vector2.LEFT if is_plr_2 else Vector2.RIGHT).rotated(PI * 0.3 * paddle_hit_region)
+	var bounce_angle: Vector2 = (Vector2.LEFT if is_plr_2 else Vector2.RIGHT).rotated(PI * 0.2625 * paddle_hit_region)
 	ball_velocity = ball_velocity.bounce(bounce_angle)
 	
 	ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length()) # (Speedup)
 	if ball_velocity.length() > BALL_MAX_SPEED:
 		ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
+	
+	if  (ball_hit_pos.x - paddle_noderef.position.x) * (1.0 if is_plr_2 else -1.0) > 0.0:
+		padchar_noderef.set_meta("time_surprised", Time.get_ticks_msec())
 	
 	return ball_velocity
 
@@ -305,30 +317,3 @@ func update_ball_trail():
 	
 	# Update ball-trail node's internal array.
 	%BallTrail.points = balltrail_positions
-
-# !!! OLD FUNCTIONS DELETE LATER, currently kept for use as reference:
-func _on_left_paddle_collider_area_entered(_area):
-	pass
-	#if ball_velocity.x > 0.0:
-		#%RightPaddle/%MeshContainer.set_meta("knockback_oomf", abs(ball_velocity.x))
-		#%RightPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
-		#var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightPaddle/%FrontBar.mesh.height + 5) / 2.0)), 5)
-		#var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
-		#ball_velocity = ball_velocity.bounce(angle)
-		#ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length())
-		#if ball_velocity.length() > BALL_MAX_SPEED:
-			#ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
-func _is_plr_2_paddle_collider_area_entered(_area):
-	pass
-	#if ball_velocity.x > 0.0:
-		#%RightPaddle/%MeshContainer.set_meta("knockback_oomf", abs(ball_velocity.x))
-		#%RightPaddle/%MeshContainer.set_meta("knockback_time", Time.get_ticks_msec())
-		#var pad_hit_offset: float = pow((%RightPaddle.position.y - %Ball.position.y) / (((%RightPaddle/%FrontBar.mesh.height + 5) / 2.0)), 5)
-		#var angle: Vector2 = Vector2.LEFT.rotated(PI * pad_hit_offset * 0.25)
-		#ball_velocity = ball_velocity.bounce(angle)
-		#ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length())
-		#if ball_velocity.length() > BALL_MAX_SPEED:
-			#ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
-
-#func process_ball_paddle_hit(is_plr1: bool):
-	
