@@ -25,8 +25,8 @@ func reset_gameobject_positions():
 	%LeftRailInner.mesh.height = Globals.GAME_SIZE.y - 35
 	
 	%CeilingCollisionShape.shape.size.x =  Globals.GAME_SIZE.x
-	%CeilingCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, -10000)
-	%FloorCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, Globals.GAME_SIZE.y + 10000)
+	%CeilingCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, - (%CeilingCollisionShape.shape.size.y / 2.0))
+	%FloorCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, Globals.GAME_SIZE.y + (%CeilingCollisionShape.shape.size.y / 2.0))
 	
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
