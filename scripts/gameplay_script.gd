@@ -225,8 +225,13 @@ func handle_ball_collision_movement(delta: float):
 		balltrail_positions.append(ball_curr_position)
 		balltrail_times.append(Time.get_ticks_msec())
 		
-		# If the ball stopped at a collision:
-		if not (ball_new_position == ball_curr_position):
+		# Handle ball collisions:
+		if (ball_new_position == ball_curr_position):
+			if ball_velocity.x < 0.0:
+				rem_add_ballshapecast_coll_exceptions(%LeftPaddle/AreaCollider)
+			elif ball_velocity.x > 0.0:
+				rem_add_ballshapecast_coll_exceptions(%RightPaddle/AreaCollider)
+		else:
 			var collider: Object
 			for coll_index: int in range(%BallShapeCast.get_collision_count()):
 				collider = %BallShapeCast.get_collider(coll_index)
