@@ -6,7 +6,7 @@ var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
 
 enum AI_MODES {
 	NO_AI,
-	COPYCAT, # Copies the other player's inputs.
+	COPYCAT, # Copies the other player's inputs with a one-frame delay.
 	RANDOM_MASH, # Mashes random movement inputs every frame. (It's not very effective.)
 	ZIGZAGGER_SLOW,
 	ZIGZAGGER, # Alternately moves between the top-most and bottom-most paddle positions. 

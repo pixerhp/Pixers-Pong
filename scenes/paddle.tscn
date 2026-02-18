@@ -24,6 +24,8 @@ height = 200.0
 [node name="Paddle" type="Node2D" unique_id=340420252]
 modulate = Color(0.95, 0.95, 0.95, 1)
 metadata/velocity = 0.0
+metadata/sidebump_strength = 0.0
+metadata/sidebump_time = -50000
 
 [node name="MeshContainer" type="Node2D" parent="." unique_id=24952529]
 unique_name_in_owner = true

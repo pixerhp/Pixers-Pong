@@ -52,6 +52,8 @@ func _process(delta: float):
 	handle_paddle_controls(true, delta)
 	handle_ball_collision_movement(delta)
 	update_ball_trail()
+	handle_paddle_sidebump_animation(false)
+	handle_paddle_sidebump_animation(true)
 	handle_paddle_knockback_anim(false)
 	handle_paddle_knockback_anim(true)
 
@@ -70,8 +72,8 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			set_input(act_prefix + "up", Input.is_action_pressed(alt_act_prefix + "up"))
 			set_input(act_prefix + "down", Input.is_action_pressed(alt_act_prefix + "down"))
 			set_input(act_prefix + "slow", Input.is_action_pressed(alt_act_prefix + "slow"))
-			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_left"))
-			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_right"))
+			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_right"))
+			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_left"))
 		Globals.AI_MODES.RANDOM_MASH:
 			set_input(act_prefix + "up", ((randi() % 2) == 0))
 			set_input(act_prefix + "down", ((randi() % 2) == 0))
@@ -134,22 +136,41 @@ func handle_paddle_controls(is_plr_2: bool, delta: float):
 	else:
 		paddlemesh_bars_noderef.modulate = Color.LIGHT_GRAY
 	
-	# Process up/down movement inputs (or lack thereof):
-	if Input.is_action_pressed(plr_prefix + "up") and not Input.is_action_pressed(plr_prefix + "down"):
-		padchar_noderef.animation = padchar_anim_prefix + "move_up"
-		if pad_vel > 0.0: 
-			pad_vel = 0.0;
-		pad_vel -= PAD_MOVEACCEL * slow_effect * delta
-	elif Input.is_action_pressed(plr_prefix + "down") and not Input.is_action_pressed(plr_prefix + "up"):
-		padchar_noderef.animation = padchar_anim_prefix + "move_down"
-		if pad_vel < 0.0: 
-			pad_vel = 0.0;
-		pad_vel += PAD_MOVEACCEL * slow_effect * delta
-	else:
-		padchar_noderef.animation = padchar_anim_prefix + "idle"
-		pad_vel *= pow(PAD_SLOWDOWN, delta * 10) # (The '* 10' is so that PAD_SLOWDOWN doesn't have to be as small.)
+	# Handle sidebump inputs:
+	if (Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")) > SIDEBUMP_DURATION:
+		if Input.is_action_pressed(plr_prefix + "bump_right"):
+			paddle_noderef.set_meta("sidebump_time", Time.get_ticks_msec())
+			paddle_noderef.set_meta("sidebump_strength", SIDEBUMP_STRENGTH_AMOUNT * (-1.0 if is_plr_2 else 1.0))
+		elif Input.is_action_pressed(plr_prefix + "bump_left"):
+			paddle_noderef.set_meta("sidebump_time", Time.get_ticks_msec())
+			paddle_noderef.set_meta("sidebump_strength", -1.0 * SIDEBUMP_STRENGTH_AMOUNT * (-1.0 if is_plr_2 else 1.0))
+	
+	# Other movement controls are disabled if the player is in a bump left/right state:
+	if (Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")) < SIDEBUMP_DURATION:
+		pad_vel *= pow(PAD_SLOWDOWN, delta)
 		if abs(pad_vel) < 0.1:
-			pad_vel = 0.0
+			padchar_noderef.animation = padchar_anim_prefix + "idle"
+		elif pad_vel < 0.0:
+			padchar_noderef.animation = padchar_anim_prefix + "move_up"
+		else:
+			padchar_noderef.animation = padchar_anim_prefix + "move_down"
+	else:
+		# Process up/down movement inputs (or lack thereof):
+		if Input.is_action_pressed(plr_prefix + "up") and not Input.is_action_pressed(plr_prefix + "down"):
+			if pad_vel > 0.0: 
+				pad_vel = 0.0;
+			pad_vel -= PAD_MOVEACCEL * slow_effect * delta
+			padchar_noderef.animation = padchar_anim_prefix + "move_up"
+		elif Input.is_action_pressed(plr_prefix + "down") and not Input.is_action_pressed(plr_prefix + "up"):
+			if pad_vel < 0.0: 
+				pad_vel = 0.0;
+			pad_vel += PAD_MOVEACCEL * slow_effect * delta
+			padchar_noderef.animation = padchar_anim_prefix + "move_down"
+		else:
+			pad_vel *= pow(PAD_SLOWDOWN, delta * 10) # (The '* 10' is so that PAD_SLOWDOWN doesn't have to be as small.)
+			if abs(pad_vel) < 0.1:
+				pad_vel = 0.0
+			padchar_noderef.animation = padchar_anim_prefix + "idle"
 	
 	# Limit paddle velocity:
 	pad_vel = clampf(pad_vel, -1 * slow_effect * PAD_MAXSPEED, slow_effect * PAD_MAXSPEED,)
@@ -170,6 +191,23 @@ func handle_paddle_controls(is_plr_2: bool, delta: float):
 	((SURP_EXPR_VARIATION / (1.0 + (%Ball.get_meta("velocity").length() / SURP_EXPR_FALLOFF))) + SURP_EXPR_BASE)):
 		padchar_noderef.animation = padchar_anim_prefix + "surprised"
 
+
+const SIDEBUMP_DURATION: int = 400
+const SIDEBUMP_STRENGTH_AMOUNT: float = 25.0
+
+func handle_paddle_sidebump_animation(is_plr_2: bool):
+	var paddle_noderef: Node2D = (%RightPaddle if is_plr_2 else %LeftPaddle)
+	
+	var time_since: int = Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")
+	if time_since > SIDEBUMP_DURATION:
+		paddle_noderef.position.x = (Globals.GAME_SIZE.x - 120) if is_plr_2 else 120.0
+		return
+	var bump_strength: float = paddle_noderef.get_meta("sidebump_strength")
+	
+	var parabola_weight: float = get_parabola_animation_weight(time_since, SIDEBUMP_DURATION)
+	paddle_noderef.position.x = 120 + (parabola_weight * bump_strength)
+	if is_plr_2: paddle_noderef.position.x = Globals.GAME_SIZE.x - paddle_noderef.position.x
+
 func handle_paddle_knockback_anim(is_plr_2: bool):
 	const OOMF_LURCH_RATIO: float = 0.0035
 	const KNOCKBACK_ANIM_DURATION: int = 120
@@ -189,7 +227,10 @@ func handle_paddle_knockback_anim(is_plr_2: bool):
 		clampf(get_parabola_animation_weight(time_since, KNOCKBACK_ANIM_DURATION), 0.0, 1.0))
 
 func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> float:
-	return 1.0 - pow(((2.0 * ((float(time_since) / float(anim_time_length)))) - 1.0), 2.0)
+	return 1.0 - pow(((2.0 * (float(time_since) / float(anim_time_length))) - 1.0), 2.0)
+
+func get_parabola_animation_weight_derivative(time_since: int, anim_time_length: int) -> float:
+	return (-8.0 * ((float(time_since) / float(anim_time_length)) - 0.5)) / (float(anim_time_length) / 1000.0)
 
 # Constants associated with the ball's movement:
 @onready var BALL_Y_TOPLIMIT: float = %BallShapeCast.shape.radius
@@ -202,7 +243,7 @@ func handle_ball_collision_movement(delta: float):
 	var ball_curr_position: Vector2 = %Ball.position
 	var ball_new_position: Vector2 = Vector2()
 	var ball_velocity: Vector2 = %Ball.get_meta("velocity")
-	if ball_velocity == Vector2(0,0): return # (Crash prevention.)
+	if ball_velocity == Vector2(0,0): return # (No need to handle movement when there's no movement.)
 	var move_fraction_remaining: float = 1.0
 	var safe_fraction: float = 0.0
 	var shapecast_stepback_margin: float = 40.0
@@ -215,7 +256,6 @@ func handle_ball_collision_movement(delta: float):
 		%BallShapeCast.position = ball_curr_position - shapecast_stepback
 		%BallShapeCast.target_position = (ball_new_position - ball_curr_position) + shapecast_stepback
 		%BallShapeCast.force_shapecast_update()
-		
 		
 		# Move the ball (either all the way or up until its first collision):
 		safe_fraction = %BallShapeCast.get_closest_collision_safe_fraction()
@@ -293,10 +333,17 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	if ball_velocity.length() > BALL_MAX_SPEED:
 		ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
 	
+	var paddle_sidebump_time_since: int = Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")
+	if paddle_sidebump_time_since < SIDEBUMP_DURATION:
+		var paddle_sidebump_strength: float = paddle_noderef.get_meta("sidebump_strength")
+		var horizontal_boost: float = get_parabola_animation_weight_derivative(paddle_sidebump_time_since, SIDEBUMP_DURATION) * paddle_sidebump_strength
+		horizontal_boost *= (-1.0 if is_plr_2 else 1.0)
+		ball_velocity.x += horizontal_boost # This is intentionally added *after* the speed limit check is done.
+	
 	# Do paddle knockback animation, paddle character surprised expression: 
 	padmeshcont_noderef.set_meta("knockback_oomf", ball_velocity.x)
 	padmeshcont_noderef.set_meta("knockback_time", Time.get_ticks_msec())
-	if  (ball_hit_pos.x - paddle_noderef.position.x) * (1.0 if is_plr_2 else -1.0) > 0.0:
+	if (ball_hit_pos.x - paddle_noderef.position.x) * (1.0 if is_plr_2 else -1.0) > 2.0:
 		padchar_noderef.set_meta("time_surprised", Time.get_ticks_msec())
 	
 	return ball_velocity
