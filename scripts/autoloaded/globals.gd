@@ -28,6 +28,11 @@ enum AI_MODES {
 var plr1_ai_mode: int = AI_MODES.NO_AI
 var plr2_ai_mode: int = AI_MODES.COPYCAT
 
+var plr1_score: int = 1
+var plr1_streak: int = 0
+var plr2_score: int = 3
+var plr2_streak: int = 2
+
 func _process(_delta):
 	if Input.is_action_pressed("pause_escape"):
 		get_tree().quit()

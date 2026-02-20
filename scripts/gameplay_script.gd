@@ -2,6 +2,7 @@ extends Node2D
 
 func _ready():
 	reset_gameobject_positions()
+	update_scores_text()
 	reset_ai_inputs(false)
 	reset_ai_inputs(true)
 
@@ -37,6 +38,16 @@ func reset_gameobject_positions():
 	
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
+
+const STREAK_PREFIX: String = "🗘"
+func update_scores_text():
+	%LeftScoreStreak/%ScoreContainer/%ScoreLabel.text = str(Globals.plr1_score)
+	if Globals.plr1_streak == 0: %LeftScoreStreak/%StreakContainer/%StreakLabel.text = ""
+	else: %LeftScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr1_streak)
+	
+	%RightScoreStreak/%ScoreContainer/%ScoreLabel.text = str(Globals.plr2_score)
+	if Globals.plr2_streak == 0: %RightScoreStreak/%StreakContainer/%StreakLabel.text = ""
+	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr2_streak)
 
 # !!! (currently placeholder)
 func reserve_ball():
