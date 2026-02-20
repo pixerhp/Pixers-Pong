@@ -51,6 +51,7 @@ func update_scores_text():
 
 # !!! (currently placeholder)
 func reserve_ball():
+	update_scores_text()
 	
 	%Ball.position = Globals.GAME_SIZE / 2.0
 	%Ball.set_meta("velocity", Vector2(-400, 0))
@@ -61,7 +62,6 @@ func reserve_ball():
 	
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
-	
 
 func _process(delta: float):
 	handle_paddle_ai(false, Globals.plr1_ai_mode)
@@ -323,6 +323,14 @@ func handle_ball_collision_movement(delta: float):
 	
 	# Re-serve the ball if it goes out-of-bounds, else update its data.
 	if abs(ball_curr_position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + 20):
+		if ball_curr_position.x < Globals.GAME_SIZE.x / 2.0:
+			Globals.plr2_score += 1
+			Globals.plr2_streak += 1
+			Globals.plr1_streak = 0
+		else:
+			Globals.plr1_score += 1
+			Globals.plr1_streak += 1
+			Globals.plr2_streak = 0
 		reserve_ball()
 	else:
 		%Ball.position = ball_curr_position

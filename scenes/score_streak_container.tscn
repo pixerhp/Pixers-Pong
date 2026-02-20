@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cl8bpv2wpw7wx"]
 
 [node name="ScoreStreakContainer" type="Control" unique_id=1614935552]
-modulate = Color(0.9, 0.9, 0.9, 1)
+modulate = Color(0.9, 0.9, 0.9, 0.24705882)
 layout_mode = 3
 anchors_preset = 0
 scale = Vector2(0.2, 0.2)
