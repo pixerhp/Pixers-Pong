@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://uo8drfr51v6o" path="res://scripts/gameplay_script.gd" id="1_n6iga"]
 [ext_resource type="ArrayMesh" uid="uid://dhcyjins7o86k" path="res://assets/models/ball_torus.obj" id="2_rncwu"]
 [ext_resource type="PackedScene" uid="uid://vis13u150xqs" path="res://scenes/paddle.tscn" id="3_ks65t"]
+[ext_resource type="PackedScene" uid="uid://cl8bpv2wpw7wx" path="res://scenes/score_streak_container.tscn" id="4_pyq0w"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_emnkm"]
 size = Vector2(350, 31.5)
@@ -151,6 +152,22 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 position = Vector2(630, 748)
 shape = SubResource("RectangleShape2D_u55sw")
+
+[node name="LeftScoreStreak" parent="." unique_id=1614935552 instance=ExtResource("4_pyq0w")]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 400.0
+offset_top = 86.4
+offset_right = 400.0
+offset_bottom = 86.4
+
+[node name="RightScoreStreak" parent="." unique_id=682745886 instance=ExtResource("4_pyq0w")]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 860.0
+offset_top = 86.4
+offset_right = 860.0
+offset_bottom = 86.4
 
 [node name="LeftPaddle" parent="." unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
