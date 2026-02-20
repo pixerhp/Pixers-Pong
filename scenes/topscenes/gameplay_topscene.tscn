@@ -155,17 +155,17 @@ shape = SubResource("RectangleShape2D_u55sw")
 
 [node name="LeftScoreStreak" parent="." unique_id=1614935552 instance=ExtResource("4_pyq0w")]
 unique_name_in_owner = true
-offset_left = 400.0
-offset_top = 86.4
-offset_right = 400.0
-offset_bottom = 86.4
+offset_left = 387.692
+offset_top = 70.0
+offset_right = 387.692
+offset_bottom = 70.0
 
 [node name="RightScoreStreak" parent="." unique_id=682745886 instance=ExtResource("4_pyq0w")]
 unique_name_in_owner = true
-offset_left = 860.0
-offset_top = 86.4
-offset_right = 860.0
-offset_bottom = 86.4
+offset_left = 872.308
+offset_top = 70.0
+offset_right = 872.308
+offset_bottom = 70.0
 
 [node name="LeftPaddle" parent="." unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true

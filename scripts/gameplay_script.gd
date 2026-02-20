@@ -28,6 +28,8 @@ func reset_gameobject_positions():
 	%CeilingCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, - (%CeilingCollisionShape.shape.size.y / 2.0))
 	%FloorCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, Globals.GAME_SIZE.y + (%CeilingCollisionShape.shape.size.y / 2.0))
 	
+	#%LeftScoreStreak.position = 
+	
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
 
