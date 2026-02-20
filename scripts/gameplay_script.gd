@@ -1,5 +1,8 @@
 extends Node2D
 
+# !!! Note: plan is to make the scores opaque, scale them up and move them, 
+# and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
+
 func _ready():
 	reset_gameobject_positions()
 	update_scores_text()
