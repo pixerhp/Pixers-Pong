@@ -207,6 +207,6 @@ target_position = Vector2(0, 0)
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="Referee" type="Sprite2D" parent="." unique_id=1232849438]
+[node name="RefRoy" type="Sprite2D" parent="." unique_id=1232849438]
 position = Vector2(631, 526)
 texture = ExtResource("5_ks65t")
