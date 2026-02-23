@@ -4,6 +4,7 @@
 [ext_resource type="ArrayMesh" uid="uid://dhcyjins7o86k" path="res://assets/models/ball_torus.obj" id="2_rncwu"]
 [ext_resource type="PackedScene" uid="uid://vis13u150xqs" path="res://scenes/paddle.tscn" id="3_ks65t"]
 [ext_resource type="PackedScene" uid="uid://cl8bpv2wpw7wx" path="res://scenes/score_streak_container.tscn" id="4_pyq0w"]
+[ext_resource type="Texture2D" uid="uid://cc25j0nn47ytn" path="res://assets/art/referee.png" id="5_ks65t"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_emnkm"]
 size = Vector2(350, 31.5)
@@ -205,3 +206,7 @@ shape = SubResource("CircleShape2D_hx5ms")
 target_position = Vector2(0, 0)
 collide_with_areas = true
 collide_with_bodies = false
+
+[node name="Referee" type="Sprite2D" parent="." unique_id=1232849438]
+position = Vector2(631, 526)
+texture = ExtResource("5_ks65t")
