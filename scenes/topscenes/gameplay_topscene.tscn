@@ -299,7 +299,7 @@ collide_with_areas = true
 collide_with_bodies = false
 
 [node name="RefRoy" type="AnimatedSprite2D" parent="." unique_id=1568092764]
-position = Vector2(631, 526)
+position = Vector2(630, 526)
 sprite_frames = SubResource("SpriteFrames_81lo5")
 animation = &"idle"
 autoplay = "idle"
