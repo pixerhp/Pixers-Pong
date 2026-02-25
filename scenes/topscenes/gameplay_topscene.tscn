@@ -40,39 +40,35 @@ radius = 7.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ks65t"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(0, 320, 384, 320)
+region = Rect2(0, 0, 384, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hx5ms"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(384, 320, 384, 320)
+region = Rect2(384, 0, 384, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_emnkm"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(768, 320, 384, 320)
+region = Rect2(768, 0, 384, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ed28v"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(1152, 320, 384, 320)
+region = Rect2(768, 320, 384, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rfs2g"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(0, 0, 384, 320)
+region = Rect2(0, 320, 384, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d18oc"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(384, 0, 384, 320)
+region = Rect2(384, 320, 384, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_df8f4"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(768, 0, 384, 320)
+region = Rect2(1152, 0, 384, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_iube2"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(1152, 0, 384, 320)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vgafc"]
-atlas = ExtResource("5_ks65t")
-region = Rect2(768, 0, 384, 320)
+region = Rect2(1152, 320, 384, 320)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_81lo5"]
 animations = [{
@@ -87,7 +83,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_emnkm")
 }],
 "loop": true,
-"name": &"count",
+"name": &"count_123",
 "speed": 5.0
 }, {
 "frames": [{
@@ -95,7 +91,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_ed28v")
 }],
 "loop": true,
-"name": &"foul_point",
+"name": &"foulball_gesture",
 "speed": 5.0
 }, {
 "frames": [{
@@ -112,20 +108,17 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_df8f4")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_iube2")
 }],
 "loop": true,
-"name": &"serve_point",
+"name": &"serve_gesture",
 "speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_vgafc")
+"texture": SubResource("AtlasTexture_iube2")
 }],
 "loop": true,
-"name": &"win_point",
+"name": &"winner_gesture",
 "speed": 5.0
 }]
 
@@ -298,7 +291,7 @@ target_position = Vector2(0, 0)
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="RefRoy" type="AnimatedSprite2D" parent="." unique_id=1568092764]
+[node name="Referee" type="AnimatedSprite2D" parent="." unique_id=1568092764]
 position = Vector2(630, 526)
 sprite_frames = SubResource("SpriteFrames_81lo5")
 animation = &"idle"
