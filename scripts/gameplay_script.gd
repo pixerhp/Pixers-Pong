@@ -244,7 +244,7 @@ func handle_paddle_knockback_anim(is_plr_2: bool):
 		pad_mesh_container_ref.position.x = 0.0
 		return
 	
-	pad_mesh_container_ref.position.x = (-1.0 * oomf * OOMF_LURCH_RATIO *
+	pad_mesh_container_ref.position.x = (oomf * OOMF_LURCH_RATIO * (1.0 if is_plr_2 else -1.0) *
 		clampf(get_parabola_animation_weight(time_since, KNOCKBACK_ANIM_DURATION), 0.0, 1.0))
 
 func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> float:
