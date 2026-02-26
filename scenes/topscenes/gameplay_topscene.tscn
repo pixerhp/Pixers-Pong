@@ -27,17 +27,6 @@ height = 588.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u55sw"]
 size = Vector2(1260, 200)
 
-[sub_resource type="Curve" id="Curve_pyq0w"]
-_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="SphereMesh" id="SphereMesh_pyq0w"]
-radius = 5.0
-height = 10.0
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_hx5ms"]
-radius = 7.0
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_ks65t"]
 atlas = ExtResource("5_ks65t")
 region = Rect2(0, 0, 384, 320)
@@ -84,7 +73,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"count_123",
-"speed": 5.0
+"speed": 2.5
 }, {
 "frames": [{
 "duration": 1.0,
@@ -121,6 +110,17 @@ animations = [{
 "name": &"winner_gesture",
 "speed": 5.0
 }]
+
+[sub_resource type="Curve" id="Curve_pyq0w"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="SphereMesh" id="SphereMesh_pyq0w"]
+radius = 5.0
+height = 10.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hx5ms"]
+radius = 7.0
 
 [node name="GameplayTopscene" type="Node2D" unique_id=297910401]
 script = ExtResource("1_n6iga")
@@ -252,6 +252,12 @@ offset_top = 70.0
 offset_right = 872.308
 offset_bottom = 70.0
 
+[node name="Referee" type="AnimatedSprite2D" parent="." unique_id=1568092764]
+position = Vector2(630, 526)
+sprite_frames = SubResource("SpriteFrames_81lo5")
+animation = &"idle"
+autoplay = "idle"
+
 [node name="LeftPaddle" parent="." unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(120, 324)
@@ -290,9 +296,3 @@ shape = SubResource("CircleShape2D_hx5ms")
 target_position = Vector2(0, 0)
 collide_with_areas = true
 collide_with_bodies = false
-
-[node name="Referee" type="AnimatedSprite2D" parent="." unique_id=1568092764]
-position = Vector2(630, 526)
-sprite_frames = SubResource("SpriteFrames_81lo5")
-animation = &"idle"
-autoplay = "idle"
