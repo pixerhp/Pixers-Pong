@@ -29,35 +29,35 @@ size = Vector2(1260, 200)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ks65t"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(0, 0, 384, 320)
+region = Rect2(0, 0, 512, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hx5ms"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(384, 0, 384, 320)
+region = Rect2(512, 0, 512, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_emnkm"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(768, 0, 384, 320)
+region = Rect2(1024, 0, 512, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ed28v"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(768, 320, 384, 320)
+region = Rect2(1024, 320, 512, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rfs2g"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(0, 320, 384, 320)
+region = Rect2(0, 320, 512, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d18oc"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(384, 320, 384, 320)
+region = Rect2(512, 320, 512, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_df8f4"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(1152, 0, 384, 320)
+region = Rect2(1536, 0, 512, 320)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_iube2"]
 atlas = ExtResource("5_ks65t")
-region = Rect2(1152, 320, 384, 320)
+region = Rect2(1536, 320, 512, 320)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_81lo5"]
 animations = [{
@@ -253,6 +253,7 @@ offset_right = 872.308
 offset_bottom = 70.0
 
 [node name="Referee" type="AnimatedSprite2D" parent="." unique_id=1568092764]
+unique_name_in_owner = true
 position = Vector2(630, 526)
 sprite_frames = SubResource("SpriteFrames_81lo5")
 animation = &"idle"
