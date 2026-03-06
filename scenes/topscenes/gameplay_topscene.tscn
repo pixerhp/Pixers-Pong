@@ -71,7 +71,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_emnkm")
 }],
-"loop": true,
+"loop": false,
 "name": &"count_123",
 "speed": 2.5
 }, {
