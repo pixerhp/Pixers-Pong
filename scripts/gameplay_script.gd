@@ -67,16 +67,43 @@ func reserve_ball():
 	%BallShapeCast.clear_exceptions()
 
 func _process(delta: float):
-	handle_paddle_ai(false, Globals.plr1_ai_mode)
-	handle_paddle_ai(true, Globals.plr2_ai_mode)
-	handle_paddle_controls(false, delta)
-	handle_paddle_controls(true, delta)
-	handle_ball_collision_movement(delta)
-	update_ball_trail()
-	handle_paddle_sidebump_animation(false)
-	handle_paddle_sidebump_animation(true)
-	handle_paddle_knockback_anim(false)
-	handle_paddle_knockback_anim(true)
+	checkdo_toggle_pause()
+	if not is_game_paused:
+		handle_paddle_ai(false, Globals.plr1_ai_mode)
+		handle_paddle_ai(true, Globals.plr2_ai_mode)
+		handle_paddle_controls(false, delta)
+		handle_paddle_controls(true, delta)
+		handle_ball_collision_movement(delta)
+		update_ball_trail()
+		handle_paddle_sidebump_animation(false)
+		handle_paddle_sidebump_animation(true)
+		handle_paddle_knockback_anim(false)
+		handle_paddle_knockback_anim(true)
+
+var is_game_paused: bool = false
+var paused_start_time: int = 0
+func checkdo_toggle_pause():
+	if Input.is_action_just_pressed("pause_escape"):
+		if is_game_paused == false:
+			%LeftPaddle/%AnimChar.pause()
+			%RightPaddle/%AnimChar.pause()
+			%Referee.pause()
+			paused_start_time = Time.get_ticks_msec()
+			is_game_paused = true
+		else:
+			var paused_duration: int = Time.get_ticks_msec() - paused_start_time
+			%LeftPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time") + paused_duration)
+			%RightPaddle.set_meta("sidebump_time", %RightPaddle.get_meta("sidebump_time") + paused_duration)
+			%LeftPaddle/%MeshContainer.set_meta("knockback_time", %LeftPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
+			%RightPaddle/%MeshContainer.set_meta("knockback_time", %RightPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
+			%LeftPaddle/%AnimChar.set_meta("time_surprised", %LeftPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
+			%RightPaddle/%AnimChar.set_meta("time_surprised", %RightPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
+			%LeftPaddle/%AnimChar.play()
+			%RightPaddle/%AnimChar.play()
+			%Referee.play()
+			for i in range(balltrail_times.size()):
+				balltrail_times[i] += paused_duration
+			is_game_paused = false
 
 func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	var paddle_noderef: Node2D = %RightPaddle if is_plr_2 else %LeftPaddle
