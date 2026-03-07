@@ -425,3 +425,7 @@ func update_ball_trail():
 	
 	# Update ball-trail node's internal array.
 	%BallTrail.points = balltrail_positions
+
+
+func _on_quit_to_desk_button_pressed():
+	get_tree().quit()
