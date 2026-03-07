@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://uo8drfr51v6o" path="res://scripts/gameplay_script.gd" id="1_n6iga"]
 [ext_resource type="ArrayMesh" uid="uid://dhcyjins7o86k" path="res://assets/models/ball_torus.obj" id="2_rncwu"]
+[ext_resource type="StyleBox" uid="uid://bqln1mbiyvm4d" path="res://assets/styles/inner_vignette_panel.tres" id="3_df8f4"]
 [ext_resource type="PackedScene" uid="uid://vis13u150xqs" path="res://scenes/paddle.tscn" id="3_ks65t"]
 [ext_resource type="PackedScene" uid="uid://cl8bpv2wpw7wx" path="res://scenes/score_streak_container.tscn" id="4_pyq0w"]
 [ext_resource type="Texture2D" uid="uid://cc25j0nn47ytn" path="res://assets/art/referee.png" id="5_ks65t"]
@@ -9,6 +10,7 @@
 [ext_resource type="StyleBox" uid="uid://dqwo7lmx1r506" path="res://assets/styles/button_default.tres" id="7_emnkm"]
 [ext_resource type="StyleBox" uid="uid://r75uu6a6dxcf" path="res://assets/styles/button_pressed.tres" id="8_rfs2g"]
 [ext_resource type="StyleBox" uid="uid://t2qdtndfu2sc" path="res://assets/styles/button_hover.tres" id="9_d18oc"]
+[ext_resource type="StyleBox" uid="uid://d4gh36qf2ytct" path="res://assets/styles/outer_vignette_panel.tres" id="10_d18oc"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_emnkm"]
 size = Vector2(350, 31.5)
@@ -126,71 +128,119 @@ height = 10.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_hx5ms"]
 radius = 7.0
 
-[node name="GameplayTopscene" type="Node2D" unique_id=297910401]
+[node name="GameplayTopscene" type="Control" unique_id=1589095980]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_n6iga")
 
-[node name="DecorationsContainer" type="Node2D" parent="." unique_id=324449397]
+[node name="CenteringParent" type="Control" parent="." unique_id=17587445]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -630.0
+offset_top = -324.0
+offset_right = -630.0
+offset_bottom = -324.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="BackgroundColorRect" type="ColorRect" parent="DecorationsContainer" unique_id=357506674]
+[node name="OuterVignettePanel" type="Panel" parent="CenteringParent" unique_id=1129526650]
+layout_mode = 0
+offset_left = -25.0
+offset_top = -25.0
+offset_right = 1285.0
+offset_bottom = 673.0
+theme_override_styles/panel = ExtResource("10_d18oc")
+
+[node name="ClippingParent" type="Control" parent="CenteringParent" unique_id=400948451]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1260.0
+offset_bottom = 648.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DecorationsContainer" type="Node2D" parent="CenteringParent/ClippingParent" unique_id=324449397]
+
+[node name="BackgroundColorRect" type="ColorRect" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=357506674]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(1260, 648)
 offset_right = 1260.0
 offset_bottom = 648.0
 color = Color(0.0595, 0.0651, 0.07, 1)
 
-[node name="CornerStripTL" type="MeshInstance2D" parent="DecorationsContainer" unique_id=15007037]
+[node name="InnerVignettePanel" type="Panel" parent="CenteringParent/ClippingParent/DecorationsContainer/BackgroundColorRect" unique_id=1330635959]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("3_df8f4")
+
+[node name="CornerStripTL" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=15007037]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(140, 72)
 rotation = -0.5235988
 mesh = SubResource("QuadMesh_emnkm")
 
-[node name="CornerStripTR" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1513567981]
+[node name="CornerStripTR" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=1513567981]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(1120, 72)
 rotation = 0.5235988
 mesh = SubResource("QuadMesh_emnkm")
 
-[node name="CornerStripBL" type="MeshInstance2D" parent="DecorationsContainer" unique_id=57345611]
+[node name="CornerStripBL" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=57345611]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(140, 576)
 rotation = 0.5235988
 mesh = SubResource("QuadMesh_emnkm")
 
-[node name="CornerStripBR" type="MeshInstance2D" parent="DecorationsContainer" unique_id=25645161]
+[node name="CornerStripBR" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=25645161]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(1120, 576)
 rotation = -0.5235988
 mesh = SubResource("QuadMesh_emnkm")
 
-[node name="Centerline1" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1616997012]
+[node name="Centerline1" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=1616997012]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(525, 324)
 mesh = SubResource("QuadMesh_u55sw")
 
-[node name="Centerline2" type="MeshInstance2D" parent="DecorationsContainer" unique_id=59382275]
+[node name="Centerline2" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=59382275]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(595, 324)
 mesh = SubResource("QuadMesh_u55sw")
 
-[node name="Centerline3" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1483719762]
+[node name="Centerline3" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=1483719762]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(665, 324)
 mesh = SubResource("QuadMesh_u55sw")
 
-[node name="Centerline4" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1201154186]
+[node name="Centerline4" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=1201154186]
 unique_name_in_owner = true
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
 position = Vector2(735, 324)
 mesh = SubResource("QuadMesh_u55sw")
 
-[node name="CentercircleOuter" type="MeshInstance2D" parent="DecorationsContainer" unique_id=2056381829]
+[node name="CentercircleOuter" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=2056381829]
 unique_name_in_owner = true
 visible = false
 self_modulate = Color(0.09019608, 0.09411765, 0.09803922, 1)
@@ -198,102 +248,105 @@ position = Vector2(417, 115.00001)
 scale = Vector2(420, 420)
 mesh = ExtResource("2_rncwu")
 
-[node name="CentercircleInner" type="MeshInstance2D" parent="DecorationsContainer/CentercircleOuter" unique_id=1211374549]
+[node name="CentercircleInner" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer/CentercircleOuter" unique_id=1211374549]
 unique_name_in_owner = true
 visible = false
 self_modulate = Color(0.05882353, 0.06666667, 0.07058824, 1)
 mesh = SubResource("SphereMesh_u55sw")
 
-[node name="LeftRailOuter" type="MeshInstance2D" parent="DecorationsContainer" unique_id=966295476]
+[node name="LeftRailOuter" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=966295476]
 unique_name_in_owner = true
 self_modulate = Color(0.11439999, 0.12636, 0.13, 1)
 position = Vector2(120, 324)
 mesh = SubResource("CapsuleMesh_pyq0w")
 
-[node name="LeftRailInner" type="MeshInstance2D" parent="DecorationsContainer/LeftRailOuter" unique_id=2030413950]
+[node name="LeftRailInner" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer/LeftRailOuter" unique_id=2030413950]
 unique_name_in_owner = true
 self_modulate = Color(0.0465, 0.05, 0.05, 1)
 mesh = SubResource("CapsuleMesh_u55sw")
 
-[node name="RightRailOuter" type="MeshInstance2D" parent="DecorationsContainer" unique_id=1312472268]
+[node name="RightRailOuter" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer" unique_id=1312472268]
 unique_name_in_owner = true
 self_modulate = Color(0.11372549, 0.1254902, 0.12941177, 1)
 position = Vector2(1140, 324)
 mesh = SubResource("CapsuleMesh_pyq0w")
 
-[node name="RightRailInner" type="MeshInstance2D" parent="DecorationsContainer/RightRailOuter" unique_id=559996426]
+[node name="RightRailInner" type="MeshInstance2D" parent="CenteringParent/ClippingParent/DecorationsContainer/RightRailOuter" unique_id=559996426]
 unique_name_in_owner = true
 self_modulate = Color(0.047058824, 0.050980393, 0.050980393, 1)
 mesh = SubResource("CapsuleMesh_u55sw")
 
-[node name="CeilingCollider" type="Area2D" parent="." unique_id=1188319716]
+[node name="CeilingCollider" type="Area2D" parent="CenteringParent/ClippingParent" unique_id=1188319716]
 unique_name_in_owner = true
 
-[node name="CeilingCollisionShape" type="CollisionShape2D" parent="CeilingCollider" unique_id=1305783784]
+[node name="CeilingCollisionShape" type="CollisionShape2D" parent="CenteringParent/ClippingParent/CeilingCollider" unique_id=1305783784]
 unique_name_in_owner = true
 position = Vector2(630, -100)
 shape = SubResource("RectangleShape2D_u55sw")
 
-[node name="FloorCollider" type="Area2D" parent="." unique_id=375607716]
+[node name="FloorCollider" type="Area2D" parent="CenteringParent/ClippingParent" unique_id=375607716]
 unique_name_in_owner = true
 
-[node name="FloorCollisionShape" type="CollisionShape2D" parent="FloorCollider" unique_id=1405641867]
+[node name="FloorCollisionShape" type="CollisionShape2D" parent="CenteringParent/ClippingParent/FloorCollider" unique_id=1405641867]
 unique_name_in_owner = true
 position = Vector2(630, 748)
 shape = SubResource("RectangleShape2D_u55sw")
 
-[node name="LeftScoreStreak" parent="." unique_id=1614935552 instance=ExtResource("4_pyq0w")]
+[node name="LeftScoreStreak" parent="CenteringParent/ClippingParent" unique_id=1614935552 instance=ExtResource("4_pyq0w")]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 387.692
 offset_top = 70.0
 offset_right = 387.692
 offset_bottom = 70.0
 
-[node name="RightScoreStreak" parent="." unique_id=682745886 instance=ExtResource("4_pyq0w")]
+[node name="RightScoreStreak" parent="CenteringParent/ClippingParent" unique_id=682745886 instance=ExtResource("4_pyq0w")]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 872.308
 offset_top = 70.0
 offset_right = 872.308
 offset_bottom = 70.0
 
-[node name="Referee" type="AnimatedSprite2D" parent="." unique_id=1568092764]
+[node name="Referee" type="AnimatedSprite2D" parent="CenteringParent/ClippingParent" unique_id=1568092764]
 unique_name_in_owner = true
 position = Vector2(630, 526)
 sprite_frames = SubResource("SpriteFrames_81lo5")
 animation = &"idle"
 autoplay = "idle"
 
-[node name="LeftPaddle" parent="." unique_id=340420252 instance=ExtResource("3_ks65t")]
+[node name="LeftPaddle" parent="CenteringParent/ClippingParent" unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(120, 324)
 
-[node name="RightPaddle" parent="." unique_id=1876564758 instance=ExtResource("3_ks65t")]
+[node name="RightPaddle" parent="CenteringParent/ClippingParent" unique_id=1876564758 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(1140, 324)
-scale = Vector2(-1, 1)
+rotation = 3.1415927
+scale = Vector2(1, -1)
 
-[node name="BallTrail" type="Line2D" parent="." unique_id=1365490242]
+[node name="BallTrail" type="Line2D" parent="CenteringParent/ClippingParent" unique_id=1365490242]
 unique_name_in_owner = true
 width = 8.0
 width_curve = SubResource("Curve_pyq0w")
 default_color = Color(1, 1, 1, 0.19607843)
 
-[node name="Ball" type="Node2D" parent="." unique_id=2146992066]
+[node name="Ball" type="Node2D" parent="CenteringParent/ClippingParent" unique_id=2146992066]
 unique_name_in_owner = true
 position = Vector2(630, 324)
 metadata/velocity = Vector2(-400, 0)
 
-[node name="BallMeshInner" type="MeshInstance2D" parent="Ball" unique_id=1691678160]
+[node name="BallMeshInner" type="MeshInstance2D" parent="CenteringParent/ClippingParent/Ball" unique_id=1691678160]
 self_modulate = Color(0.16470589, 0.28627452, 0.30588236, 1)
 mesh = SubResource("SphereMesh_pyq0w")
 
-[node name="BallMeshOuter" type="MeshInstance2D" parent="Ball" unique_id=151043058]
+[node name="BallMeshOuter" type="MeshInstance2D" parent="CenteringParent/ClippingParent/Ball" unique_id=151043058]
 self_modulate = Color(0.95, 0.95, 0.95, 1)
 position = Vector2(-6.9999995, -6.9999995)
 scale = Vector2(14, 14)
 mesh = ExtResource("2_rncwu")
 
-[node name="BallShapeCast" type="ShapeCast2D" parent="." unique_id=515139131]
+[node name="BallShapeCast" type="ShapeCast2D" parent="CenteringParent/ClippingParent" unique_id=515139131]
 unique_name_in_owner = true
 position = Vector2(630, 324)
 enabled = false
@@ -302,16 +355,15 @@ target_position = Vector2(0, 0)
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="PauseMenuContainer" type="Control" parent="." unique_id=201271272]
+[node name="PauseMenuContainer" type="Control" parent="CenteringParent/ClippingParent" unique_id=201271272]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(1260, 648)
-layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 1260.0
+offset_bottom = 648.0
 
-[node name="BackPanel" type="Panel" parent="PauseMenuContainer" unique_id=1601381535]
+[node name="BackPanel" type="Panel" parent="CenteringParent/ClippingParent/PauseMenuContainer" unique_id=1601381535]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -326,7 +378,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = ExtResource("6_hx5ms")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenuContainer/BackPanel" unique_id=1161905306]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel" unique_id=1161905306]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -334,10 +386,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Spacer1" type="Control" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1019609415]
+[node name="Spacer1" type="Control" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1019609415]
 layout_mode = 2
 
-[node name="ResumeButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1925751659]
+[node name="ResumeButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1925751659]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -347,7 +399,7 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "RESUME"
 
-[node name="SettingsButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=899708958]
+[node name="SettingsButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=899708958]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -357,7 +409,7 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "SETTINGS"
 
-[node name="QuitToMenuButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1664834077]
+[node name="QuitToMenuButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1664834077]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -367,7 +419,7 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "QUIT TO MAIN MENU"
 
-[node name="QuitToDeskButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=550602696]
+[node name="QuitToDeskButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=550602696]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -377,5 +429,5 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "QUIT TO DESKTOP"
 
-[node name="Spacer2" type="Control" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=631958866]
+[node name="Spacer2" type="Control" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=631958866]
 layout_mode = 2

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://gguoo0llm78c"]
 
 [ext_resource type="PackedScene" uid="uid://djf03i2v6xbtj" path="res://scenes/topscenes/gameplay_topscene.tscn" id="1_54y85"]
-[ext_resource type="StyleBox" uid="uid://d4gh36qf2ytct" path="res://assets/styles/game_encase_panel.tres" id="1_jp52h"]
+[ext_resource type="StyleBox" uid="uid://d4gh36qf2ytct" path="res://assets/styles/outer_vignette_panel.tres" id="1_jp52h"]
 
 [node name="GameplayEncaser" type="Control" unique_id=782872632]
 layout_mode = 3
