@@ -90,6 +90,7 @@ func checkdo_toggle_pause():
 			%Referee.pause()
 			paused_start_time = Time.get_ticks_msec()
 			is_game_paused = true
+			%PauseMenuContainer.visible = true
 		else:
 			var paused_duration: int = Time.get_ticks_msec() - paused_start_time
 			%LeftPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time") + paused_duration)
@@ -104,6 +105,7 @@ func checkdo_toggle_pause():
 			for i in range(balltrail_times.size()):
 				balltrail_times[i] += paused_duration
 			is_game_paused = false
+			%PauseMenuContainer.visible = false
 
 func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	var paddle_noderef: Node2D = %RightPaddle if is_plr_2 else %LeftPaddle
