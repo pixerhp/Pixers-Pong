@@ -432,4 +432,5 @@ text = "QUIT TO DESKTOP"
 [node name="Spacer2" type="Control" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=631958866]
 layout_mode = 2
 
+[connection signal="pressed" from="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer/QuitToDeskButton" to="." method="_on_quit_to_desk_button_pressed"]

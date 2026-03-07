@@ -85,27 +85,31 @@ var paused_start_time: int = 0
 func checkdo_toggle_pause():
 	if Input.is_action_just_pressed("pause_escape"):
 		if is_game_paused == false:
-			%LeftPaddle/%AnimChar.pause()
-			%RightPaddle/%AnimChar.pause()
-			%Referee.pause()
-			paused_start_time = Time.get_ticks_msec()
-			is_game_paused = true
-			%PauseMenuContainer.visible = true
+			initiate_pause()
 		else:
-			var paused_duration: int = Time.get_ticks_msec() - paused_start_time
-			%LeftPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time") + paused_duration)
-			%RightPaddle.set_meta("sidebump_time", %RightPaddle.get_meta("sidebump_time") + paused_duration)
-			%LeftPaddle/%MeshContainer.set_meta("knockback_time", %LeftPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
-			%RightPaddle/%MeshContainer.set_meta("knockback_time", %RightPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
-			%LeftPaddle/%AnimChar.set_meta("time_surprised", %LeftPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
-			%RightPaddle/%AnimChar.set_meta("time_surprised", %RightPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
-			%LeftPaddle/%AnimChar.play()
-			%RightPaddle/%AnimChar.play()
-			%Referee.play()
-			for i in range(balltrail_times.size()):
-				balltrail_times[i] += paused_duration
-			is_game_paused = false
-			%PauseMenuContainer.visible = false
+			initiate_unpause()
+func initiate_pause():
+	%LeftPaddle/%AnimChar.pause()
+	%RightPaddle/%AnimChar.pause()
+	%Referee.pause()
+	paused_start_time = Time.get_ticks_msec()
+	is_game_paused = true
+	%PauseMenuContainer.visible = true
+func initiate_unpause():
+	var paused_duration: int = Time.get_ticks_msec() - paused_start_time
+	%LeftPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time") + paused_duration)
+	%RightPaddle.set_meta("sidebump_time", %RightPaddle.get_meta("sidebump_time") + paused_duration)
+	%LeftPaddle/%MeshContainer.set_meta("knockback_time", %LeftPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
+	%RightPaddle/%MeshContainer.set_meta("knockback_time", %RightPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
+	%LeftPaddle/%AnimChar.set_meta("time_surprised", %LeftPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
+	%RightPaddle/%AnimChar.set_meta("time_surprised", %RightPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
+	%LeftPaddle/%AnimChar.play()
+	%RightPaddle/%AnimChar.play()
+	%Referee.play()
+	for i in range(balltrail_times.size()):
+		balltrail_times[i] += paused_duration
+	is_game_paused = false
+	%PauseMenuContainer.visible = false
 
 func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	var paddle_noderef: Node2D = %RightPaddle if is_plr_2 else %LeftPaddle
@@ -426,6 +430,9 @@ func update_ball_trail():
 	# Update ball-trail node's internal array.
 	%BallTrail.points = balltrail_positions
 
+
+func _on_resume_button_pressed():
+	initiate_unpause()
 
 func _on_quit_to_desk_button_pressed():
 	get_tree().quit()
