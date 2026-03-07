@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://gguoo0llm78c"]
+
+[ext_resource type="PackedScene" uid="uid://djf03i2v6xbtj" path="res://scenes/topscenes/gameplay_topscene.tscn" id="1_54y85"]
+[ext_resource type="StyleBox" uid="uid://d4gh36qf2ytct" path="res://assets/styles/game_encase_panel.tres" id="1_jp52h"]
+
+[node name="GameplayEncaser" type="Control" unique_id=782872632]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="." unique_id=1437530726]
+custom_minimum_size = Vector2(1320, 708)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("1_jp52h")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=1620699073]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -630.0
+offset_top = -324.0
+offset_right = 630.0
+offset_bottom = 324.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=1227590761]
+handle_input_locally = false
+canvas_item_default_texture_filter = 0
+size = Vector2i(1260, 648)
+render_target_update_mode = 4
+
+[node name="GameplayTopscene" parent="SubViewportContainer/SubViewport" unique_id=297910401 instance=ExtResource("1_54y85")]

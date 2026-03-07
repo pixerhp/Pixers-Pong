@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Pixer's Pong"
-run/main_scene="uid://djf03i2v6xbtj"
+run/main_scene="uid://gguoo0llm78c"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 boot_splash/image="uid://c8njw4gkdiofe"
 config/icon="uid://c8njw4gkdiofe"
@@ -120,3 +120,4 @@ textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.0425, 0.046875, 0.05, 1)

@@ -73,6 +73,7 @@ metadata/time_surprised = -50000
 
 [node name="AreaCollider" type="Area2D" parent="." unique_id=905259053]
 unique_name_in_owner = true
+visible = false
 
 [node name="FrontCapsule" type="CollisionShape2D" parent="AreaCollider" unique_id=375941652]
 shape = SubResource("CapsuleShape2D_llhxm")
