@@ -158,7 +158,7 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				set_input(act_prefix + "bump_right", false)
 		
 		Globals.CPU_MODES.ZIGZAGGER_SLOW:
-			handle_paddle_ai(is_plr_2, Globals.AI_MODES.ZIGZAGGER)
+			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.ZIGZAGGER)
 			set_input(act_prefix + "slow", true)
 		
 		Globals.CPU_MODES.ZIGZAGGER:
