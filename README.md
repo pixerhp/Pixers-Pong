@@ -1,3 +1,5 @@
-# Pixer's Pong &nbsp; | .&nbsp;&nbsp;&nbsp; |
+# Pixer's Pong!
 
-A simple pong game made for practice with using Godot.
+A pong game made with Godot for gamedev practice.
+
+o| &nbsp; . &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |o
