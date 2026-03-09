@@ -122,19 +122,44 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	match ai_mode:
 		Globals.AI_MODES.NO_AI:
 			return
+		
 		Globals.AI_MODES.COPYCAT:
 			set_input(act_prefix + "up", Input.is_action_pressed(alt_act_prefix + "up"))
 			set_input(act_prefix + "down", Input.is_action_pressed(alt_act_prefix + "down"))
 			set_input(act_prefix + "slow", Input.is_action_pressed(alt_act_prefix + "slow"))
 			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_right"))
 			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_left"))
+		
 		Globals.AI_MODES.RANDOM_MASH:
-			set_input(act_prefix + "up", ((randi() % 2) == 0))
-			set_input(act_prefix + "down", ((randi() % 2) == 0))
-			set_input(act_prefix + "slow", ((randi() % 2) == 0))
+			const RANDOM_MOVEMENT_DURATION: int = 32
+			var rng = RandomNumberGenerator.new()
+			rng.seed = Time.get_ticks_msec() / RANDOM_MOVEMENT_DURATION
+			if ((rng.randi() % 3) == 0):
+				set_input(act_prefix + "up", false)
+				set_input(act_prefix + "down", false)
+			else:
+				if ((rng.randi() % 2) == 0):
+					set_input(act_prefix + "up", true)
+					set_input(act_prefix + "down", false)
+				else:
+					set_input(act_prefix + "up", false)
+					set_input(act_prefix + "down", true)
+			set_input(act_prefix + "slow", ((rng.randi() % 3) == 0))
+			if ((rng.randi() % 32) == 0):
+				if ((rng.randi() % 2) == 0):
+					set_input(act_prefix + "bump_left", true)
+					set_input(act_prefix + "bump_right", false)
+				else:
+					set_input(act_prefix + "bump_left", false)
+					set_input(act_prefix + "bump_right", true)
+			else:
+				set_input(act_prefix + "bump_left", false)
+				set_input(act_prefix + "bump_right", false)
+		
 		Globals.AI_MODES.ZIGZAGGER_SLOW:
 			handle_paddle_ai(is_plr_2, Globals.AI_MODES.ZIGZAGGER)
 			set_input(act_prefix + "slow", true)
+		
 		Globals.AI_MODES.ZIGZAGGER:
 			if paddle_noderef.get_meta("velocity") == 0.0:
 				if paddle_noderef.position.y < Globals.GAME_SIZE.y / 2.0:

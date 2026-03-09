@@ -26,7 +26,7 @@ enum AI_MODES {
 }
 
 var plr1_ai_mode: int = AI_MODES.NO_AI
-var plr2_ai_mode: int = AI_MODES.COPYCAT
+var plr2_ai_mode: int = AI_MODES.RANDOM_MASH
 
 var plr1_score: int = 0
 var plr1_streak: int = 0
