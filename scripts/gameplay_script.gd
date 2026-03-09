@@ -133,6 +133,7 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 		Globals.CPU_MODES.RANDOM_MASH:
 			const RANDOM_MOVEMENT_DURATION: int = 32
 			var rng = RandomNumberGenerator.new()
+			@warning_ignore("integer_division")
 			rng.seed = Time.get_ticks_msec() / RANDOM_MOVEMENT_DURATION
 			if ((rng.randi() % 3) == 0):
 				set_input(act_prefix + "up", false)
