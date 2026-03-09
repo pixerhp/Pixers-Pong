@@ -13,6 +13,7 @@ enum CPU_MODES {
 	
 	CHASER_SLOW, 
 	CHASER, # Simply "chases" the ball's current y-position.
+	
 	CONVERGER_SLOW,
 	CONVERGER, # !!! Tries to move to where the ball will be if it reaches the paddle x on it's current trajectory.
 	PATIENT_CONVERGER_SLOW,
@@ -26,7 +27,7 @@ enum CPU_MODES {
 }
 
 var plr1_cpu_mode: int = CPU_MODES.NO_AI
-var plr2_cpu_mode: int = CPU_MODES.RANDOM_MASH
+var plr2_cpu_mode: int = CPU_MODES.CHASER
 
 var plr1_score: int = 0
 var plr1_streak: int = 0

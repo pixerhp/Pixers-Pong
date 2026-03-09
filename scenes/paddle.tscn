@@ -21,6 +21,10 @@ rings = 5
 radius = 8.0
 height = 200.0
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3xiby"]
+radius = 30.0
+height = 110.0
+
 [node name="Paddle" type="Node2D" unique_id=340420252]
 modulate = Color(0.95, 0.95, 0.95, 1)
 metadata/velocity = 0.0
@@ -71,12 +75,17 @@ animation = &"plr_idle"
 frame_progress = 0.0
 metadata/time_surprised = -50000
 
-[node name="AreaCollider" type="Area2D" parent="." unique_id=905259053]
+[node name="PadCollider" type="Area2D" parent="." unique_id=905259053]
 unique_name_in_owner = true
-visible = false
 
-[node name="FrontCapsule" type="CollisionShape2D" parent="AreaCollider" unique_id=375941652]
+[node name="FrontCapsule" type="CollisionShape2D" parent="PadCollider" unique_id=375941652]
 shape = SubResource("CapsuleShape2D_llhxm")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="AreaCollider" unique_id=1465389828]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="PadCollider" unique_id=1465389828]
 polygon = PackedVector2Array(-24.33, 0, -7.745, -94.075, -7.745, 94.075)
+
+[node name="CharCollider" type="Area2D" parent="." unique_id=1301653362]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharCollider" unique_id=1521180142]
+position = Vector2(-50, 0)
+shape = SubResource("CapsuleShape2D_3xiby")

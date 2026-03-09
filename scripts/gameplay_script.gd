@@ -160,15 +160,34 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 		Globals.CPU_MODES.ZIGZAGGER_SLOW:
 			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.ZIGZAGGER)
 			set_input(act_prefix + "slow", true)
-		
 		Globals.CPU_MODES.ZIGZAGGER:
 			if paddle_noderef.get_meta("velocity") == 0.0:
 				if paddle_noderef.position.y < Globals.GAME_SIZE.y / 2.0:
-					set_input(act_prefix + "down", true)
 					set_input(act_prefix + "up", false)
+					set_input(act_prefix + "down", true)
 				else:
 					set_input(act_prefix + "up", true)
 					set_input(act_prefix + "down", false)
+		
+		Globals.CPU_MODES.CHASER_SLOW:
+			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.CHASER)
+			set_input(act_prefix + "slow", true)
+		Globals.CPU_MODES.CHASER:
+			var vert_difference: float = %Ball.position.y - paddle_noderef.position.y
+			if (
+				(Input.is_action_pressed(act_prefix + "up") and Input.is_action_pressed(act_prefix + "down")) or
+				(Input.is_action_pressed(act_prefix + "up") and (vert_difference > 0.0)) or 
+				(Input.is_action_pressed(act_prefix + "down") and (vert_difference < 0.0)) or 
+				(abs(vert_difference) < (0.25 * PAD_Y_TOPLIMIT))
+			):
+				set_input(act_prefix + "up", false)
+				set_input(act_prefix + "down", false)
+			elif (vert_difference < (-0.5 * PAD_Y_TOPLIMIT)):
+				set_input(act_prefix + "up", (paddle_noderef.position.y > PAD_Y_TOPLIMIT))
+				set_input(act_prefix + "down", false)
+			elif (vert_difference > (0.5 * PAD_Y_TOPLIMIT)):
+				set_input(act_prefix + "up", false)
+				set_input(act_prefix + "down", (paddle_noderef.position.y < PAD_Y_BOTTOMLIMIT))
 
 func reset_ai_inputs(is_plr_2: bool):
 	if is_plr_2:
@@ -268,7 +287,7 @@ func handle_paddle_controls(is_plr_2: bool, delta: float):
 	
 	# Situationally override whatever expression the paddle character has with being surprised. 
 	if (float(Time.get_ticks_msec() - padchar_noderef.get_meta("time_surprised")) < 
-	((SURP_EXPR_VARIATION / (1.0 + (%Ball.get_meta("velocity").length() / SURP_EXPR_FALLOFF))) + SURP_EXPR_BASE)):
+	((SURP_EXPR_VARIATION / (1.0 + (%Ball.get_meta("velocity").x / SURP_EXPR_FALLOFF))) + SURP_EXPR_BASE)):
 		padchar_noderef.animation = padchar_anim_prefix + "surprised"
 
 
@@ -318,7 +337,6 @@ func get_parabola_animation_weight_derivative(time_since: int, anim_time_length:
 const BALL_PADHIT_SPEEDUP: float = 35
 const BALL_MAX_SPEED: float = 4000
 const BALL_MAX_BOUNCE_LOOPS: int = 100
-
 func handle_ball_collision_movement(delta: float):
 	var ball_curr_position: Vector2 = %Ball.position
 	var ball_new_position: Vector2 = Vector2()
@@ -345,24 +363,39 @@ func handle_ball_collision_movement(delta: float):
 		balltrail_positions.append(ball_curr_position)
 		balltrail_times.append(Time.get_ticks_msec())
 		
-		# Handle ball collisions:
-		if (ball_new_position == ball_curr_position):
-			if ball_velocity.x < 0.0:
-				rem_add_ballshapecast_coll_exceptions(%LeftPaddle/AreaCollider)
-			elif ball_velocity.x > 0.0:
-				rem_add_ballshapecast_coll_exceptions(%RightPaddle/AreaCollider)
+		# Remove paddle collision exceptions for the paddle farthest from the ball.
+		if ball_curr_position.x < (Globals.GAME_SIZE.x / 2.0):
+			rem_add_ballshapecast_coll_exceptions(%RightPaddle/PadCollider)
+			rem_add_ballshapecast_coll_exceptions(%RightPaddle/CharCollider)
 		else:
+			rem_add_ballshapecast_coll_exceptions(%LeftPaddle/PadCollider)
+			rem_add_ballshapecast_coll_exceptions(%LeftPaddle/CharCollider)
+		
+		# Handle ball collisions:
+		if not (ball_new_position == ball_curr_position):
 			var collider: Object
 			for coll_index: int in range(%BallShapeCast.get_collision_count()):
 				collider = %BallShapeCast.get_collider(coll_index)
-				if collider == %LeftPaddle/AreaCollider:
+				if collider == %LeftPaddle/PadCollider:
 					rem_add_ballshapecast_coll_exceptions(
-						%RightPaddle/AreaCollider, %LeftPaddle/AreaCollider)
+						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
 					ball_velocity = calc_paddlehit_bounce(ball_curr_position, ball_velocity, false)
-				elif collider == %RightPaddle/AreaCollider:
+				elif collider == %LeftPaddle/CharCollider:
+					ballshapecast_current_exceptions.append(%LeftPaddle/CharCollider)
+					%BallShapeCast.add_exception(%LeftPaddle/CharCollider)
 					rem_add_ballshapecast_coll_exceptions(
-						%LeftPaddle/AreaCollider, %RightPaddle/AreaCollider)
+						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
+					ball_velocity = calc_charthrow(ball_velocity, false)
+				elif collider == %RightPaddle/PadCollider:
+					rem_add_ballshapecast_coll_exceptions(
+						%LeftPaddle/PadCollider, %RightPaddle/PadCollider)
 					ball_velocity = calc_paddlehit_bounce(ball_curr_position, ball_velocity, true)
+				elif collider == %RightPaddle/CharCollider:
+					ballshapecast_current_exceptions.append(%RightPaddle/CharCollider)
+					%BallShapeCast.add_exception(%RightPaddle/CharCollider)
+					rem_add_ballshapecast_coll_exceptions(
+						%LeftPaddle/PadCollider, %RightPaddle/PadCollider)
+					ball_velocity = calc_charthrow(ball_velocity, true)
 				elif collider == %CeilingCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%FloorCollider, %CeilingCollider)
@@ -413,8 +446,11 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar)
 	# Hit region ranges from -1.0 (hit the very top of the paddle) to 1.0 (hit the very bottom):
 	var paddle_hit_region: float = ((paddle_noderef.position.y - ball_hit_pos.y) if is_plr_2 else (ball_hit_pos.y - paddle_noderef.position.y)) / (PAD_Y_TOPLIMIT + BALL_Y_TOPLIMIT)
+	paddle_hit_region = clampf(paddle_hit_region, -1.0, 1.0)
+	print(paddle_hit_region)
 	paddle_hit_region = pow(paddle_hit_region, 5) # (Intensify angle near edges.)
 	var bounce_angle: Vector2 = (Vector2.LEFT if is_plr_2 else Vector2.RIGHT).rotated(PI * 0.2625 * paddle_hit_region)
+	print(bounce_angle)
 	ball_velocity = ball_velocity.bounce(bounce_angle)
 	
 	ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length()) # (Speedup)
@@ -434,7 +470,14 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	if (ball_hit_pos.x - paddle_noderef.position.x) * (1.0 if is_plr_2 else -1.0) > 2.0:
 		padchar_noderef.set_meta("time_surprised", Time.get_ticks_msec())
 	
+	print(ball_velocity)
+	print(ball_velocity.angle())
+	print()
 	return ball_velocity
+
+func calc_charthrow(init_vel: Vector2, is_plr_2: bool) -> Vector2:
+	(%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar).set_meta("time_surprised", Time.get_ticks_msec())
+	return Vector2(init_vel.length() * 0.5 * (-1.0 if is_plr_2 else 1.0), 0.0).rotated(atan(init_vel.y/init_vel.x) * 0.25 * (-1.0 if (init_vel.x < 0.0) else 1.0) * (-1.0 if is_plr_2 else 1.0))
 
 # Constants and variables associated with the ball's trail:
 const BALLTRAIL_DURATION: float = 250 # (Time in ms.)
