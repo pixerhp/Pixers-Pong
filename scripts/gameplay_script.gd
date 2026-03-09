@@ -447,10 +447,8 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	# Hit region ranges from -1.0 (hit the very top of the paddle) to 1.0 (hit the very bottom):
 	var paddle_hit_region: float = ((paddle_noderef.position.y - ball_hit_pos.y) if is_plr_2 else (ball_hit_pos.y - paddle_noderef.position.y)) / (PAD_Y_TOPLIMIT + BALL_Y_TOPLIMIT)
 	paddle_hit_region = clampf(paddle_hit_region, -1.0, 1.0)
-	print(paddle_hit_region)
 	paddle_hit_region = pow(paddle_hit_region, 5) # (Intensify angle near edges.)
 	var bounce_angle: Vector2 = (Vector2.LEFT if is_plr_2 else Vector2.RIGHT).rotated(PI * 0.2625 * paddle_hit_region)
-	print(bounce_angle)
 	ball_velocity = ball_velocity.bounce(bounce_angle)
 	
 	ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length()) # (Speedup)
@@ -470,9 +468,6 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	if (ball_hit_pos.x - paddle_noderef.position.x) * (1.0 if is_plr_2 else -1.0) > 2.0:
 		padchar_noderef.set_meta("time_surprised", Time.get_ticks_msec())
 	
-	print(ball_velocity)
-	print(ball_velocity.angle())
-	print()
 	return ball_velocity
 
 func calc_charthrow(init_vel: Vector2, is_plr_2: bool) -> Vector2:
