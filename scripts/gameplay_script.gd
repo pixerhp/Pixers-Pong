@@ -69,8 +69,8 @@ func reserve_ball():
 func _process(delta: float):
 	checkdo_toggle_pause()
 	if not is_game_paused:
-		handle_paddle_ai(false, Globals.plr1_ai_mode)
-		handle_paddle_ai(true, Globals.plr2_ai_mode)
+		handle_paddle_ai(false, Globals.plr1_cpu_mode)
+		handle_paddle_ai(true, Globals.plr2_cpu_mode)
 		handle_paddle_controls(false, delta)
 		handle_paddle_controls(true, delta)
 		handle_ball_collision_movement(delta)
@@ -120,17 +120,17 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	#Input.parse_input_event(input_event)
 	
 	match ai_mode:
-		Globals.AI_MODES.NO_AI:
+		Globals.CPU_MODES.NO_AI:
 			return
 		
-		Globals.AI_MODES.COPYCAT:
+		Globals.CPU_MODES.COPYCAT:
 			set_input(act_prefix + "up", Input.is_action_pressed(alt_act_prefix + "up"))
 			set_input(act_prefix + "down", Input.is_action_pressed(alt_act_prefix + "down"))
 			set_input(act_prefix + "slow", Input.is_action_pressed(alt_act_prefix + "slow"))
 			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_right"))
 			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_left"))
 		
-		Globals.AI_MODES.RANDOM_MASH:
+		Globals.CPU_MODES.RANDOM_MASH:
 			const RANDOM_MOVEMENT_DURATION: int = 32
 			var rng = RandomNumberGenerator.new()
 			rng.seed = Time.get_ticks_msec() / RANDOM_MOVEMENT_DURATION
@@ -156,11 +156,11 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				set_input(act_prefix + "bump_left", false)
 				set_input(act_prefix + "bump_right", false)
 		
-		Globals.AI_MODES.ZIGZAGGER_SLOW:
+		Globals.CPU_MODES.ZIGZAGGER_SLOW:
 			handle_paddle_ai(is_plr_2, Globals.AI_MODES.ZIGZAGGER)
 			set_input(act_prefix + "slow", true)
 		
-		Globals.AI_MODES.ZIGZAGGER:
+		Globals.CPU_MODES.ZIGZAGGER:
 			if paddle_noderef.get_meta("velocity") == 0.0:
 				if paddle_noderef.position.y < Globals.GAME_SIZE.y / 2.0:
 					set_input(act_prefix + "down", true)
@@ -205,7 +205,7 @@ func handle_paddle_controls(is_plr_2: bool, delta: float):
 	#var paddlemesh_noderef: Node2D = (%RightPaddle/%MeshContainer if is_plr_2 else %LeftPaddle/%MeshContainer)
 	var paddlemesh_bars_noderef: Node2D = (%RightPaddle/%BarsContainer if is_plr_2 else %LeftPaddle/%BarsContainer)
 	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar)
-	var padchar_anim_prefix: String = "plr_" if ((Globals.plr2_ai_mode if is_plr_2 else Globals.plr1_ai_mode) == Globals.AI_MODES.NO_AI) else "bot_"
+	var padchar_anim_prefix: String = "plr_" if ((Globals.plr2_cpu_mode if is_plr_2 else Globals.plr1_cpu_mode) == Globals.CPU_MODES.NO_AI) else "bot_"
 	var plr_prefix: String = ("plr2_" if is_plr_2 else "plr1_")
 	# General setup:
 	var pad_vel: float = paddle_noderef.get_meta("velocity")

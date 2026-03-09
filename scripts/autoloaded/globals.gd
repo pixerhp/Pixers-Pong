@@ -4,7 +4,7 @@ var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
 	ProjectSettings.get_setting("display/window/size/viewport_width"),
 	ProjectSettings.get_setting("display/window/size/viewport_height"),)
 
-enum AI_MODES {
+enum CPU_MODES {
 	NO_AI,
 	COPYCAT, # Copies the other player's inputs with a one-frame delay.
 	RANDOM_MASH, # Mashes random movement inputs every frame. (It's not very effective.)
@@ -25,8 +25,8 @@ enum AI_MODES {
 	MASTER, # Good luck. # !!! like previous, but aggressively tries to aim the ball to where the other player isn't with its paddle hits.
 }
 
-var plr1_ai_mode: int = AI_MODES.NO_AI
-var plr2_ai_mode: int = AI_MODES.RANDOM_MASH
+var plr1_cpu_mode: int = CPU_MODES.NO_AI
+var plr2_cpu_mode: int = CPU_MODES.RANDOM_MASH
 
 var plr1_score: int = 0
 var plr1_streak: int = 0
