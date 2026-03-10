@@ -71,10 +71,8 @@ func _process(delta: float):
 	if not is_game_paused:
 		handle_paddle_ai(false, Globals.plr1_cpu_mode)
 		handle_paddle_ai(true, Globals.plr2_cpu_mode)
-		if Globals.plr1_force_slow:
-			set_input("plr1_slow", true)
-		if Globals.plr2_force_slow:
-			set_input("plr2_slow", true)
+		if Globals.plr1_force_slow: set_input("plr1_slow", true)
+		if Globals.plr2_force_slow: set_input("plr2_slow", true)
 		handle_paddle_controls(false, delta)
 		handle_paddle_controls(true, delta)
 		handle_ball_collision_movement(delta)
@@ -221,6 +219,29 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
+		Globals.CPU_MODES.DOUBLE_PREDICTOR:
+			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
+				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
+			const BOUNCE_LIMIT: int = 2
+			for i in range(BOUNCE_LIMIT):
+				if predicted_ball_y < BALL_Y_TOPLIMIT:
+					predicted_ball_y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - predicted_ball_y)
+				elif predicted_ball_y > BALL_Y_BOTTOMLIMIT:
+					predicted_ball_y = BALL_Y_BOTTOMLIMIT - (predicted_ball_y - BALL_Y_BOTTOMLIMIT)
+				else:
+					break
+				if i >= (BOUNCE_LIMIT - 1):
+					set_input(act_prefix + "up", paddle_noderef.position.y > ((Globals.GAME_SIZE.y / 2.0) + (PAD_Y_TOPLIMIT * 0.5)))
+					set_input(act_prefix + "down", paddle_noderef.position.y < ((Globals.GAME_SIZE.y / 2.0) - (PAD_Y_TOPLIMIT * 0.5)))
+					return
+			if ((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)):
+				set_input(act_prefix + "up", false)
+				set_input(act_prefix + "down", false)
+			else:
+				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
+				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
+		
 		Globals.CPU_MODES.DEEP_PREDICTOR:
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
@@ -243,6 +264,13 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			else:
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
+		
+		Globals.CPU_MODES.MASTER:
+			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
+				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
+			const BOUNCE_LIMIT: int = 16
+			pass
 
 func reset_ai_inputs(is_plr_2: bool):
 	if is_plr_2:
@@ -389,8 +417,6 @@ func get_parabola_animation_weight_derivative(time_since: int, anim_time_length:
 # Constants associated with the ball's movement:
 @onready var BALL_Y_TOPLIMIT: float = %BallShapeCast.shape.radius
 @onready var BALL_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
-const BALL_PADHIT_SPEEDUP: float = 35
-const BALL_MAX_SPEED: float = 4500
 const BALL_MAX_BOUNCE_LOOPS: int = 100
 func handle_ball_collision_movement(delta: float):
 	var ball_curr_position: Vector2 = %Ball.position
@@ -506,9 +532,9 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	var bounce_angle: Vector2 = (Vector2.LEFT if is_plr_2 else Vector2.RIGHT).rotated(PI * 0.2625 * paddle_hit_region)
 	ball_velocity = ball_velocity.bounce(bounce_angle)
 	
-	ball_velocity *= ((ball_velocity.length() + BALL_PADHIT_SPEEDUP) / ball_velocity.length()) # (Speedup)
-	if ball_velocity.length() > BALL_MAX_SPEED:
-		ball_velocity = ball_velocity.normalized() * BALL_MAX_SPEED
+	ball_velocity *= ((ball_velocity.length() + Globals.ball_padhit_speedup) / ball_velocity.length()) # (Speedup)
+	if ball_velocity.length() > Globals.ball_max_speed:
+		ball_velocity = ball_velocity.normalized() * Globals.ball_max_speed
 	
 	var paddle_sidebump_time_since: int = Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")
 	if paddle_sidebump_time_since < SIDEBUMP_DURATION:

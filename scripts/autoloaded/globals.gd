@@ -4,6 +4,19 @@ var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
 	ProjectSettings.get_setting("display/window/size/viewport_width"),
 	ProjectSettings.get_setting("display/window/size/viewport_height"),)
 
+var ball_max_speed: float = 4500
+var ball_padhit_speedup: float = 35
+
+var plr1_cpu_mode: int = CPU_MODES.OFF
+var plr1_force_slow: bool = false
+var plr2_cpu_mode: int = CPU_MODES.DOUBLE_PREDICTOR
+var plr2_force_slow: bool = false
+
+var plr1_score: int = 0
+var plr1_streak: int = 0
+var plr2_score: int = 0
+var plr2_streak: int = 0
+
 enum CPU_MODES {
 	OFF,
 	OFF_BUT_YOURE_A_ROBOT, # Beep boop.
@@ -14,20 +27,11 @@ enum CPU_MODES {
 	CONVERGER, # "Converges" onto where the ball will go if it continues on its current path.
 	PATIENT_CONVERGER, # Like converger, but situationally waits in the middle.
 	BOUNCE_PREDICTOR, # Similar to converger, but can account for one bounce.
+		DOUBLE_PREDICTOR, # Similar to bounce predictor, but accounts for up to two bounces.
 	DEEP_PREDICTOR, # Predicts where the ball will go after an arbitrary number of bounces.
 	
-	MASTER, # Strategically tries to defeat you instead of just surviving. Good luck.
+	MASTER, # Predicts their opponent's paddle hit, and strategically tries to defeat them. Good luck.
 }
-
-var plr1_cpu_mode: int = CPU_MODES.OFF
-var plr1_force_slow: bool = false
-var plr2_cpu_mode: int = CPU_MODES.DEEP_PREDICTOR
-var plr2_force_slow: bool = false
-
-var plr1_score: int = 0
-var plr1_streak: int = 0
-var plr2_score: int = 0
-var plr2_streak: int = 0
 
 func _process(_delta):
 	#if Input.is_action_pressed("pause_escape"):
