@@ -71,6 +71,10 @@ func _process(delta: float):
 	if not is_game_paused:
 		handle_paddle_ai(false, Globals.plr1_cpu_mode)
 		handle_paddle_ai(true, Globals.plr2_cpu_mode)
+		if Globals.plr1_force_slow:
+			set_input("plr1_slow", true)
+		if Globals.plr2_force_slow:
+			set_input("plr2_slow", true)
 		handle_paddle_controls(false, delta)
 		handle_paddle_controls(true, delta)
 		handle_ball_collision_movement(delta)
@@ -156,9 +160,6 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				set_input(act_prefix + "bump_left", false)
 				set_input(act_prefix + "bump_right", false)
 		
-		Globals.CPU_MODES.ZIGZAGGER_SLOW:
-			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.ZIGZAGGER)
-			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.ZIGZAGGER:
 			if paddle_noderef.get_meta("velocity") == 0.0:
 				if paddle_noderef.position.y < Globals.GAME_SIZE.y / 2.0:
@@ -168,9 +169,6 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 					set_input(act_prefix + "up", true)
 					set_input(act_prefix + "down", false)
 		
-		Globals.CPU_MODES.CHASER_SLOW:
-			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.CHASER)
-			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.CHASER:
 			var vert_diff: float = %Ball.position.y - paddle_noderef.position.y
 			if (
@@ -187,9 +185,6 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				set_input(act_prefix + "up", false)
 				set_input(act_prefix + "down", (paddle_noderef.position.y < PAD_Y_BOTTOMLIMIT))
 		
-		Globals.CPU_MODES.CONVERGER_SLOW:
-			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.CONVERGER)
-			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.CONVERGER:
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
@@ -197,9 +192,6 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 			set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
-		Globals.CPU_MODES.PATIENT_CONVERGER_SLOW:
-			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.PATIENT_CONVERGER)
-			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.PATIENT_CONVERGER:
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
@@ -214,9 +206,6 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
-		Globals.CPU_MODES.BOUNCE_PREDICTOR_SLOW:
-			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.BOUNCE_PREDICTOR)
-			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.BOUNCE_PREDICTOR:
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
@@ -228,9 +217,6 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 			set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
-		Globals.CPU_MODES.PATIENT_BOUNCE_PREDICTOR_SLOW:
-			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.PATIENT_BOUNCE_PREDICTOR)
-			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.PATIENT_BOUNCE_PREDICTOR:
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
