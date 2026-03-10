@@ -8,29 +8,26 @@ enum CPU_MODES {
 	OFF,
 	OFF_BUT_YOURE_A_ROBOT,
 	COPYCAT, # Copies the other player's inputs with a one-frame delay.
-	RANDOM_MASH, # Mashes random movement inputs every frame. (It's not very effective.)
-	#WEIGHTED_RANDOM_MASH,
+	RANDOM_MASH, # Mashes random movement inputs. (It's not very effective.)
+		CONTEXTUAL_RANDOM_MASH, # Mashes random inputs, with some more likely than others based on context.
 	ZIGZAGGER_SLOW,
-	ZIGZAGGER, # Alternately moves between the top-most and bottom-most paddle positions. 
+	ZIGZAGGER, # Alternately moves between the top and bottom paddle positions. 
 	CHASER_SLOW, 
-	CHASER, # Simply "chases" the ball's current y-position.
-	
+	CHASER, # Simply "chases" the ball's y-position.
 	CONVERGER_SLOW,
-	CONVERGER, # !!! Tries to move to where the ball will be if it reaches the paddle x on it's current trajectory.
-	
+	CONVERGER,
 	PATIENT_CONVERGER_SLOW,
-	PATIENT_CONVERGER, # !!! like previous but waits in the center if the ball's current trajectory goes beyond the floor/ceiling
-	
-	SINGLE_BOUNCE_PREDICTOR_SLOW,
-	SINGLE_BOUNCE_PREDICTOR, # !!! Accounts for up to one bounce, waits in the center if there will be multiple.
-	DEEP_BOUNCE_PREDICTOR_SLOW,
-	DEEP_BOUNCE_PREDICTOR, # !!! like previous, but accounts for arbirarily many bounces, so no waiting in center.
-	MASTER_SLOW,
-	MASTER, # Good luck. # !!! like previous, but aggressively tries to aim the ball to where the other player isn't with its paddle hits.
+	PATIENT_CONVERGER, # "Converges" onto where the ball will be if it continues on its current path without bounces.
+		BOUNCE_PREDICTOR_SLOW,
+		BOUNCE_PREDICTOR, # !!! Accounts for up to one bounce, waits in the center if there will be multiple.
+		DEEP_PREDICTOR_SLOW,
+		DEEP_PREDICTOR, # !!! like previous, but accounts for arbirarily many bounces, so no waiting in center.
+		MASTER_SLOW,
+		MASTER, # Good luck. # !!! like previous, but aggressively tries to aim the ball to where the other player isn't with its paddle hits.
 }
 
 var plr1_cpu_mode: int = CPU_MODES.OFF
-var plr2_cpu_mode: int = CPU_MODES.CONVERGER
+var plr2_cpu_mode: int = CPU_MODES.PATIENT_CONVERGER
 
 var plr1_score: int = 0
 var plr1_streak: int = 0

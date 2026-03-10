@@ -192,7 +192,18 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.CONVERGER:
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
-			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (%Ball.position.x -paddle_noderef.position.x) * (-1.0 if is_plr_2 else 1.0))
+			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
+				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
+			set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
+			set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
+		
+		Globals.CPU_MODES.PATIENT_CONVERGER_SLOW:
+			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.PATIENT_CONVERGER)
+			set_input(act_prefix + "slow", true)
+		Globals.CPU_MODES.PATIENT_CONVERGER:
+			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
+				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
 			if ( # Wait in the center if the ball is travelling to the other player or is predicted OOB:
 				((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)) or 
 				(predicted_ball_y < BALL_Y_TOPLIMIT) or (predicted_ball_y > BALL_Y_BOTTOMLIMIT)
