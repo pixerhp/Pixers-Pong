@@ -144,7 +144,7 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				else:
 					set_input(act_prefix + "up", false)
 					set_input(act_prefix + "down", true)
-			set_input(act_prefix + "slow", ((rng.randi() % 3) == 0))
+			set_input(act_prefix + "slow", ((rng.randi() % 4) == 0))
 			if ((rng.randi() % 32) == 0):
 				if ((rng.randi() % 2) == 0):
 					set_input(act_prefix + "bump_left", true)
@@ -204,6 +204,41 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
+			if ( # Wait in the center if the ball is travelling to the other player or is predicted OOB:
+				((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)) or 
+				(predicted_ball_y < BALL_Y_TOPLIMIT) or (predicted_ball_y > BALL_Y_BOTTOMLIMIT)
+			):
+				set_input(act_prefix + "up", paddle_noderef.position.y > ((Globals.GAME_SIZE.y / 2.0) + (PAD_Y_TOPLIMIT * 0.5)))
+				set_input(act_prefix + "down", paddle_noderef.position.y < ((Globals.GAME_SIZE.y / 2.0) - (PAD_Y_TOPLIMIT * 0.5)))
+			else: # Else move to the predicted ball location:
+				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
+				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
+		
+		Globals.CPU_MODES.BOUNCE_PREDICTOR_SLOW:
+			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.BOUNCE_PREDICTOR)
+			set_input(act_prefix + "slow", true)
+		Globals.CPU_MODES.BOUNCE_PREDICTOR:
+			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
+				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
+			if predicted_ball_y < BALL_Y_TOPLIMIT:
+				predicted_ball_y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - predicted_ball_y)
+			elif predicted_ball_y > BALL_Y_BOTTOMLIMIT:
+				predicted_ball_y = BALL_Y_BOTTOMLIMIT - (predicted_ball_y - BALL_Y_BOTTOMLIMIT)
+			set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
+			set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
+		
+		Globals.CPU_MODES.PATIENT_BOUNCE_PREDICTOR_SLOW:
+			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.PATIENT_BOUNCE_PREDICTOR)
+			set_input(act_prefix + "slow", true)
+		Globals.CPU_MODES.PATIENT_BOUNCE_PREDICTOR:
+			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
+				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
+			if predicted_ball_y < BALL_Y_TOPLIMIT:
+				predicted_ball_y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - predicted_ball_y)
+			elif predicted_ball_y > BALL_Y_BOTTOMLIMIT:
+				predicted_ball_y = BALL_Y_BOTTOMLIMIT - (predicted_ball_y - BALL_Y_BOTTOMLIMIT)
 			if ( # Wait in the center if the ball is travelling to the other player or is predicted OOB:
 				((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)) or 
 				(predicted_ball_y < BALL_Y_TOPLIMIT) or (predicted_ball_y > BALL_Y_BOTTOMLIMIT)

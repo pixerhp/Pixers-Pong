@@ -9,7 +9,6 @@ enum CPU_MODES {
 	OFF_BUT_YOURE_A_ROBOT,
 	COPYCAT, # Copies the other player's inputs with a one-frame delay.
 	RANDOM_MASH, # Mashes random movement inputs. (It's not very effective.)
-		CONTEXTUAL_RANDOM_MASH, # Mashes random inputs, with some more likely than others based on context.
 	ZIGZAGGER_SLOW,
 	ZIGZAGGER, # Alternately moves between the top and bottom paddle positions. 
 	CHASER_SLOW, 
@@ -18,16 +17,21 @@ enum CPU_MODES {
 	CONVERGER,
 	PATIENT_CONVERGER_SLOW,
 	PATIENT_CONVERGER, # "Converges" onto where the ball will be if it continues on its current path without bounces.
-		BOUNCE_PREDICTOR_SLOW,
-		BOUNCE_PREDICTOR, # !!! Accounts for up to one bounce, waits in the center if there will be multiple.
-		DEEP_PREDICTOR_SLOW,
-		DEEP_PREDICTOR, # !!! like previous, but accounts for arbirarily many bounces, so no waiting in center.
-		MASTER_SLOW,
-		MASTER, # Good luck. # !!! like previous, but aggressively tries to aim the ball to where the other player isn't with its paddle hits.
+	BOUNCE_PREDICTOR_SLOW,
+	BOUNCE_PREDICTOR,
+	PATIENT_BOUNCE_PREDICTOR_SLOW,
+	PATIENT_BOUNCE_PREDICTOR, # !!! Accounts for up to one bounce, waits in the center if there will be multiple.
+	
+	#DOUBLE_PREDICTOR,?
+	#DOUBLE_PREDICTOR_SLOW,?
+	DEEP_PREDICTOR_SLOW,
+	DEEP_PREDICTOR, # !!! like previous, but accounts for arbirarily many bounces, so no waiting in center.
+	MASTER_SLOW,
+	MASTER, # Good luck. # !!! like previous, but aggressively tries to aim the ball to where the other player isn't with its paddle hits.
 }
 
 var plr1_cpu_mode: int = CPU_MODES.OFF
-var plr2_cpu_mode: int = CPU_MODES.PATIENT_CONVERGER
+var plr2_cpu_mode: int = CPU_MODES.PATIENT_BOUNCE_PREDICTOR
 
 var plr1_score: int = 0
 var plr1_streak: int = 0
