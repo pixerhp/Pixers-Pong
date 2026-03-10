@@ -214,24 +214,33 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				predicted_ball_y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - predicted_ball_y)
 			elif predicted_ball_y > BALL_Y_BOTTOMLIMIT:
 				predicted_ball_y = BALL_Y_BOTTOMLIMIT - (predicted_ball_y - BALL_Y_BOTTOMLIMIT)
-			set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
-			set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
+			if ((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)):
+				set_input(act_prefix + "up", false)
+				set_input(act_prefix + "down", false)
+			else:
+				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
+				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
-		Globals.CPU_MODES.PATIENT_BOUNCE_PREDICTOR:
+		Globals.CPU_MODES.DEEP_PREDICTOR:
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
-			if predicted_ball_y < BALL_Y_TOPLIMIT:
-				predicted_ball_y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - predicted_ball_y)
-			elif predicted_ball_y > BALL_Y_BOTTOMLIMIT:
-				predicted_ball_y = BALL_Y_BOTTOMLIMIT - (predicted_ball_y - BALL_Y_BOTTOMLIMIT)
-			if ( # Wait in the center if the ball is travelling to the other player or is predicted OOB:
-				((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)) or 
-				(predicted_ball_y < BALL_Y_TOPLIMIT) or (predicted_ball_y > BALL_Y_BOTTOMLIMIT)
-			):
-				set_input(act_prefix + "up", paddle_noderef.position.y > ((Globals.GAME_SIZE.y / 2.0) + (PAD_Y_TOPLIMIT * 0.5)))
-				set_input(act_prefix + "down", paddle_noderef.position.y < ((Globals.GAME_SIZE.y / 2.0) - (PAD_Y_TOPLIMIT * 0.5)))
-			else: # Else move to the predicted ball location:
+			const BOUNCE_LIMIT: int = 8
+			for i in range(BOUNCE_LIMIT):
+				if predicted_ball_y < BALL_Y_TOPLIMIT:
+					predicted_ball_y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - predicted_ball_y)
+				elif predicted_ball_y > BALL_Y_BOTTOMLIMIT:
+					predicted_ball_y = BALL_Y_BOTTOMLIMIT - (predicted_ball_y - BALL_Y_BOTTOMLIMIT)
+				else:
+					break
+				if i >= (BOUNCE_LIMIT - 1):
+					set_input(act_prefix + "up", paddle_noderef.position.y > ((Globals.GAME_SIZE.y / 2.0) + (PAD_Y_TOPLIMIT * 0.5)))
+					set_input(act_prefix + "down", paddle_noderef.position.y < ((Globals.GAME_SIZE.y / 2.0) - (PAD_Y_TOPLIMIT * 0.5)))
+					return
+			if ((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)):
+				set_input(act_prefix + "up", false)
+				set_input(act_prefix + "down", false)
+			else:
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 
@@ -381,7 +390,7 @@ func get_parabola_animation_weight_derivative(time_since: int, anim_time_length:
 @onready var BALL_Y_TOPLIMIT: float = %BallShapeCast.shape.radius
 @onready var BALL_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
 const BALL_PADHIT_SPEEDUP: float = 35
-const BALL_MAX_SPEED: float = 4000
+const BALL_MAX_SPEED: float = 4500
 const BALL_MAX_BOUNCE_LOOPS: int = 100
 func handle_ball_collision_movement(delta: float):
 	var ball_curr_position: Vector2 = %Ball.position
