@@ -111,16 +111,14 @@ func initiate_unpause():
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
 
+var RANDOM_MOVEMENT_SEED_OFFSET: int = randi()
 func handle_paddle_ai(is_plr_2: bool, ai_mode):
 	var paddle_noderef: Node2D = %RightPaddle if is_plr_2 else %LeftPaddle
 	var act_prefix: String = "plr2_" if is_plr_2 else "plr1_"
 	var alt_act_prefix: String = "plr1_" if is_plr_2 else "plr2_"
-	#input_event.action = "plr2_up"
-	#input_event.pressed = true
-	#Input.parse_input_event(input_event)
 	
 	match ai_mode:
-		Globals.CPU_MODES.NO_AI:
+		Globals.CPU_MODES.OFF, Globals.CPU_MODES.OFF_BUT_YOURE_A_ROBOT:
 			return
 		
 		Globals.CPU_MODES.COPYCAT:
@@ -134,7 +132,8 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			const RANDOM_MOVEMENT_DURATION: int = 32
 			var rng = RandomNumberGenerator.new()
 			@warning_ignore("integer_division")
-			rng.seed = Time.get_ticks_msec() / RANDOM_MOVEMENT_DURATION
+			rng.seed = (Time.get_ticks_msec() / RANDOM_MOVEMENT_DURATION) * (314 if is_plr_2 else 1)
+			rng.seed += RANDOM_MOVEMENT_SEED_OFFSET
 			if ((rng.randi() % 3) == 0):
 				set_input(act_prefix + "up", false)
 				set_input(act_prefix + "down", false)
@@ -173,21 +172,36 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.CHASER)
 			set_input(act_prefix + "slow", true)
 		Globals.CPU_MODES.CHASER:
-			var vert_difference: float = %Ball.position.y - paddle_noderef.position.y
+			var vert_diff: float = %Ball.position.y - paddle_noderef.position.y
 			if (
-				(Input.is_action_pressed(act_prefix + "up") and Input.is_action_pressed(act_prefix + "down")) or
-				(Input.is_action_pressed(act_prefix + "up") and (vert_difference > 0.0)) or 
-				(Input.is_action_pressed(act_prefix + "down") and (vert_difference < 0.0)) or 
-				(abs(vert_difference) < (0.25 * PAD_Y_TOPLIMIT))
+				(Input.is_action_pressed(act_prefix + "up") and (vert_diff > 0.0)) or 
+				(Input.is_action_pressed(act_prefix + "down") and (vert_diff < 0.0)) or 
+				(abs(vert_diff) < (0.25 * PAD_Y_TOPLIMIT))
 			):
 				set_input(act_prefix + "up", false)
 				set_input(act_prefix + "down", false)
-			elif (vert_difference < (-0.5 * PAD_Y_TOPLIMIT)):
+			elif (vert_diff < (-0.5 * PAD_Y_TOPLIMIT)):
 				set_input(act_prefix + "up", (paddle_noderef.position.y > PAD_Y_TOPLIMIT))
 				set_input(act_prefix + "down", false)
-			elif (vert_difference > (0.5 * PAD_Y_TOPLIMIT)):
+			elif (vert_diff > (0.5 * PAD_Y_TOPLIMIT)):
 				set_input(act_prefix + "up", false)
 				set_input(act_prefix + "down", (paddle_noderef.position.y < PAD_Y_BOTTOMLIMIT))
+		
+		Globals.CPU_MODES.CONVERGER_SLOW:
+			handle_paddle_ai(is_plr_2, Globals.CPU_MODES.CONVERGER)
+			set_input(act_prefix + "slow", true)
+		Globals.CPU_MODES.CONVERGER:
+			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
+			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (%Ball.position.x -paddle_noderef.position.x) * (-1.0 if is_plr_2 else 1.0))
+			if ( # Wait in the center if the ball is travelling to the other player or is predicted OOB:
+				((ball_velocity.x < 0.0) if is_plr_2 else (ball_velocity.x > 0.0)) or 
+				(predicted_ball_y < BALL_Y_TOPLIMIT) or (predicted_ball_y > BALL_Y_BOTTOMLIMIT)
+			):
+				set_input(act_prefix + "up", paddle_noderef.position.y > ((Globals.GAME_SIZE.y / 2.0) + (PAD_Y_TOPLIMIT * 0.5)))
+				set_input(act_prefix + "down", paddle_noderef.position.y < ((Globals.GAME_SIZE.y / 2.0) - (PAD_Y_TOPLIMIT * 0.5)))
+			else: # Else move to the predicted ball location:
+				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
+				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 
 func reset_ai_inputs(is_plr_2: bool):
 	if is_plr_2:
@@ -225,7 +239,7 @@ func handle_paddle_controls(is_plr_2: bool, delta: float):
 	#var paddlemesh_noderef: Node2D = (%RightPaddle/%MeshContainer if is_plr_2 else %LeftPaddle/%MeshContainer)
 	var paddlemesh_bars_noderef: Node2D = (%RightPaddle/%BarsContainer if is_plr_2 else %LeftPaddle/%BarsContainer)
 	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar)
-	var padchar_anim_prefix: String = "plr_" if ((Globals.plr2_cpu_mode if is_plr_2 else Globals.plr1_cpu_mode) == Globals.CPU_MODES.NO_AI) else "bot_"
+	var padchar_anim_prefix: String = "plr_" if ((Globals.plr2_cpu_mode if is_plr_2 else Globals.plr1_cpu_mode) == Globals.CPU_MODES.OFF) else "bot_"
 	var plr_prefix: String = ("plr2_" if is_plr_2 else "plr1_")
 	# General setup:
 	var pad_vel: float = paddle_noderef.get_meta("velocity")
@@ -472,7 +486,8 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 
 func calc_charthrow(init_vel: Vector2, is_plr_2: bool) -> Vector2:
 	(%RightPaddle/%AnimChar if is_plr_2 else %LeftPaddle/%AnimChar).set_meta("time_surprised", Time.get_ticks_msec())
-	return Vector2(init_vel.length() * 0.5 * (-1.0 if is_plr_2 else 1.0), 0.0).rotated(atan(init_vel.y/init_vel.x) * 0.25 * (-1.0 if (init_vel.x < 0.0) else 1.0) * (-1.0 if is_plr_2 else 1.0))
+	return Vector2(init_vel.length() * 0.5 * (-1.0 if is_plr_2 else 1.0), 0.0).rotated(
+		atan(init_vel.y/init_vel.x) * 0.25 * (-1.0 if (init_vel.x < 0.0) else 1.0) * (-1.0 if is_plr_2 else 1.0))
 
 # Constants and variables associated with the ball's trail:
 const BALLTRAIL_DURATION: float = 250 # (Time in ms.)
