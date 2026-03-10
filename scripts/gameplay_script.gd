@@ -28,8 +28,8 @@ func reset_gameobject_positions():
 	%LeftRailOuter.mesh.height = Globals.GAME_SIZE.y - 25
 	%LeftRailInner.mesh.height = Globals.GAME_SIZE.y - 35
 	
-	%CeilingCollisionShape.shape.size.x =  Globals.GAME_SIZE.x
-	%CeilingCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, - (%CeilingCollisionShape.shape.size.y / 2.0))
+	%CeilingCollisionShape.shape.size.x =  Globals.GAME_SIZE.x 
+	%CeilingCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, -1.0 * (%CeilingCollisionShape.shape.size.y / 2.0))
 	%FloorCollisionShape.position = Vector2(Globals.GAME_SIZE.x / 2.0, Globals.GAME_SIZE.y + (%CeilingCollisionShape.shape.size.y / 2.0))
 	
 	%LeftScoreStreak.position = Vector2(Globals.GAME_SIZE.x / 3.25, 70.0)
@@ -69,8 +69,8 @@ func reserve_ball():
 func _process(delta: float):
 	checkdo_toggle_pause()
 	if not is_game_paused:
-		handle_paddle_ai(false, Globals.plr1_cpu_mode)
-		handle_paddle_ai(true, Globals.plr2_cpu_mode)
+		handle_paddle_cpu(false, Globals.plr1_cpu_mode)
+		handle_paddle_cpu(true, Globals.plr2_cpu_mode)
 		if Globals.plr1_force_slow: set_input("plr1_slow", true)
 		if Globals.plr2_force_slow: set_input("plr2_slow", true)
 		handle_paddle_controls(false, delta)
@@ -110,11 +110,13 @@ func initiate_unpause():
 	%Referee.play()
 	for i in range(balltrail_times.size()):
 		balltrail_times[i] += paused_duration
+	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
 
 var RANDOM_MOVEMENT_SEED_OFFSET: int = randi()
-func handle_paddle_ai(is_plr_2: bool, ai_mode):
+var total_paused_time: int = 0
+func handle_paddle_cpu(is_plr_2: bool, ai_mode):
 	var paddle_noderef: Node2D = %RightPaddle if is_plr_2 else %LeftPaddle
 	var act_prefix: String = "plr2_" if is_plr_2 else "plr1_"
 	var alt_act_prefix: String = "plr1_" if is_plr_2 else "plr2_"
@@ -134,7 +136,7 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 			const RANDOM_MOVEMENT_DURATION: int = 32
 			var rng = RandomNumberGenerator.new()
 			@warning_ignore("integer_division")
-			rng.seed = (Time.get_ticks_msec() / RANDOM_MOVEMENT_DURATION) * (314 if is_plr_2 else 1)
+			rng.seed = ((Time.get_ticks_msec() - total_paused_time) / RANDOM_MOVEMENT_DURATION) * (314 if is_plr_2 else 1)
 			rng.seed += RANDOM_MOVEMENT_SEED_OFFSET
 			if ((rng.randi() % 3) == 0):
 				set_input(act_prefix + "up", false)
@@ -266,11 +268,61 @@ func handle_paddle_ai(is_plr_2: bool, ai_mode):
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
 		Globals.CPU_MODES.MASTER:
+			var PAD_HIT_TOL: float = 8.0 + BALL_Y_TOPLIMIT
+			
+			# Dive backwards to the ball if it's behind the paddle:
+			if ((%Ball.position.x > (%RightPaddle.position.x + PAD_HIT_TOL)) if is_plr_2 else (%Ball.position.x < (%LeftPaddle.position.x - PAD_HIT_TOL))):
+				set_input(act_prefix + "up", (paddle_noderef.position.y > %Ball.position.y))
+				set_input(act_prefix + "down", (paddle_noderef.position.y < %Ball.position.y))
+				set_input(act_prefix + "slow", false)
+				set_input(act_prefix + ("bump_right" if is_plr_2 else "bump_left"), true)
+				return
+			else:
+				set_input(act_prefix + ("bump_right" if is_plr_2 else "bump_left"), false)
+			
 			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
-			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
-				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
-			const BOUNCE_LIMIT: int = 16
-			pass
+			var WALL_HIT_TOL: float = clamp(-2.5 * log(0.004 * abs(ball_velocity.y)), 0, 25) # (Based on weak empirically determined data.)
+			var ball_x_distance_to_hit: float = (
+				(
+					((%RightPaddle.position.x - PAD_HIT_TOL) - %Ball.position.x
+					) if (ball_velocity.x > 0.0) else (
+						(%Ball.position.x - (%LeftPaddle.position.x + PAD_HIT_TOL)) + ((%RightPaddle.position.x - PAD_HIT_TOL) - (%LeftPaddle.position.x + PAD_HIT_TOL)))
+				) if is_plr_2 else (
+					(%Ball.position.x - (%LeftPaddle.position.x + PAD_HIT_TOL)
+					) if (ball_velocity.x < 0.0) else (
+						((%RightPaddle.position.x - PAD_HIT_TOL) - %Ball.position.x) + ((%RightPaddle.position.x - PAD_HIT_TOL) - (%LeftPaddle.position.x + PAD_HIT_TOL)))
+				)
+			)
+			var predicted_ball_y: float = %Ball.position.y + (
+				(ball_velocity.y / (abs(ball_velocity.x) * (1.0 if is_plr_2 else 1.0))) * ball_x_distance_to_hit
+			)
+			const BOUNCE_LIMIT: int = 64
+			for i in range(BOUNCE_LIMIT):
+				if predicted_ball_y < (BALL_Y_TOPLIMIT + WALL_HIT_TOL):
+					predicted_ball_y = (BALL_Y_TOPLIMIT + WALL_HIT_TOL) + ((BALL_Y_TOPLIMIT + WALL_HIT_TOL) - predicted_ball_y)
+				elif predicted_ball_y > (BALL_Y_BOTTOMLIMIT - WALL_HIT_TOL):
+					predicted_ball_y = (BALL_Y_BOTTOMLIMIT - WALL_HIT_TOL) - (predicted_ball_y - (BALL_Y_BOTTOMLIMIT - WALL_HIT_TOL))
+				else:
+					break
+			
+			var targ_y: float = predicted_ball_y
+			
+			if ((ball_velocity.x > 0.0) if (is_plr_2) else (ball_velocity.x < 0.0)):
+				const DECISION_DURATION: int = 628
+				var rng = RandomNumberGenerator.new()
+				@warning_ignore("integer_division")
+				rng.seed = ((Time.get_ticks_msec() - total_paused_time) / DECISION_DURATION) * (222 if is_plr_2 else 1)
+				rng.seed += RANDOM_MOVEMENT_SEED_OFFSET
+				match (rng.randi() % 5):
+					1: targ_y += (PAD_Y_TOPLIMIT * -0.9)
+					2: targ_y += (PAD_Y_TOPLIMIT * -0.6)
+					3: pass
+					4: targ_y += (PAD_Y_TOPLIMIT * 0.6)
+					5: targ_y += (PAD_Y_TOPLIMIT * 0.9)
+			
+			set_input(act_prefix + "up", (paddle_noderef.position.y > targ_y) and (not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and (not paddle_noderef.position.y <= PAD_Y_TOPLIMIT))
+			set_input(act_prefix + "down", (paddle_noderef.position.y < targ_y) and (not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and (not paddle_noderef.position.y >= PAD_Y_BOTTOMLIMIT))
+			set_input(act_prefix + "slow", abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.25))
 
 func reset_ai_inputs(is_plr_2: bool):
 	if is_plr_2:
@@ -457,7 +509,7 @@ func handle_ball_collision_movement(delta: float):
 			var collider: Object
 			for coll_index: int in range(%BallShapeCast.get_collision_count()):
 				collider = %BallShapeCast.get_collider(coll_index)
-				if collider == %LeftPaddle/PadCollider:
+				if collider == %LeftPaddle/PadCollider: # (This would be a match statement, but it errors that the noderefs aren't const.)
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
 					ball_velocity = calc_paddlehit_bounce(ball_curr_position, ball_velocity, false)

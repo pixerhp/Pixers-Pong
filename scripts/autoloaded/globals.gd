@@ -7,9 +7,9 @@ var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
 var ball_max_speed: float = 4500
 var ball_padhit_speedup: float = 35
 
-var plr1_cpu_mode: int = CPU_MODES.OFF
+var plr1_cpu_mode: int = CPU_MODES.MASTER
 var plr1_force_slow: bool = false
-var plr2_cpu_mode: int = CPU_MODES.DOUBLE_PREDICTOR
+var plr2_cpu_mode: int = CPU_MODES.MASTER
 var plr2_force_slow: bool = false
 
 var plr1_score: int = 0
@@ -27,7 +27,7 @@ enum CPU_MODES {
 	CONVERGER, # "Converges" onto where the ball will go if it continues on its current path.
 	PATIENT_CONVERGER, # Like converger, but situationally waits in the middle.
 	BOUNCE_PREDICTOR, # Similar to converger, but can account for one bounce.
-		DOUBLE_PREDICTOR, # Similar to bounce predictor, but accounts for up to two bounces.
+	DOUBLE_PREDICTOR, # Similar to bounce predictor, but accounts for up to two bounces.
 	DEEP_PREDICTOR, # Predicts where the ball will go after an arbitrary number of bounces.
 	
 	MASTER, # Predicts their opponent's paddle hit, and strategically tries to defeat them. Good luck.

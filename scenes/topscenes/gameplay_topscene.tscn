@@ -310,6 +310,7 @@ offset_bottom = 70.0
 
 [node name="Referee" type="AnimatedSprite2D" parent="CenteringParent/ClippingParent" unique_id=1568092764]
 unique_name_in_owner = true
+visible = false
 position = Vector2(630, 526)
 sprite_frames = SubResource("SpriteFrames_81lo5")
 animation = &"idle"
@@ -334,7 +335,7 @@ default_color = Color(1, 1, 1, 0.19607843)
 [node name="Ball" type="Node2D" parent="CenteringParent/ClippingParent" unique_id=2146992066]
 unique_name_in_owner = true
 position = Vector2(630, 324)
-metadata/velocity = Vector2(-400, 0)
+metadata/velocity = Vector2(-400, 40)
 
 [node name="BallMeshInner" type="MeshInstance2D" parent="CenteringParent/ClippingParent/Ball" unique_id=1691678160]
 self_modulate = Color(0.16470589, 0.28627452, 0.30588236, 1)
@@ -352,6 +353,7 @@ position = Vector2(630, 324)
 enabled = false
 shape = SubResource("CircleShape2D_hx5ms")
 target_position = Vector2(0, 0)
+margin = 2.0
 collide_with_areas = true
 collide_with_bodies = false
 
