@@ -6,6 +6,7 @@ var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
 
 var ball_max_speed: float = 4500
 var ball_padhit_speedup: float = 35
+var prevent_ball_backhits: bool = true
 
 var plr1_cpu_mode: int = CPU_MODES.MASTER
 var plr1_force_slow: bool = false

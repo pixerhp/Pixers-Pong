@@ -601,6 +601,9 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	if (ball_hit_pos.x - paddle_noderef.position.x) * (1.0 if is_plr_2 else -1.0) > 2.0:
 		padchar_noderef.set_meta("time_surprised", Time.get_ticks_msec())
 	
+	if Globals.prevent_ball_backhits:
+		ball_velocity.x = abs(ball_velocity.x) * (-1.0 if is_plr_2 else 1.0)
+	
 	return ball_velocity
 
 func calc_charthrow(init_vel: Vector2, is_plr_2: bool) -> Vector2:
