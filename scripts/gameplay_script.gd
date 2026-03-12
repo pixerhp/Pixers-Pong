@@ -306,7 +306,9 @@ func handle_paddle_cpu(is_plr_2: bool, ai_mode):
 					break
 			
 			var targ_y: float = predicted_ball_y
+			set_input(act_prefix + ("bump_left" if is_plr_2 else "bump_right"), false)
 			
+			# Random trajectory angling movement:
 			if ((ball_velocity.x > 0.0) if (is_plr_2) else (ball_velocity.x < 0.0)):
 				const DECISION_DURATION: int = 628
 				var rng = RandomNumberGenerator.new()
@@ -319,6 +321,8 @@ func handle_paddle_cpu(is_plr_2: bool, ai_mode):
 					3: pass
 					4: targ_y += (PAD_Y_TOPLIMIT * 0.6)
 					5: targ_y += (PAD_Y_TOPLIMIT * 0.9)
+				if (abs(ball_x_distance_to_hit / ball_velocity.x) < 0.1) and (abs(ball_velocity.x) < (1750.0 * 0.43922 * ((%RightPaddle.position.x - %LeftPaddle.position.x) / (PAD_Y_BOTTOMLIMIT - PAD_Y_TOPLIMIT)))):
+					set_input(act_prefix + ("bump_left" if is_plr_2 else "bump_right"), true)
 			
 			set_input(act_prefix + "up", (paddle_noderef.position.y > targ_y) and (not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and (not paddle_noderef.position.y <= PAD_Y_TOPLIMIT))
 			set_input(act_prefix + "down", (paddle_noderef.position.y < targ_y) and (not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and (not paddle_noderef.position.y >= PAD_Y_BOTTOMLIMIT))
