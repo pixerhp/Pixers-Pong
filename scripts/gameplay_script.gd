@@ -5,7 +5,7 @@ extends Node
 
 func _ready():
 	reset_gameobject_positions()
-	#DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	update_scores_text()
 	reset_ai_inputs(false)
 	reset_ai_inputs(true)
