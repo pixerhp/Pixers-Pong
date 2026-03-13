@@ -312,7 +312,6 @@ offset_bottom = 70.0
 
 [node name="Referee" type="AnimatedSprite2D" parent="CenteringParent/ClippingParent" unique_id=1568092764]
 unique_name_in_owner = true
-visible = false
 position = Vector2(630, 526)
 sprite_frames = SubResource("SpriteFrames_81lo5")
 animation = &"idle"

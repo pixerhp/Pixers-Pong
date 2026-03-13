@@ -12,10 +12,11 @@ func _ready():
 
 func reset_gameobject_positions():
 	%CenteringParent.position = Vector2(0,0)
-	#%CenteringParent.set_deferred("size", Globals.GAME_SIZE)
 	%OuterVignettePanel.position = Vector2(-25.0, -25.0)
 	%OuterVignettePanel.size = Globals.GAME_SIZE + Vector2(50.0, 50.0)
-	%ClippingParent.set_deferred("size", Globals.GAME_SIZE)
+	%OuterVignettePanel.position = (get_viewport().get_visible_rect().size / 2.0) - (%OuterVignettePanel.size / 2.0)
+	%ClippingParent.size = Globals.GAME_SIZE
+	%ClippingParent.position = (get_viewport().get_visible_rect().size / 2.0) - (Globals.GAME_SIZE / 2.0)
 	%BackgroundColorRect.custom_minimum_size = Globals.GAME_SIZE
 	
 	%CornerStripTL.position = Vector2(140, 72)
@@ -47,6 +48,11 @@ func reset_gameobject_positions():
 	
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
+	
+	PAD_Y_TOPLIMIT = %LeftPaddle/%FrontBar.mesh.height / 2.0
+	PAD_Y_BOTTOMLIMIT = Globals.GAME_SIZE.y - (%LeftPaddle/%FrontBar.mesh.height / 2.0)
+	BALL_Y_TOPLIMIT = %BallShapeCast.shape.radius
+	BALL_Y_BOTTOMLIMIT = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
 
 const STREAK_PREFIX: String = "🗘"
 func update_scores_text():
@@ -73,9 +79,10 @@ func reserve_ball():
 	%BallShapeCast.clear_exceptions()
 
 func _process(delta: float):
-	print(self.position)
+	if Input.is_action_just_pressed("test"):
+		Globals.GAME_SIZE = Vector2(randi_range(500, 3000), randi_range(300, 2000))
+		reset_gameobject_positions()
 	print(%CenteringParent.position)
-	print(%ClippingParent.position)
 	print()
 	checkdo_toggle_pause()
 	if not is_game_paused:
