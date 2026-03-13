@@ -22,8 +22,8 @@ Globals="*uid://dl6ovnkbgf2b7"
 
 [display]
 
-window/size/viewport_width=1260
-window/stretch/mode="canvas_items"
+window/size/viewport_width=2260
+window/stretch/mode="viewport"
 window/stretch/aspect="expand"
 
 [file_customization]

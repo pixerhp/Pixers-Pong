@@ -5,11 +5,17 @@ extends Node
 
 func _ready():
 	reset_gameobject_positions()
+	#DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	update_scores_text()
 	reset_ai_inputs(false)
 	reset_ai_inputs(true)
 
 func reset_gameobject_positions():
+	%CenteringParent.position = Vector2(0,0)
+	#%CenteringParent.set_deferred("size", Globals.GAME_SIZE)
+	%OuterVignettePanel.position = Vector2(-25.0, -25.0)
+	%OuterVignettePanel.size = Globals.GAME_SIZE + Vector2(50.0, 50.0)
+	%ClippingParent.set_deferred("size", Globals.GAME_SIZE)
 	%BackgroundColorRect.custom_minimum_size = Globals.GAME_SIZE
 	
 	%CornerStripTL.position = Vector2(140, 72)
@@ -67,6 +73,10 @@ func reserve_ball():
 	%BallShapeCast.clear_exceptions()
 
 func _process(delta: float):
+	print(self.position)
+	print(%CenteringParent.position)
+	print(%ClippingParent.position)
+	print()
 	checkdo_toggle_pause()
 	if not is_game_paused:
 		handle_paddle_cpu(false, Globals.plr1_cpu_mode)

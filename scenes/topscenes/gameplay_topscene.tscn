@@ -138,6 +138,7 @@ grow_vertical = 2
 script = ExtResource("1_n6iga")
 
 [node name="CenteringParent" type="Control" parent="." unique_id=17587445]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -146,12 +147,13 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -630.0
 offset_top = -324.0
-offset_right = -630.0
-offset_bottom = -324.0
+offset_right = 630.0
+offset_bottom = 324.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="OuterVignettePanel" type="Panel" parent="CenteringParent" unique_id=1129526650]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = -25.0
 offset_top = -25.0
@@ -160,13 +162,12 @@ offset_bottom = 673.0
 theme_override_styles/panel = ExtResource("10_d18oc")
 
 [node name="ClippingParent" type="Control" parent="CenteringParent" unique_id=400948451]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 1260.0
-offset_bottom = 648.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -180,6 +181,7 @@ offset_bottom = 648.0
 color = Color(0.0595, 0.0651, 0.07, 1)
 
 [node name="InnerVignettePanel" type="Panel" parent="CenteringParent/ClippingParent/DecorationsContainer/BackgroundColorRect" unique_id=1330635959]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -357,15 +359,18 @@ margin = 2.0
 collide_with_areas = true
 collide_with_bodies = false
 
-[node name="PauseMenuContainer" type="Control" parent="CenteringParent/ClippingParent" unique_id=201271272]
+[node name="PauseMenuContainer" type="Control" parent="." unique_id=201271272]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(1260, 648)
-anchors_preset = 0
-offset_right = 1260.0
-offset_bottom = 648.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="BackPanel" type="Panel" parent="CenteringParent/ClippingParent/PauseMenuContainer" unique_id=1601381535]
+[node name="BackPanel" type="Panel" parent="PauseMenuContainer" unique_id=1601381535]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -380,7 +385,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = ExtResource("6_hx5ms")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel" unique_id=1161905306]
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenuContainer/BackPanel" unique_id=1161905306]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -388,10 +393,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Spacer1" type="Control" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1019609415]
+[node name="Spacer1" type="Control" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1019609415]
 layout_mode = 2
 
-[node name="ResumeButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1925751659]
+[node name="ResumeButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1925751659]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -401,7 +406,7 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "RESUME"
 
-[node name="SettingsButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=899708958]
+[node name="SettingsButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=899708958]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -411,7 +416,7 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "SETTINGS"
 
-[node name="QuitToMenuButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1664834077]
+[node name="QuitToMenuButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=1664834077]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -421,7 +426,7 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "QUIT TO MAIN MENU"
 
-[node name="QuitToDeskButton" type="Button" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=550602696]
+[node name="QuitToDeskButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=550602696]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -431,8 +436,8 @@ theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
 text = "QUIT TO DESKTOP"
 
-[node name="Spacer2" type="Control" parent="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer" unique_id=631958866]
+[node name="Spacer2" type="Control" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=631958866]
 layout_mode = 2
 
-[connection signal="pressed" from="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
-[connection signal="pressed" from="CenteringParent/ClippingParent/PauseMenuContainer/BackPanel/VBoxContainer/QuitToDeskButton" to="." method="_on_quit_to_desk_button_pressed"]
+[connection signal="pressed" from="PauseMenuContainer/BackPanel/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
+[connection signal="pressed" from="PauseMenuContainer/BackPanel/VBoxContainer/QuitToDeskButton" to="." method="_on_quit_to_desk_button_pressed"]
