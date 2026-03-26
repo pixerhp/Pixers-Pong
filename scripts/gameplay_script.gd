@@ -9,6 +9,7 @@ func _ready():
 	update_scores_text()
 	reset_ai_inputs(false)
 	reset_ai_inputs(true)
+	first_serve_start_time = Time.get_ticks_msec()
 
 func reset_gameobject_positions():
 	%CenteringParent.position = Vector2(0,0)
@@ -64,6 +65,33 @@ func update_scores_text():
 	if Globals.plr2_streak == 0: %RightScoreStreak/%StreakContainer/%StreakLabel.text = ""
 	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr2_streak)
 
+var first_serve_start_time: int = Time.get_ticks_msec()
+const FIRST_SERVE_TOTAL_DURATION: int = 5000
+func do_first_serve_animation():
+	const FS_PADS_SLIDE_S: float = 0.0
+	const FS_PADS_SLIDE_E: float = 0.15
+	const FS_INTRODUCE_SCORES_S: float = 0.1
+	const FS_INTRODUCE_SCORES_E: float = 0.2
+	var total_prog: float = float(Time.get_ticks_msec() - first_serve_start_time) / float(FIRST_SERVE_TOTAL_DURATION)
+	var sect_prog: float = 0.0
+	
+	sect_prog = get_sect_prog(total_prog, FS_PADS_SLIDE_S, FS_PADS_SLIDE_E)
+	%LeftPaddle.position.x = (-120.0 if (sect_prog < 0.0) else (120.0 if (sect_prog > 1.0) else (-120.0 + (240.0 * sect_prog))))
+	%RightPaddle.position.x = Globals.GAME_SIZE.x - %LeftPaddle.position.x
+	
+	sect_prog = get_sect_prog(total_prog, FS_INTRODUCE_SCORES_S, FS_INTRODUCE_SCORES_E)
+	%LeftScoreStreak.position.y = (-70.0 if (sect_prog < 0.0) else (70.0 if (sect_prog > 1.0) else (-70.0 + (140.0 * ease_out_back(sect_prog, 1.1)))))
+	%RightScoreStreak.position.y = %LeftScoreStreak.position.y
+
+func is_sect_prog_in_range(sect_progress: float) -> bool:
+	return ((0.0 < sect_progress) and (sect_progress < 1.0))
+
+func get_sect_prog(total_progress: float, section_start: float, section_end: float) -> float:
+	return ((total_progress - section_start) / (section_end - section_start))
+
+func ease_out_back(ratio: float, c: float) -> float:
+	return 1 + ((c + 1) * pow(ratio - 1, 3)) + (c *  pow(ratio - 1, 2))
+
 # !!! (currently placeholder)
 func reserve_ball():
 	update_scores_text()
@@ -79,13 +107,18 @@ func reserve_ball():
 	%BallShapeCast.clear_exceptions()
 
 func _process(delta: float):
-	if Input.is_action_just_pressed("test"):
-		Globals.GAME_SIZE = Vector2(randi_range(500, 3000), randi_range(300, 2000))
-		reset_gameobject_positions()
-	print(%CenteringParent.position)
-	print()
+	#if Input.is_action_just_pressed("test"):
+		#Globals.GAME_SIZE = Vector2(randi_range(500, 3000), randi_range(300, 2000))
+		#reset_gameobject_positions()
+	#print(%CenteringParent.position)
+	#print()
+	
 	checkdo_toggle_pause()
-	if not is_game_paused:
+	if is_game_paused:
+		return
+	elif (Time.get_ticks_msec() - first_serve_start_time) < FIRST_SERVE_TOTAL_DURATION:
+		do_first_serve_animation()
+	else:
 		handle_paddle_cpu(false, Globals.plr1_cpu_mode)
 		handle_paddle_cpu(true, Globals.plr2_cpu_mode)
 		if Globals.plr1_force_slow: set_input("plr1_slow", true)
@@ -127,6 +160,7 @@ func initiate_unpause():
 	%Referee.play()
 	for i in range(balltrail_times.size()):
 		balltrail_times[i] += paused_duration
+	first_serve_start_time += paused_duration
 	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
