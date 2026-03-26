@@ -37,11 +37,11 @@ size = Vector2(1260, 200)
 atlas = ExtResource("5_ks65t")
 region = Rect2(0, 0, 512, 320)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hx5ms"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_vgafc"]
 atlas = ExtResource("5_ks65t")
 region = Rect2(512, 0, 512, 320)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_emnkm"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_81lo5"]
 atlas = ExtResource("5_ks65t")
 region = Rect2(1024, 0, 512, 320)
 
@@ -70,16 +70,26 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ks65t")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_hx5ms")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_emnkm")
 }],
 "loop": false,
-"name": &"count_123",
+"name": &"count_1",
 "speed": 2.5
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vgafc")
+}],
+"loop": true,
+"name": &"count_2",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_81lo5")
+}],
+"loop": true,
+"name": &"count_3",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
