@@ -49,6 +49,10 @@ func reset_gameobject_positions():
 	
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
+	%LeftPaddle/%AnimChar.animation = ("plr_" if (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF) else "bot_") + "idle"
+	%RightPaddle/%AnimChar.animation = ("plr_" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_") + "idle"
+	
+	%Referee.position = Vector2(Globals.GAME_SIZE.x/2.0, Globals.GAME_SIZE.y + 144.0)
 	
 	PAD_Y_TOPLIMIT = %LeftPaddle/%FrontBar.mesh.height / 2.0
 	PAD_Y_BOTTOMLIMIT = Globals.GAME_SIZE.y - (%LeftPaddle/%FrontBar.mesh.height / 2.0)
@@ -66,22 +70,40 @@ func update_scores_text():
 	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr2_streak)
 
 var first_serve_start_time: int = Time.get_ticks_msec()
-const FIRST_SERVE_TOTAL_DURATION: int = 5000
+var first_serve_still_needs_to_conclude: bool = true
+const FIRST_SERVE_TOTAL_DURATION: int = 4000
 func do_first_serve_animation():
+	first_serve_still_needs_to_conclude = true
 	const FS_PADS_SLIDE_S: float = 0.0
 	const FS_PADS_SLIDE_E: float = 0.15
-	const FS_INTRODUCE_SCORES_S: float = 0.1
+	const FS_INTRODUCE_SCORES_S: float = 0.075
 	const FS_INTRODUCE_SCORES_E: float = 0.2
+	const FS_REF_APPROACH_S: float = 0.1
+	const FS_REF_APPROACH_E: float = 0.2
+	const FS_REF_COUNT_S: float = 0.3
+	const FS_REF_COUNT_E: float = 0.9
+	
 	var total_prog: float = float(Time.get_ticks_msec() - first_serve_start_time) / float(FIRST_SERVE_TOTAL_DURATION)
 	var sect_prog: float = 0.0
 	
 	sect_prog = get_sect_prog(total_prog, FS_PADS_SLIDE_S, FS_PADS_SLIDE_E)
 	%LeftPaddle.position.x = (-120.0 if (sect_prog < 0.0) else (120.0 if (sect_prog > 1.0) else (-120.0 + (240.0 * sect_prog))))
 	%RightPaddle.position.x = Globals.GAME_SIZE.x - %LeftPaddle.position.x
-	
 	sect_prog = get_sect_prog(total_prog, FS_INTRODUCE_SCORES_S, FS_INTRODUCE_SCORES_E)
 	%LeftScoreStreak.position.y = (-70.0 if (sect_prog < 0.0) else (70.0 if (sect_prog > 1.0) else (-70.0 + (140.0 * ease_out_back(sect_prog, 1.1)))))
 	%RightScoreStreak.position.y = %LeftScoreStreak.position.y
+	sect_prog = get_sect_prog(total_prog, FS_REF_APPROACH_S, FS_REF_APPROACH_E)
+	%Referee.position.y = (
+		(Globals.GAME_SIZE.y + (144.0 if (sect_prog < 0.0) else (-144.0 if (sect_prog > 1.0) else (144.0 - (288.0 * sect_prog)))))
+		if (total_prog < FS_REF_COUNT_S) else 
+		((Globals.GAME_SIZE.y-144.0) if (total_prog < FS_REF_COUNT_E) else
+		((Globals.GAME_SIZE.y - 144.0) + (288.0 * get_sect_prog(total_prog, FS_REF_COUNT_E, 1.0))))
+	)
+	if total_prog < FS_REF_COUNT_S: %Referee.play("idle")
+	elif total_prog < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 3.0)): %Referee.play("count_1")
+	elif total_prog < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 1.5)): %Referee.play("count_2")
+	elif total_prog < FS_REF_COUNT_E: %Referee.play("count_3")
+	else: %Referee.play("idle")
 
 func is_sect_prog_in_range(sect_progress: float) -> bool:
 	return ((0.0 < sect_progress) and (sect_progress < 1.0))
@@ -118,19 +140,25 @@ func _process(delta: float):
 		return
 	elif (Time.get_ticks_msec() - first_serve_start_time) < FIRST_SERVE_TOTAL_DURATION:
 		do_first_serve_animation()
+		if (float(Time.get_ticks_msec() - first_serve_start_time) / float(FIRST_SERVE_TOTAL_DURATION)) < 0.9:
+			return
 	else:
-		handle_paddle_cpu(false, Globals.plr1_cpu_mode)
-		handle_paddle_cpu(true, Globals.plr2_cpu_mode)
-		if Globals.plr1_force_slow: set_input("plr1_slow", true)
-		if Globals.plr2_force_slow: set_input("plr2_slow", true)
-		handle_paddle_controls(false, delta)
-		handle_paddle_controls(true, delta)
-		handle_ball_collision_movement(delta)
-		update_ball_trail()
-		handle_paddle_sidebump_animation(false)
-		handle_paddle_sidebump_animation(true)
-		handle_paddle_knockback_anim(false)
-		handle_paddle_knockback_anim(true)
+		if first_serve_still_needs_to_conclude:
+			print("hi")
+			reset_gameobject_positions()
+			first_serve_still_needs_to_conclude = false
+	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
+	handle_paddle_cpu(true, Globals.plr2_cpu_mode)
+	if Globals.plr1_force_slow: set_input("plr1_slow", true)
+	if Globals.plr2_force_slow: set_input("plr2_slow", true)
+	handle_paddle_controls(false, delta)
+	handle_paddle_controls(true, delta)
+	handle_ball_collision_movement(delta)
+	update_ball_trail()
+	handle_paddle_sidebump_animation(false)
+	handle_paddle_sidebump_animation(true)
+	handle_paddle_knockback_anim(false)
+	handle_paddle_knockback_anim(true)
 
 var is_game_paused: bool = false
 var paused_start_time: int = 0
