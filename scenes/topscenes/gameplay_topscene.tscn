@@ -330,12 +330,14 @@ autoplay = "idle"
 [node name="LeftPaddle" parent="CenteringParent/ClippingParent" unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(120, 324)
+metadata/sidebump_time = -99999999
 
 [node name="RightPaddle" parent="CenteringParent/ClippingParent" unique_id=1876564758 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(1140, 324)
 rotation = 3.1415927
 scale = Vector2(1, -1)
+metadata/sidebump_time = -99999999
 
 [node name="BallTrail" type="Line2D" parent="CenteringParent/ClippingParent" unique_id=1365490242]
 unique_name_in_owner = true
