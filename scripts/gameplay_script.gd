@@ -1,9 +1,7 @@
 extends Node
 
 func _ready():
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
 	reset_all_gameobjects()
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	update_scores_text()
 	reset_ai_inputs(false)
 	reset_ai_inputs(true)
@@ -14,8 +12,6 @@ func _process(delta: float):
 	if Input.is_action_just_pressed("court_resize_test"):
 		Globals.GAME_SIZE = Vector2(randi_range(500, 3000), randi_range(300, 2000))
 		reset_all_gameobjects()
-		#var node: Control = Control.new()
-		#node.set_anchors_and_offsets_preset()
 	
 	checkdo_toggle_pause()
 	if is_game_paused:
@@ -75,6 +71,7 @@ func reset_all_gameobjects():
 	PAD_Y_BOTTOMLIMIT = Globals.GAME_SIZE.y - (%LeftPaddle/%FrontBar.mesh.height / 2.0)
 	BALL_Y_TOPLIMIT = %BallShapeCast.shape.radius
 	BALL_Y_BOTTOMLIMIT = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
+	reset_framing()
 	reset_court_decorations()
 	update_scores_text()
 	reset_scores_visuals()
@@ -82,15 +79,17 @@ func reset_all_gameobjects():
 	reset_ball()
 	reset_referee()
 
-func reset_court_decorations():
-	%CenteringParent.position = Vector2(0,0)
-	%OuterVignettePanel.position = Vector2(-25.0, -25.0)
-	%OuterVignettePanel.size = Globals.GAME_SIZE + Vector2(50.0, 50.0)
-	%OuterVignettePanel.position = (
-		(get_viewport().get_visible_rect().size / 2.0) - (%OuterVignettePanel.size / 2.0))
-	%ClippingParent.size = Globals.GAME_SIZE
-	%ClippingParent.position = (
+func reset_framing():
+	get_window().set_content_scale_size(Globals.GAME_SIZE)
+	%CenteringParent.set_size(Globals.GAME_SIZE)
+	%CenteringParent.set_position(
 		(get_viewport().get_visible_rect().size / 2.0) - (Globals.GAME_SIZE / 2.0))
+	%OuterVignettePanel.set_size(Globals.GAME_SIZE + Vector2(50.0, 50.0))
+	%OuterVignettePanel.set_position(
+		(get_viewport().get_visible_rect().size / 2.0) - (%OuterVignettePanel.size / 2.0))
+	%ClippingParent.set_size(Globals.GAME_SIZE)
+	%ClippingParent.set_position(Vector2(0,0))
+func reset_court_decorations():
 	%BackgroundColorRect.custom_minimum_size = Globals.GAME_SIZE
 	%CornerStripTL.position = Vector2(140, 72)
 	%CornerStripTR.position = Vector2(Globals.GAME_SIZE.x - 140, 72)

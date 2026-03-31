@@ -370,6 +370,24 @@ margin = 2.0
 collide_with_areas = true
 collide_with_bodies = false
 
+[node name="ColorRect" type="ColorRect" parent="CenteringParent/ClippingParent" unique_id=1751128402]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 1, 0.13725491)
+
+[node name="ColorRect" type="ColorRect" parent="CenteringParent" unique_id=1754582395]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 1, 0, 0.1254902)
+
 [node name="PauseMenuContainer" type="Control" parent="." unique_id=201271272]
 unique_name_in_owner = true
 visible = false
@@ -449,6 +467,15 @@ text = "QUIT TO DESKTOP"
 
 [node name="Spacer2" type="Control" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=631958866]
 layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1422858362]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0, 0, 0.1254902)
 
 [connection signal="pressed" from="PauseMenuContainer/BackPanel/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="PauseMenuContainer/BackPanel/VBoxContainer/QuitToDeskButton" to="." method="_on_quit_to_desk_button_pressed"]
