@@ -1,8 +1,5 @@
 extends Node
 
-# !!! Note: plan is to make the scores opaque, scale them up and move them, 
-# and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
-
 func _ready():
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
 	reset_all_gameobjects()
@@ -13,29 +10,65 @@ func _ready():
 	firstserve_start_time = Time.get_ticks_msec()
 
 func _process(delta: float):
-	# A test for resizing the court mid-game:
-	if Input.is_action_just_pressed("test"):
+	# [A temporary test for resizing the court mid-game:]
+	if Input.is_action_just_pressed("court_resize_test"):
 		Globals.GAME_SIZE = Vector2(randi_range(500, 3000), randi_range(300, 2000))
 		reset_all_gameobjects()
+		#var node: Control = Control.new()
+		#node.set_anchors_and_offsets_preset()
 	
 	checkdo_toggle_pause()
 	if is_game_paused:
 		return
 	checkdo_first_serve_animation()
-	
-	if should_handle_regular_gameplay():
-		handle_paddle_cpu(false, Globals.plr1_cpu_mode)
-		handle_paddle_cpu(true, Globals.plr2_cpu_mode)
-		if Globals.plr1_force_slow: set_input("plr1_slow", true)
-		if Globals.plr2_force_slow: set_input("plr2_slow", true)
-		handle_paddle_controls(false, delta)
-		handle_paddle_controls(true, delta)
-		handle_ball_collision_movement(delta)
-		update_ball_trail()
-		handle_paddle_sidebump_animation(false)
-		handle_paddle_sidebump_animation(true)
-		handle_paddle_knockback_anim(false)
-		handle_paddle_knockback_anim(true)
+	if not should_handle_regular_gameplay():
+		return
+	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
+	handle_paddle_cpu(true, Globals.plr2_cpu_mode)
+	if Globals.plr1_force_slow: set_input("plr1_slow", true)
+	if Globals.plr2_force_slow: set_input("plr2_slow", true)
+	handle_paddle_controls(false, delta)
+	handle_paddle_controls(true, delta)
+	handle_ball_collision_movement(delta)
+	update_ball_trail()
+	handle_paddle_sidebump_animation(false)
+	handle_paddle_sidebump_animation(true)
+	handle_paddle_knockback_anim(false)
+	handle_paddle_knockback_anim(true)
+
+# Variables and functions associated with pausing/unpausing functionality:
+var is_game_paused: bool = false
+var paused_start_time: int = 0
+func checkdo_toggle_pause():
+	if Input.is_action_just_pressed("pause_escape"):
+		if is_game_paused == false:
+			initiate_pause()
+		else:
+			initiate_unpause()
+func initiate_pause():
+	%LeftPaddle/%AnimChar.pause()
+	%RightPaddle/%AnimChar.pause()
+	%Referee.pause()
+	paused_start_time = Time.get_ticks_msec()
+	is_game_paused = true
+	%PauseMenuContainer.visible = true
+func initiate_unpause():
+	var paused_duration: int = Time.get_ticks_msec() - paused_start_time
+	%LeftPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time") + paused_duration)
+	%RightPaddle.set_meta("sidebump_time", %RightPaddle.get_meta("sidebump_time") + paused_duration)
+	%LeftPaddle/%MeshContainer.set_meta("knockback_time", %LeftPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
+	%RightPaddle/%MeshContainer.set_meta("knockback_time", %RightPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
+	%LeftPaddle/%AnimChar.set_meta("time_surprised", %LeftPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
+	%RightPaddle/%AnimChar.set_meta("time_surprised", %RightPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
+	%LeftPaddle/%AnimChar.play()
+	%RightPaddle/%AnimChar.play()
+	%Referee.play()
+	for i in range(balltrail_times.size()):
+		balltrail_times[i] += paused_duration
+	firstserve_start_time += paused_duration
+	total_paused_time += paused_duration
+	is_game_paused = false
+	%PauseMenuContainer.visible = false
 
 func reset_all_gameobjects():
 	PAD_Y_TOPLIMIT = %LeftPaddle/%FrontBar.mesh.height / 2.0
@@ -59,23 +92,19 @@ func reset_court_decorations():
 	%ClippingParent.position = (
 		(get_viewport().get_visible_rect().size / 2.0) - (Globals.GAME_SIZE / 2.0))
 	%BackgroundColorRect.custom_minimum_size = Globals.GAME_SIZE
-	
 	%CornerStripTL.position = Vector2(140, 72)
 	%CornerStripTR.position = Vector2(Globals.GAME_SIZE.x - 140, 72)
 	%CornerStripBL.position = Vector2(140, Globals.GAME_SIZE.y - 72)
 	%CornerStripBR.position = Vector2(Globals.GAME_SIZE.x - 140, Globals.GAME_SIZE.y - 72)
-	
 	%Centerline1.position = (Globals.GAME_SIZE / 2.0) + Vector2(-105, 0)
 	%Centerline2.position = (Globals.GAME_SIZE / 2.0) + Vector2(-35, 0)
 	%Centerline3.position = (Globals.GAME_SIZE / 2.0) + Vector2(35, 0)
 	%Centerline4.position = (Globals.GAME_SIZE / 2.0) + Vector2(105, 0)
 	%Centerline1.mesh.size.y = Globals.GAME_SIZE.y
-	
 	%LeftRailOuter.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightRailOuter.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
 	%LeftRailOuter.mesh.height = Globals.GAME_SIZE.y - 25
 	%LeftRailInner.mesh.height = Globals.GAME_SIZE.y - 35
-	
 	%CeilingCollisionShape.shape.size.x =  Globals.GAME_SIZE.x 
 	%CeilingCollisionShape.position = Vector2(
 		Globals.GAME_SIZE.x / 2.0, 
@@ -83,7 +112,6 @@ func reset_court_decorations():
 	%FloorCollisionShape.position = Vector2(
 		Globals.GAME_SIZE.x / 2.0, 
 		Globals.GAME_SIZE.y + (%CeilingCollisionShape.shape.size.y / 2.0))
-
 func reset_scores_visuals():
 	%LeftScoreStreak.position = Vector2(Globals.GAME_SIZE.x / 3.25, 70.0)
 	%RightScoreStreak.position = Vector2(Globals.GAME_SIZE.x-(Globals.GAME_SIZE.x/3.25), 70.0)
@@ -93,7 +121,6 @@ func reset_scores_visuals():
 	%RightScoreStreak.rotation = %LeftScoreStreak.rotation
 	%LeftScoreStreak.modulate.a = 0.24
 	%RightScoreStreak.modulate.a = %LeftScoreStreak.modulate.a
-
 func reset_paddles():
 	%LeftPaddle.position = Vector2(120, Globals.GAME_SIZE.y / 2.0)
 	%RightPaddle.position = Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0)
@@ -107,11 +134,9 @@ func reset_paddles():
 	%RightPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time"))
 	%LeftPaddle.set_meta("sidebump_strength", 0.0)
 	%RightPaddle.set_meta("sidebump_strength", %LeftPaddle.get_meta("sidebump_strength"))
-
 func reset_ball():
 	%Ball.position = Globals.GAME_SIZE / 2.0
 	%Ball.set_meta("velocity", Vector2(-400.0, 0.0))
-
 func reset_referee():
 	%Referee.position = Vector2(Globals.GAME_SIZE.x/2.0, Globals.GAME_SIZE.y + 144.0)
 	%Referee.scale.x = 1.0
@@ -159,7 +184,10 @@ func checkdo_first_serve_animation():
 	%LeftPaddle.position.x = (-120.0 if (section_proportion < 0.0) else (120.0 if (section_proportion > 1.0) else (-120.0 + (240.0 * section_proportion))))
 	%RightPaddle.position.x = Globals.GAME_SIZE.x - %LeftPaddle.position.x
 	section_proportion = proportion_from_range(playthrough_proportion, FS_INTRODUCE_SCORES_S, FS_INTRODUCE_SCORES_E)
-	%LeftScoreStreak.position.y = (-70.0 if (section_proportion < 0.0) else (70.0 if (section_proportion > 1.0) else (-70.0 + (140.0 * ease_out_back(section_proportion, 1.1)))))
+	%LeftScoreStreak.position.y = (
+		-70.0 if (section_proportion < 0.0) else (
+		70.0 if (section_proportion > 1.0) else (
+		-70.0 + (140.0 * ease_out_back(section_proportion, 1.1)))))
 	%RightScoreStreak.position.y = %LeftScoreStreak.position.y
 	section_proportion = proportion_from_range(playthrough_proportion, FS_REF_APPROACH_S, FS_REF_APPROACH_E)
 	%Referee.position.y = (
@@ -179,11 +207,8 @@ func is_in_range_i(value: int, min: int, max: int) -> bool:
 func is_in_range_f(value: float, min: float, max: float) -> bool:
 	return ((min <= value) and (value <= max))
 
-func proportion_from_range(current: float, range_start: float, range_end: float) -> float:
-	return ((current - range_start) / (range_end - range_start))
-
-func ease_out_back(ratio: float, c: float) -> float:
-	return 1 + ((c + 1) * pow(ratio - 1, 3)) + (c *  pow(ratio - 1, 2))
+# !!! Note: plan is to make the scores opaque, scale them up and move them, 
+# and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
 
 # !!! (currently placeholder)
 func reserve_ball():
@@ -199,42 +224,17 @@ func reserve_ball():
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
 
-var is_game_paused: bool = false
-var paused_start_time: int = 0
-func checkdo_toggle_pause():
-	if Input.is_action_just_pressed("pause_escape"):
-		if is_game_paused == false:
-			initiate_pause()
-		else:
-			initiate_unpause()
-func initiate_pause():
-	%LeftPaddle/%AnimChar.pause()
-	%RightPaddle/%AnimChar.pause()
-	%Referee.pause()
-	paused_start_time = Time.get_ticks_msec()
-	is_game_paused = true
-	%PauseMenuContainer.visible = true
-func initiate_unpause():
-	var paused_duration: int = Time.get_ticks_msec() - paused_start_time
-	%LeftPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time") + paused_duration)
-	%RightPaddle.set_meta("sidebump_time", %RightPaddle.get_meta("sidebump_time") + paused_duration)
-	%LeftPaddle/%MeshContainer.set_meta("knockback_time", %LeftPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
-	%RightPaddle/%MeshContainer.set_meta("knockback_time", %RightPaddle/%MeshContainer.get_meta("knockback_time") + paused_duration)
-	%LeftPaddle/%AnimChar.set_meta("time_surprised", %LeftPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
-	%RightPaddle/%AnimChar.set_meta("time_surprised", %RightPaddle/%AnimChar.get_meta("time_surprised") + paused_duration)
-	%LeftPaddle/%AnimChar.play()
-	%RightPaddle/%AnimChar.play()
-	%Referee.play()
-	for i in range(balltrail_times.size()):
-		balltrail_times[i] += paused_duration
-	firstserve_start_time += paused_duration
-	total_paused_time += paused_duration
-	is_game_paused = false
-	%PauseMenuContainer.visible = false
+# !!! add foul ball detection and animation
+
+func proportion_from_range(current: float, range_start: float, range_end: float) -> float:
+	return ((current - range_start) / (range_end - range_start))
+func ease_out_back(ratio: float, c: float) -> float:
+	return 1 + ((c + 1) * pow(ratio - 1, 3)) + (c *  pow(ratio - 1, 2))
 
 func should_handle_regular_gameplay() -> bool:
 	return not (
-		is_in_range_i(Time.get_ticks_msec(), firstserve_start_time, firstserve_start_time + FIRSTSERVE_PLAYHALT_DURATION) #!!! or reserve requires conclusion or etc
+		is_in_range_i(Time.get_ticks_msec(), firstserve_start_time, firstserve_start_time + FIRSTSERVE_PLAYHALT_DURATION) 
+		#!!! 'or' reserve requires conclusion or etc
 	)
 
 var RANDOM_MOVEMENT_SEED_OFFSET: int = randi()
@@ -444,11 +444,20 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 					3: pass
 					4: targ_y += (PAD_Y_TOPLIMIT * 0.6)
 					5: targ_y += (PAD_Y_TOPLIMIT * 0.9)
-				if (abs(ball_x_distance_to_hit / ball_velocity.x) < 0.1) and (abs(ball_velocity.x) < (1750.0 * 0.43922 * ((%RightPaddle.position.x - %LeftPaddle.position.x) / (PAD_Y_BOTTOMLIMIT - PAD_Y_TOPLIMIT)))):
+				if (
+					(abs(ball_x_distance_to_hit / ball_velocity.x) < 0.1) and 
+					(abs(ball_velocity.x) < (1750.0 * 0.43922 * ((%RightPaddle.position.x - %LeftPaddle.position.x) / (PAD_Y_BOTTOMLIMIT - PAD_Y_TOPLIMIT))))
+				):
 					set_input(act_prefix + ("bump_left" if is_plr2 else "bump_right"), true)
 			
-			set_input(act_prefix + "up", (paddle_noderef.position.y > targ_y) and (not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and (not paddle_noderef.position.y <= PAD_Y_TOPLIMIT))
-			set_input(act_prefix + "down", (paddle_noderef.position.y < targ_y) and (not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and (not paddle_noderef.position.y >= PAD_Y_BOTTOMLIMIT))
+			set_input(act_prefix + "up", 
+				(paddle_noderef.position.y > targ_y) and 
+				(not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and 
+				(not paddle_noderef.position.y <= PAD_Y_TOPLIMIT))
+			set_input(act_prefix + "down", 
+				(paddle_noderef.position.y < targ_y) and 
+				(not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and 
+				(not paddle_noderef.position.y >= PAD_Y_BOTTOMLIMIT))
 			set_input(act_prefix + "slow", abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.25))
 
 func reset_ai_inputs(is_plr2: bool):
@@ -555,17 +564,14 @@ func handle_paddle_controls(is_plr2: bool, delta: float):
 
 const SIDEBUMP_DURATION: int = 400
 const SIDEBUMP_STRENGTH_AMOUNT: float = 25.0
-
 func handle_paddle_sidebump_animation(is_plr2: bool):
 	var paddle_noderef: Node2D = (%RightPaddle if is_plr2 else %LeftPaddle)
-	
 	var time_since: int = Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")
 	if time_since > SIDEBUMP_DURATION:
 		paddle_noderef.position.x = (Globals.GAME_SIZE.x - 120) if is_plr2 else 120.0
 		return
 	var bump_strength: float = paddle_noderef.get_meta("sidebump_strength")
-	
-	var parabola_weight: float = get_parabola_animation_weight(time_since, SIDEBUMP_DURATION)
+	var parabola_weight: float = parabola_arc_weight(time_since, SIDEBUMP_DURATION)
 	paddle_noderef.position.x = 120 + (parabola_weight * bump_strength)
 	if is_plr2: paddle_noderef.position.x = Globals.GAME_SIZE.x - paddle_noderef.position.x
 
@@ -573,9 +579,8 @@ func handle_paddle_knockback_anim(is_plr2: bool):
 	const OOMF_LURCH_RATIO: float = 0.0035
 	const KNOCKBACK_ANIM_DURATION: int = 120
 	const MIN_OOMF_CUTOFF: float = 700.0
-	
-	var pad_mesh_container_ref: Node2D = (%RightPaddle/%MeshContainer if is_plr2 else %LeftPaddle/%MeshContainer)
-	
+	var pad_mesh_container_ref: Node2D = (
+		%RightPaddle/%MeshContainer if is_plr2 else %LeftPaddle/%MeshContainer)
 	var oomf: float = pad_mesh_container_ref.get_meta("knockback_oomf")
 	if abs(oomf) < MIN_OOMF_CUTOFF:
 		return
@@ -583,14 +588,14 @@ func handle_paddle_knockback_anim(is_plr2: bool):
 	if time_since > KNOCKBACK_ANIM_DURATION:
 		pad_mesh_container_ref.position.x = 0.0
 		return
-	
 	pad_mesh_container_ref.position.x = (oomf * OOMF_LURCH_RATIO * (1.0 if is_plr2 else -1.0) *
-		clampf(get_parabola_animation_weight(time_since, KNOCKBACK_ANIM_DURATION), 0.0, 1.0))
+		clampf(parabola_arc_weight(time_since, KNOCKBACK_ANIM_DURATION), 0.0, 1.0))
 
-func get_parabola_animation_weight(time_since: int, anim_time_length: int) -> float:
+# Used for parabolic movement arcs, such as paddle knockback and side-bumps:
+func parabola_arc_weight(time_since: int, anim_time_length: int) -> float:
 	return 1.0 - pow(((2.0 * (float(time_since) / float(anim_time_length))) - 1.0), 2.0)
-
-func get_parabola_animation_weight_derivative(time_since: int, anim_time_length: int) -> float:
+# Used for calculating velocity imparted onto the ball during a paddle side-bump:
+func parabola_arc_derivative(time_since: int, anim_time_length: int) -> float:
 	return (-8.0 * ((float(time_since) / float(anim_time_length)) - 0.5)) / (float(anim_time_length) / 1000.0)
 
 # Constants associated with the ball's movement:
@@ -705,7 +710,9 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	var padmeshcont_noderef: Node2D = (%RightPaddle/%MeshContainer if is_plr2 else %LeftPaddle/%MeshContainer)
 	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr2 else %LeftPaddle/%AnimChar)
 	# Hit region ranges from -1.0 (hit the very top of the paddle) to 1.0 (hit the very bottom):
-	var paddle_hit_region: float = ((paddle_noderef.position.y - ball_hit_pos.y) if is_plr2 else (ball_hit_pos.y - paddle_noderef.position.y)) / (PAD_Y_TOPLIMIT + BALL_Y_TOPLIMIT)
+	var paddle_hit_region: float = (
+		((paddle_noderef.position.y - ball_hit_pos.y) if is_plr2 
+		else (ball_hit_pos.y - paddle_noderef.position.y)) / (PAD_Y_TOPLIMIT + BALL_Y_TOPLIMIT))
 	paddle_hit_region = clampf(paddle_hit_region, -1.0, 1.0)
 	paddle_hit_region = pow(paddle_hit_region, 5) # (Intensify angle near edges.)
 	var bounce_angle: Vector2 = (Vector2.LEFT if is_plr2 else Vector2.RIGHT).rotated(PI * 0.2625 * paddle_hit_region)
@@ -718,7 +725,7 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr
 	var paddle_sidebump_time_since: int = Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")
 	if paddle_sidebump_time_since < SIDEBUMP_DURATION:
 		var paddle_sidebump_strength: float = paddle_noderef.get_meta("sidebump_strength")
-		var horizontal_boost: float = get_parabola_animation_weight_derivative(paddle_sidebump_time_since, SIDEBUMP_DURATION) * paddle_sidebump_strength
+		var horizontal_boost: float = parabola_arc_derivative(paddle_sidebump_time_since, SIDEBUMP_DURATION) * paddle_sidebump_strength
 		horizontal_boost *= (-1.0 if is_plr2 else 1.0)
 		ball_velocity.x += horizontal_boost # This is intentionally added *after* the speed limit check is done.
 	
