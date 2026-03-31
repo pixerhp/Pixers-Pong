@@ -77,6 +77,7 @@ func reset_all_gameobjects():
 	reset_scores_visuals()
 	reset_paddles()
 	reset_ball()
+	reset_balltrail()
 	reset_referee()
 
 func reset_framing():
@@ -136,6 +137,11 @@ func reset_paddles():
 func reset_ball():
 	%Ball.position = Globals.GAME_SIZE / 2.0
 	%Ball.set_meta("velocity", Vector2(-400.0, 0.0))
+func reset_balltrail():
+	balltrail_positions.clear()
+	balltrail_times.clear()
+	%BallTrail.points = PackedVector2Array([])
+	print(%BallTrail.points)
 func reset_referee():
 	%Referee.position = Vector2(Globals.GAME_SIZE.x/2.0, Globals.GAME_SIZE.y + 144.0)
 	%Referee.scale.x = 1.0
@@ -216,9 +222,7 @@ func reserve_ball():
 	%Ball.position = Globals.GAME_SIZE / 2.0
 	%Ball.set_meta("velocity", Vector2(-400, 0))
 	
-	balltrail_positions.clear()
-	balltrail_times.clear()
-	%BallTrail.points = []
+	reset_balltrail()
 	
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
