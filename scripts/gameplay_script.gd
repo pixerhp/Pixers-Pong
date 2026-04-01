@@ -143,6 +143,7 @@ func reset_ball():
 	%Ball.set_meta("velocity", Vector2(-400.0, 0.0))
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
+	%Ball.modulate = Color.WHITE
 func reset_balltrail():
 	balltrail_positions.clear()
 	balltrail_times.clear()
@@ -696,6 +697,9 @@ func handle_ball_collision_movement(delta: float):
 			Globals.plr2_streak = 0
 		reserve_ball()
 	else:
+		#%Ball.modulate = Color.from_hsv(
+			#0.014, (ball_velocity.length() / Globals.ball_max_speed) * 0.25, 1.004, 1.0)
+		
 		%Ball.position = ball_curr_position
 		%Ball.set_meta("velocity", ball_velocity)
 
