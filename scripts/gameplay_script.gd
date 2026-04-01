@@ -8,11 +8,6 @@ func _ready():
 	firstserve_start_time = Time.get_ticks_msec()
 
 func _process(delta: float):
-	# [A temporary test for resizing the court mid-game:]
-	if Input.is_action_just_pressed("court_resize_test"):
-		Globals.GAME_SIZE = Vector2(randi_range(500, 3000), randi_range(300, 2000))
-		reset_all_gameobjects()
-	
 	checkdo_toggle_pause()
 	if is_game_paused:
 		return
@@ -65,6 +60,13 @@ func initiate_unpause():
 	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
+
+func set_court_size(new_court_size: Vector2 = Vector2(
+	ProjectSettings.get_setting("display/window/size/viewport_width"),
+	ProjectSettings.get_setting("display/window/size/viewport_height"))
+):
+	Globals.GAME_SIZE = new_court_size
+	reset_all_gameobjects()
 
 func reset_all_gameobjects():
 	PAD_Y_TOPLIMIT = %LeftPaddle/%FrontBar.mesh.height / 2.0
