@@ -86,8 +86,10 @@ func reset_framing():
 	%CenteringParent.set_position(
 		(get_viewport().get_visible_rect().size / 2.0) - (Globals.GAME_SIZE / 2.0))
 	%OuterVignettePanel.set_size(Globals.GAME_SIZE + Vector2(50.0, 50.0))
-	%OuterVignettePanel.set_position(
-		(get_viewport().get_visible_rect().size / 2.0) - (%OuterVignettePanel.size / 2.0))
+	var outer_vignette_stylebox: StyleBoxFlat = %OuterVignettePanel.get_theme_stylebox("panel")
+	%OuterVignettePanel.set_position(Vector2(
+		0.0 - ((outer_vignette_stylebox.border_width_left + outer_vignette_stylebox.border_width_right) / 2.0),
+		0.0 - ((outer_vignette_stylebox.border_width_top + outer_vignette_stylebox.border_width_bottom) / 2.0)))
 	%ClippingParent.set_size(Globals.GAME_SIZE)
 	%ClippingParent.set_position(Vector2(0,0))
 func reset_court_decorations():
@@ -141,7 +143,6 @@ func reset_balltrail():
 	balltrail_positions.clear()
 	balltrail_times.clear()
 	%BallTrail.points = PackedVector2Array([])
-	print(%BallTrail.points)
 func reset_referee():
 	%Referee.position = Vector2(Globals.GAME_SIZE.x/2.0, Globals.GAME_SIZE.y + 144.0)
 	%Referee.scale.x = 1.0
