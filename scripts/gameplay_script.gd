@@ -139,6 +139,8 @@ func reset_paddles():
 func reset_ball():
 	%Ball.position = Globals.GAME_SIZE / 2.0
 	%Ball.set_meta("velocity", Vector2(-400.0, 0.0))
+	ballshapecast_current_exceptions.clear()
+	%BallShapeCast.clear_exceptions()
 func reset_balltrail():
 	balltrail_positions.clear()
 	balltrail_times.clear()
@@ -220,13 +222,8 @@ func is_in_range_f(value: float, min: float, max: float) -> bool:
 func reserve_ball():
 	update_scores_text()
 	
-	%Ball.position = Globals.GAME_SIZE / 2.0
-	%Ball.set_meta("velocity", Vector2(-400, 0))
-	
+	reset_ball()
 	reset_balltrail()
-	
-	ballshapecast_current_exceptions.clear()
-	%BallShapeCast.clear_exceptions()
 
 # !!! add foul ball detection and animation
 
