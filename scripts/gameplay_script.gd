@@ -169,12 +169,12 @@ func is_in_range_f(value: float, range_min: float, range_max: float) -> bool:
 
 # Constants, variables and code related to the 'first serve' that occurs when you start playing:
 var first_serve_start_time: int = Time.get_ticks_msec()
-const FIRST_SERVE_P1_DURATION: int = 5500
+const FIRST_SERVE_P1_DURATION: int = 5000
 var first_serve_p1_to_conclude: bool = false
 const FIRST_SERVE_P2_DURATION: int = 1000
 var first_serve_p2_to_conclude: bool = false
 func checkdo_first_serve():
-	# First serve part 1 (up until when the ball starts moving):
+	# First serve part 1 (plays up until when the ball starts moving):
 	var playthrough: float = proportion_from_range(
 		Time.get_ticks_msec(), first_serve_start_time, first_serve_start_time + FIRST_SERVE_P1_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
@@ -184,7 +184,7 @@ func checkdo_first_serve():
 	if first_serve_p1_to_conclude:
 		first_serve_p1_to_conclude = false
 		handle_first_serve_p1_conclusion()
-	# First serve part 2 (occurs after the ball starts moving):
+	# First serve part 2 (plays after the ball starts moving):
 	playthrough = proportion_from_range(
 		Time.get_ticks_msec(), 
 		first_serve_start_time + FIRST_SERVE_P1_DURATION, 
@@ -204,8 +204,8 @@ func handle_first_serve_p1_animation(playthrough: float):
 	const FS_INTRODUCE_SCORES_E: float = 0.2
 	const FS_REF_APPROACH_S: float = 0.1
 	const FS_REF_APPROACH_E: float = 0.2
-	const FS_REF_COUNT_S: float = 0.3
-	const FS_REF_COUNT_E: float = 0.9
+	const FS_REF_COUNT_S: float = 0.4
+	const FS_REF_COUNT_E: float = 1.0
 	
 	var section_proportion: float = 0.0
 	section_proportion = proportion_from_range(playthrough, FS_PADS_SLIDE_S, FS_PADS_SLIDE_E)
