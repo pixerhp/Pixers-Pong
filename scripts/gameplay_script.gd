@@ -213,10 +213,10 @@ func checkdo_first_serve_animation():
 	elif playthrough_proportion < FS_REF_COUNT_E: %Referee.play("count_3")
 	else: %Referee.play("idle")
 
-func is_in_range_i(value: int, min: int, max: int) -> bool:
-	return ((min <= value) and (value <= max))
-func is_in_range_f(value: float, min: float, max: float) -> bool:
-	return ((min <= value) and (value <= max))
+func is_in_range_i(value: int, range_min: int, range_max: int) -> bool:
+	return ((range_min <= value) and (value <= range_max))
+func is_in_range_f(value: float, range_min: float, range_max: float) -> bool:
+	return ((range_min <= value) and (value <= range_max))
 
 # !!! Note: plan is to make the scores opaque, scale them up and move them, 
 # and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
