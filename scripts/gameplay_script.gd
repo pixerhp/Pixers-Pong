@@ -166,13 +166,13 @@ func is_in_range_i(value: int, range_min: int, range_max: int) -> bool:
 	return ((range_min <= value) and (value <= range_max))
 func is_in_range_f(value: float, range_min: float, range_max: float) -> bool:
 	return ((range_min <= value) and (value <= range_max))
+func proportion_from_range(current: float, range_start: float, range_end: float) -> float:
+	return ((current - range_start) / (range_end - range_start))
+func ease_out_back(ratio: float, c: float) -> float:
+	return 1 + ((c + 1) * pow(ratio - 1, 3)) + (c *  pow(ratio - 1, 2))
 
 # Constants, variables and code related to the 'first serve' that occurs when you start playing:
 var first_serve_start_time: int = Time.get_ticks_msec()
-const FIRST_SERVE_P1_DURATION: int = 5000
-var first_serve_p1_to_conclude: bool = false
-const FIRST_SERVE_P2_DURATION: int = 1000
-var first_serve_p2_to_conclude: bool = false
 func checkdo_first_serve():
 	# First serve part 1 (plays up until when the ball starts moving):
 	var playthrough: float = proportion_from_range(
@@ -197,6 +197,7 @@ func checkdo_first_serve():
 		first_serve_p2_to_conclude = false
 		handle_first_serve_p2_conclusion()
 
+const FIRST_SERVE_P1_DURATION: int = 5000
 func handle_first_serve_p1_animation(playthrough: float):
 	const FS_PADS_SLIDE_S: float = 0.0
 	const FS_PADS_SLIDE_E: float = 0.15
@@ -230,43 +231,59 @@ func handle_first_serve_p1_animation(playthrough: float):
 	elif playthrough < FS_REF_COUNT_E: %Referee.play("count_1")
 	else: %Referee.play("idle")
 
+var first_serve_p1_to_conclude: bool = false
 func handle_first_serve_p1_conclusion():
+	reset_referee()
+	%Referee.position.y = Globals.GAME_SIZE.y - 144.0
 	
-	# !!! besides the ball, reset all other gameobjects moved by the animation
+	# !!! besides the ball, reset all other gameobjects moved by the animation ^^
 	
 	%Ball.position = Globals.GAME_SIZE / 2.0
-	ball_velocity = Vector2(300.0, 10.0)
+	ball_velocity = Vector2(-300.0, 10.0)
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
 	%Ball.modulate = Color.WHITE
 
+const FIRST_SERVE_P2_DURATION: int = 1500
 func handle_first_serve_p2_animation(playthrough: float):
-	
-	# !!! have the ref point in a direction and then move downwards here after the ball is served
-	
-	pass
+	const POINTING_LOWERING_SPLIT: float = 0.666666
+	# Referee animation handling:
+	if (playthrough > POINTING_LOWERING_SPLIT) or is_equal_approx(ball_velocity.x, 0.0):
+		%Referee.scale.x = 1.0
+		%Referee.play("idle")
+	else:
+		%Referee.play("serve_gesture")
+		%Referee.scale.x = (-1.0 if (ball_velocity.x < 0.0) else 1.0)
+	# Referee position handling:
+	if (playthrough > POINTING_LOWERING_SPLIT):
+		%Referee.position.y = (
+			(Globals.GAME_SIZE.y - 144.0) +
+			288.0 * proportion_from_range(playthrough, POINTING_LOWERING_SPLIT, 1.0)
+		)
 
+var first_serve_p2_to_conclude: bool = false
 func handle_first_serve_p2_conclusion():
-	
-	# !!! reset the ref position/stuff
-	
-	pass
+	reset_referee()
 
 # !!! Note: plan is to make the scores opaque, scale them up and move them, 
 # and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
 var winloss_reserve_start_time: int = -9999999
-const WINLOSS_RESERVE_P1_DURATION: int = 1000
-var winloss_reserve_p1_to_conclude: bool = false
-const WINLOSS_RESERVE_P2_DURATION: int = 1000
-var winloss_reserve_p2_to_conclude: bool = false
 func checkdo_winloss_reserve():
 	pass
+
+const WINLOSS_RESERVE_P1_DURATION: int = 1000
 func handle_winloss_reserve_p1_animation(playthrough: float):
 	pass
+
+var winloss_reserve_p1_to_conclude: bool = false
 func handle_winloss_reserve_p1_conclusion(playthrough: float):
 	pass
+
+const WINLOSS_RESERVE_P2_DURATION: int = 1000
 func handle_winloss_reserve_p2_animation(playthrough: float):
 	pass
+
+var winloss_reserve_p2_to_conclude: bool = false
 func handle_winloss_reserve_p2_conclusion(playthrough: float):
 	pass
 
@@ -279,14 +296,11 @@ func temptest_reserve_ball():
 
 # !!! add foul ball detection + animation, and foul ball reserve animations
 
-func proportion_from_range(current: float, range_start: float, range_end: float) -> float:
-	return ((current - range_start) / (range_end - range_start))
-func ease_out_back(ratio: float, c: float) -> float:
-	return 1 + ((c + 1) * pow(ratio - 1, 3)) + (c *  pow(ratio - 1, 2))
 
 func should_handle_regular_gameplay() -> bool:
 	return not (
-		first_serve_p1_to_conclude # or reserve_p1_to_conclude or ...
+		first_serve_p1_to_conclude or
+		winloss_reserve_p1_to_conclude # !!! or foul ball serving animation
 	)
 
 var RANDOM_MOVEMENT_SEED_OFFSET: int = randi()
