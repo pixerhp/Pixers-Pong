@@ -140,7 +140,7 @@ func reset_paddles():
 	%RightPaddle.set_meta("sidebump_strength", %LeftPaddle.get_meta("sidebump_strength"))
 func reset_ball():
 	%Ball.position = Globals.GAME_SIZE / 2.0
-	ball_velocity = Vector2(-400.0, 0.0)
+	ball_velocity = Vector2(0.0, 0.0)
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
 	%Ball.modulate = Color.WHITE
@@ -254,15 +254,30 @@ func handle_first_serve_p2_conclusion():
 
 # !!! Note: plan is to make the scores opaque, scale them up and move them, 
 # and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
+var winloss_reserve_start_time: int = -9999999
+const WINLOSS_RESERVE_P1_DURATION: int = 1000
+var winloss_reserve_p1_to_conclude: bool = false
+const WINLOSS_RESERVE_P2_DURATION: int = 1000
+var winloss_reserve_p2_to_conclude: bool = false
+func checkdo_winloss_reserve():
+	pass
+func handle_winloss_reserve_p1_animation(playthrough: float):
+	pass
+func handle_winloss_reserve_p1_conclusion(playthrough: float):
+	pass
+func handle_winloss_reserve_p2_animation(playthrough: float):
+	pass
+func handle_winloss_reserve_p2_conclusion(playthrough: float):
+	pass
 
-# !!! (currently placeholder)
-func reserve_ball():
+# [a temporary placeholder for re-serving the ball, has no animations or variation]
+func temptest_reserve_ball():
 	update_scores_text()
-	
 	reset_ball()
+	ball_velocity = Vector2(-400.0, 0.0)
 	reset_balltrail()
 
-# !!! add foul ball detection and animation
+# !!! add foul ball detection + animation, and foul ball reserve animations
 
 func proportion_from_range(current: float, range_start: float, range_end: float) -> float:
 	return ((current - range_start) / (range_end - range_start))
@@ -722,7 +737,7 @@ func handle_ball_collision_movement(delta: float):
 			Globals.plr1_score += 1
 			Globals.plr1_streak += 1
 			Globals.plr2_streak = 0
-		reserve_ball()
+		temptest_reserve_ball()
 	else:
 		#%Ball.modulate = Color.from_hsv(
 			#0.014, (ball_velocity.length() / Globals.ball_max_speed) * 0.25, 1.004, 1.0)
