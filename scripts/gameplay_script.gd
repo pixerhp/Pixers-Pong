@@ -140,7 +140,7 @@ func reset_paddles():
 	%RightPaddle.set_meta("sidebump_strength", %LeftPaddle.get_meta("sidebump_strength"))
 func reset_ball():
 	%Ball.position = Globals.GAME_SIZE / 2.0
-	%Ball.set_meta("velocity", Vector2(-400.0, 0.0))
+	ball_velocity = Vector2(-400.0, 0.0)
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
 	%Ball.modulate = Color.WHITE
@@ -235,7 +235,7 @@ func handle_first_serve_p1_conclusion():
 	# !!! besides the ball, reset all other gameobjects moved by the animation
 	
 	%Ball.position = Globals.GAME_SIZE / 2.0
-	%Ball.set_meta("velocity", Vector2(-400.0, 0.0))
+	ball_velocity = Vector2(300.0, 10.0)
 	ballshapecast_current_exceptions.clear()
 	%BallShapeCast.clear_exceptions()
 	%Ball.modulate = Color.WHITE
@@ -346,14 +346,12 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 				set_input(act_prefix + "down", (paddle_noderef.position.y < PAD_Y_BOTTOMLIMIT))
 		
 		Globals.CPU_MODES.CONVERGER:
-			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
 			set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 			set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
 		Globals.CPU_MODES.PATIENT_CONVERGER:
-			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
 			if ( # Wait in the center if the ball is travelling to the other player or is predicted OOB:
@@ -367,7 +365,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
 		Globals.CPU_MODES.BOUNCE_PREDICTOR:
-			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
 			if predicted_ball_y < BALL_Y_TOPLIMIT:
@@ -382,7 +379,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
 		Globals.CPU_MODES.DOUBLE_PREDICTOR:
-			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
 			const BOUNCE_LIMIT: int = 2
@@ -405,7 +401,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
 		
 		Globals.CPU_MODES.DEEP_PREDICTOR:
-			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
 			const BOUNCE_LIMIT: int = 8
@@ -440,7 +435,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 			else:
 				set_input(act_prefix + ("bump_right" if is_plr2 else "bump_left"), false)
 			
-			var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 			var WALL_HIT_TOL: float = clamp(-2.5 * log(0.004 * abs(ball_velocity.y)), 0, 25) # (Based on weak empirically determined data.)
 			var ball_x_distance_to_hit: float = (
 				(
@@ -595,7 +589,7 @@ func handle_paddle_controls(is_plr2: bool, delta: float):
 	
 	# Situationally override whatever expression the paddle character has with being surprised. 
 	if (float(Time.get_ticks_msec() - padchar_noderef.get_meta("time_surprised")) < 
-	((SURP_EXPR_VARIATION / (1.0 + (%Ball.get_meta("velocity").x / SURP_EXPR_FALLOFF))) + SURP_EXPR_BASE)):
+	((SURP_EXPR_VARIATION / (1.0 + (ball_velocity.x / SURP_EXPR_FALLOFF))) + SURP_EXPR_BASE)):
 		padchar_noderef.animation = padchar_anim_prefix + "surprised"
 
 
@@ -635,14 +629,14 @@ func parabola_arc_weight(time_since: int, anim_time_length: int) -> float:
 func parabola_arc_derivative(time_since: int, anim_time_length: int) -> float:
 	return (-8.0 * ((float(time_since) / float(anim_time_length)) - 0.5)) / (float(anim_time_length) / 1000.0)
 
-# Constants associated with the ball's movement:
+# Constants and variables associated with the ball's movement:
 @onready var BALL_Y_TOPLIMIT: float = %BallShapeCast.shape.radius
 @onready var BALL_Y_BOTTOMLIMIT: float = Globals.GAME_SIZE.y - %BallShapeCast.shape.radius
 const BALL_MAX_BOUNCE_LOOPS: int = 100
+var ball_velocity: Vector2 = Vector2(0.0, 0.0)
 func handle_ball_collision_movement(delta: float):
 	var ball_curr_position: Vector2 = %Ball.position
 	var ball_new_position: Vector2 = Vector2()
-	var ball_velocity: Vector2 = %Ball.get_meta("velocity")
 	if ball_velocity == Vector2(0,0): return # (No need to handle movement when there's no movement.)
 	var move_fraction_remaining: float = 1.0
 	var safe_fraction: float = 0.0
@@ -734,7 +728,6 @@ func handle_ball_collision_movement(delta: float):
 			#0.014, (ball_velocity.length() / Globals.ball_max_speed) * 0.25, 1.004, 1.0)
 		
 		%Ball.position = ball_curr_position
-		%Ball.set_meta("velocity", ball_velocity)
 
 var ballshapecast_current_exceptions: Array[Area2D] = []
 func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D = null):
