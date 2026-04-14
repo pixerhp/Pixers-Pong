@@ -5,13 +5,13 @@ func _ready():
 	update_scores_text()
 	reset_ai_inputs(false)
 	reset_ai_inputs(true)
-	firstserve_start_time = Time.get_ticks_msec()
+	first_serve_start_time = Time.get_ticks_msec()
 
 func _process(delta: float):
 	checkdo_toggle_pause()
 	if is_game_paused:
 		return
-	checkdo_first_serve_animation()
+	checkdo_first_serve()
 	if not should_handle_regular_gameplay():
 		return
 	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
@@ -56,7 +56,7 @@ func initiate_unpause():
 	%Referee.play()
 	for i in range(balltrail_times.size()):
 		balltrail_times[i] += paused_duration
-	firstserve_start_time += paused_duration
+	first_serve_start_time += paused_duration
 	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
@@ -162,26 +162,42 @@ func update_scores_text():
 	if Globals.plr2_streak == 0: %RightScoreStreak/%StreakContainer/%StreakLabel.text = ""
 	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr2_streak)
 
+func is_in_range_i(value: int, range_min: int, range_max: int) -> bool:
+	return ((range_min <= value) and (value <= range_max))
+func is_in_range_f(value: float, range_min: float, range_max: float) -> bool:
+	return ((range_min <= value) and (value <= range_max))
+
 # Constants, variables and code related to the 'first serve' that occurs when you start playing:
-var firstserve_start_time: int = Time.get_ticks_msec()
-const FIRSTSERVE_ANIMATION_DURATION: int = 5500
-const FIRSTSERVE_PLAYHALT_DURATION: int = 5000
-var firstserve_anim_to_conclude: bool = false
-var firstserve_halt_to_conclude: bool = false
-func checkdo_first_serve_animation():
-	var playthrough_proportion: float = proportion_from_range(
-		Time.get_ticks_msec(), firstserve_start_time, firstserve_start_time + FIRSTSERVE_ANIMATION_DURATION)
-	
-	# Check whether the animation should be playing, and if not, then run conclusion code if needed.
-	if is_in_range_f(playthrough_proportion, 0.0, 1.0):
-		firstserve_anim_to_conclude = true
-	else:
-		if firstserve_anim_to_conclude:
-			# !!! 
-			firstserve_anim_to_conclude = false
+var first_serve_start_time: int = Time.get_ticks_msec()
+const FIRST_SERVE_P1_DURATION: int = 5500
+var first_serve_p1_to_conclude: bool = false
+const FIRST_SERVE_P2_DURATION: int = 1000
+var first_serve_p2_to_conclude: bool = false
+func checkdo_first_serve():
+	# First serve part 1 (up until when the ball starts moving):
+	var playthrough: float = proportion_from_range(
+		Time.get_ticks_msec(), first_serve_start_time, first_serve_start_time + FIRST_SERVE_P1_DURATION)
+	if is_in_range_f(playthrough, 0.0, 1.0):
+		first_serve_p1_to_conclude = true
+		handle_first_serve_p1_animation(playthrough)
 		return
-	
-	var section_proportion: float = 0.0
+	if first_serve_p1_to_conclude:
+		first_serve_p1_to_conclude = false
+		handle_first_serve_p1_conclusion()
+	# First serve part 2 (occurs after the ball starts moving):
+	playthrough = proportion_from_range(
+		Time.get_ticks_msec(), 
+		first_serve_start_time + FIRST_SERVE_P1_DURATION, 
+		first_serve_start_time + FIRST_SERVE_P1_DURATION + FIRST_SERVE_P2_DURATION)
+	if is_in_range_f(playthrough, 0.0, 1.0):
+		first_serve_p2_to_conclude = true
+		handle_first_serve_p2_animation(playthrough)
+		return
+	if first_serve_p2_to_conclude:
+		first_serve_p2_to_conclude = false
+		handle_first_serve_p2_conclusion()
+
+func handle_first_serve_p1_animation(playthrough: float):
 	const FS_PADS_SLIDE_S: float = 0.0
 	const FS_PADS_SLIDE_E: float = 0.15
 	const FS_INTRODUCE_SCORES_S: float = 0.075
@@ -191,32 +207,50 @@ func checkdo_first_serve_animation():
 	const FS_REF_COUNT_S: float = 0.3
 	const FS_REF_COUNT_E: float = 0.9
 	
-	section_proportion = proportion_from_range(playthrough_proportion, FS_PADS_SLIDE_S, FS_PADS_SLIDE_E)
+	var section_proportion: float = 0.0
+	section_proportion = proportion_from_range(playthrough, FS_PADS_SLIDE_S, FS_PADS_SLIDE_E)
 	%LeftPaddle.position.x = (-120.0 if (section_proportion < 0.0) else (120.0 if (section_proportion > 1.0) else (-120.0 + (240.0 * section_proportion))))
 	%RightPaddle.position.x = Globals.GAME_SIZE.x - %LeftPaddle.position.x
-	section_proportion = proportion_from_range(playthrough_proportion, FS_INTRODUCE_SCORES_S, FS_INTRODUCE_SCORES_E)
+	section_proportion = proportion_from_range(playthrough, FS_INTRODUCE_SCORES_S, FS_INTRODUCE_SCORES_E)
 	%LeftScoreStreak.position.y = (
 		-70.0 if (section_proportion < 0.0) else (
 		70.0 if (section_proportion > 1.0) else (
 		-70.0 + (140.0 * ease_out_back(section_proportion, 1.1)))))
 	%RightScoreStreak.position.y = %LeftScoreStreak.position.y
-	section_proportion = proportion_from_range(playthrough_proportion, FS_REF_APPROACH_S, FS_REF_APPROACH_E)
+	section_proportion = proportion_from_range(playthrough, FS_REF_APPROACH_S, FS_REF_APPROACH_E)
 	%Referee.position.y = (
 		(Globals.GAME_SIZE.y + (144.0 if (section_proportion < 0.0) else (-144.0 if (section_proportion > 1.0) else (144.0 - (288.0 * section_proportion)))))
-		if (playthrough_proportion < FS_REF_COUNT_S) else 
-		((Globals.GAME_SIZE.y-144.0) if (playthrough_proportion < FS_REF_COUNT_E) else
-		((Globals.GAME_SIZE.y - 144.0) + (288.0 * proportion_from_range(playthrough_proportion, FS_REF_COUNT_E, 1.0))))
+		if (playthrough < FS_REF_COUNT_S) else 
+		((Globals.GAME_SIZE.y-144.0) if (playthrough < FS_REF_COUNT_E) else
+		((Globals.GAME_SIZE.y - 144.0) + (288.0 * proportion_from_range(playthrough, FS_REF_COUNT_E, 1.0))))
 	)
-	if playthrough_proportion < FS_REF_COUNT_S: %Referee.play("idle")
-	elif playthrough_proportion < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 3.0)): %Referee.play("count_1")
-	elif playthrough_proportion < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 1.5)): %Referee.play("count_2")
-	elif playthrough_proportion < FS_REF_COUNT_E: %Referee.play("count_3")
+	if playthrough < FS_REF_COUNT_S: %Referee.play("idle")
+	elif playthrough < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 3.0)): %Referee.play("count_3")
+	elif playthrough < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 1.5)): %Referee.play("count_2")
+	elif playthrough < FS_REF_COUNT_E: %Referee.play("count_1")
 	else: %Referee.play("idle")
 
-func is_in_range_i(value: int, range_min: int, range_max: int) -> bool:
-	return ((range_min <= value) and (value <= range_max))
-func is_in_range_f(value: float, range_min: float, range_max: float) -> bool:
-	return ((range_min <= value) and (value <= range_max))
+func handle_first_serve_p1_conclusion():
+	
+	# !!! besides the ball, reset all other gameobjects moved by the animation
+	
+	%Ball.position = Globals.GAME_SIZE / 2.0
+	%Ball.set_meta("velocity", Vector2(-400.0, 0.0))
+	ballshapecast_current_exceptions.clear()
+	%BallShapeCast.clear_exceptions()
+	%Ball.modulate = Color.WHITE
+
+func handle_first_serve_p2_animation(playthrough: float):
+	
+	# !!! have the ref point in a direction and then move downwards here after the ball is served
+	
+	pass
+
+func handle_first_serve_p2_conclusion():
+	
+	# !!! reset the ref position/stuff
+	
+	pass
 
 # !!! Note: plan is to make the scores opaque, scale them up and move them, 
 # and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
@@ -237,8 +271,7 @@ func ease_out_back(ratio: float, c: float) -> float:
 
 func should_handle_regular_gameplay() -> bool:
 	return not (
-		is_in_range_i(Time.get_ticks_msec(), firstserve_start_time, firstserve_start_time + FIRSTSERVE_PLAYHALT_DURATION) 
-		#!!! 'or' reserve requires conclusion or etc
+		first_serve_p1_to_conclude # or reserve_p1_to_conclude or ...
 	)
 
 var RANDOM_MOVEMENT_SEED_OFFSET: int = randi()
