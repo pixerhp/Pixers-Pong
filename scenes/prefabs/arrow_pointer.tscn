@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://dvxs6tdfud5sl"]
+
+[ext_resource type="Texture2D" uid="uid://pb568jd6hi6g" path="res://assets/art/arrow.png" id="1_ykf56"]
+[ext_resource type="Texture2D" uid="uid://bt732k1y5kco1" path="res://assets/art/question_mark.png" id="2_5vkmy"]
+
+[node name="ArrowAndQuestion" type="Node2D" unique_id=1333024161]
+
+[node name="RotationContainer" type="Node2D" parent="." unique_id=142338715]
+unique_name_in_owner = true
+
+[node name="ArrowSprite" type="Sprite2D" parent="RotationContainer" unique_id=677340614]
+position = Vector2(120, 0)
+texture = ExtResource("1_ykf56")
+
+[node name="QuestionTransformer" type="RemoteTransform2D" parent="RotationContainer" unique_id=766621225]
+position = Vector2(190, 0)
+remote_path = NodePath("../../QuestionSprite")
+update_rotation = false
+update_scale = false
+
+[node name="QuestionSprite" type="Sprite2D" parent="." unique_id=237233097]
+unique_name_in_owner = true
+position = Vector2(190, 0)
+texture = ExtResource("2_5vkmy")
