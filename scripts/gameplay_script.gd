@@ -219,15 +219,15 @@ func handle_first_serve_p1_animation(playthrough: float):
 	# Referee countdown:
 	const REF_COUNT_START: float = 0.4
 	const REF_COUNT_END: float = 1.0
-	const REF_COUNT_MID1: float = ((REF_COUNT_END - REF_COUNT_START) / 3.0)
-	const REF_COUNT_MID2: float = ((REF_COUNT_END - REF_COUNT_START) / 1.5)
+	const REF_COUNT_MID1: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 3.0)
+	const REF_COUNT_MID2: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 1.5)
 	if (playthrough < REF_COUNT_START) or (playthrough > REF_COUNT_END): 
 		%Referee.play("idle")
 	elif (playthrough < REF_COUNT_MID1): 
 		%Referee.play("count_3")
 	elif (playthrough < REF_COUNT_MID2): 
 		%Referee.play("count_2")
-	else: 
+	else:
 		%Referee.play("count_1")
 	
 	# !!! (add arrows and ?s stuff.)
