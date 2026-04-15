@@ -3,8 +3,8 @@ extends Node
 func _ready():
 	reset_all_gameobjects()
 	update_scores_text()
-	reset_ai_inputs(false)
-	reset_ai_inputs(true)
+	reset_cpu_inputs(false)
+	reset_cpu_inputs(true)
 	first_serve_start_time = Time.get_ticks_msec()
 
 func _process(delta: float):
@@ -199,50 +199,49 @@ func checkdo_first_serve():
 
 const FIRST_SERVE_P1_DURATION: int = 5000
 func handle_first_serve_p1_animation(playthrough: float):
-	const FS_PADS_SLIDE_S: float = 0.0
-	const FS_PADS_SLIDE_E: float = 0.15
-	const FS_INTRODUCE_SCORES_S: float = 0.075
-	const FS_INTRODUCE_SCORES_E: float = 0.2
-	const FS_REF_APPROACH_S: float = 0.1
-	const FS_REF_APPROACH_E: float = 0.2
-	const FS_REF_COUNT_S: float = 0.4
-	const FS_REF_COUNT_E: float = 1.0
-	
-	var section_proportion: float = 0.0
-	section_proportion = proportion_from_range(playthrough, FS_PADS_SLIDE_S, FS_PADS_SLIDE_E)
-	%LeftPaddle.position.x = (-120.0 if (section_proportion < 0.0) else (120.0 if (section_proportion > 1.0) else (-120.0 + (240.0 * section_proportion))))
+	# Paddles slide-in animation:
+	const PADS_SLIDEIN_START: float = 0.0
+	const PADS_SLIDEIN_END: float = 0.15
+	%LeftPaddle.position.x = -120.0 + (240.0 * 
+		clampf(proportion_from_range(playthrough, PADS_SLIDEIN_START, PADS_SLIDEIN_END), 0.0, 1.0))
 	%RightPaddle.position.x = Globals.GAME_SIZE.x - %LeftPaddle.position.x
-	section_proportion = proportion_from_range(playthrough, FS_INTRODUCE_SCORES_S, FS_INTRODUCE_SCORES_E)
-	%LeftScoreStreak.position.y = (
-		-70.0 if (section_proportion < 0.0) else (
-		70.0 if (section_proportion > 1.0) else (
-		-70.0 + (140.0 * ease_out_back(section_proportion, 1.1)))))
+	# Scores/streaks ease-in animation:
+	const SCORES_EASEIN_START: float = 0.075
+	const SCORES_EASEIN_END: float = 0.2
+	%LeftScoreStreak.position.y = -70.0 + (140.0 * ease_out_back(clampf(
+		proportion_from_range(playthrough, SCORES_EASEIN_START, SCORES_EASEIN_END), 0.0, 1.0), 1.1))
 	%RightScoreStreak.position.y = %LeftScoreStreak.position.y
-	section_proportion = proportion_from_range(playthrough, FS_REF_APPROACH_S, FS_REF_APPROACH_E)
-	%Referee.position.y = (
-		(Globals.GAME_SIZE.y + (144.0 if (section_proportion < 0.0) else (-144.0 if (section_proportion > 1.0) else (144.0 - (288.0 * section_proportion)))))
-		if (playthrough < FS_REF_COUNT_S) else 
-		((Globals.GAME_SIZE.y-144.0) if (playthrough < FS_REF_COUNT_E) else
-		((Globals.GAME_SIZE.y - 144.0) + (288.0 * proportion_from_range(playthrough, FS_REF_COUNT_E, 1.0))))
-	)
-	if playthrough < FS_REF_COUNT_S: %Referee.play("idle")
-	elif playthrough < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 3.0)): %Referee.play("count_3")
-	elif playthrough < (FS_REF_COUNT_S + ((FS_REF_COUNT_E - FS_REF_COUNT_S) / 1.5)): %Referee.play("count_2")
-	elif playthrough < FS_REF_COUNT_E: %Referee.play("count_1")
-	else: %Referee.play("idle")
+	# Referee slide-in animation:
+	const REF_SLIDEIN_START: float = 0.1
+	const REF_SLIDEIN_END: float = 0.2
+	%Referee.position.y = Globals.GAME_SIZE.y + (144.0 - (288.0 * 
+		clampf(proportion_from_range(playthrough, REF_SLIDEIN_START, REF_SLIDEIN_END), 0.0, 1.0)))
+	# Referee countdown:
+	const REF_COUNT_START: float = 0.4
+	const REF_COUNT_END: float = 1.0
+	const REF_COUNT_MID1: float = ((REF_COUNT_END - REF_COUNT_START) / 3.0)
+	const REF_COUNT_MID2: float = ((REF_COUNT_END - REF_COUNT_START) / 1.5)
+	if (playthrough < REF_COUNT_START) or (playthrough > REF_COUNT_END): 
+		%Referee.play("idle")
+	elif (playthrough < REF_COUNT_MID1): 
+		%Referee.play("count_3")
+	elif (playthrough < REF_COUNT_MID2): 
+		%Referee.play("count_2")
+	else: 
+		%Referee.play("count_1")
+	
+	# !!! (add arrows and ?s stuff.)
 
 var first_serve_p1_to_conclude: bool = false
 func handle_first_serve_p1_conclusion():
+	reset_paddles()
+	reset_scores_visuals()
 	reset_referee()
 	%Referee.position.y = Globals.GAME_SIZE.y - 144.0
+	# !!! (add stuff for arrows, ?, etc after they're implemented into the animation.)
 	
-	# !!! besides the ball, reset all other gameobjects moved by the animation ^^
-	
-	%Ball.position = Globals.GAME_SIZE / 2.0
+	reset_ball()
 	ball_velocity = Vector2(-300.0, 10.0)
-	ballshapecast_current_exceptions.clear()
-	%BallShapeCast.clear_exceptions()
-	%Ball.modulate = Color.WHITE
 
 const FIRST_SERVE_P2_DURATION: int = 1500
 func handle_first_serve_p2_animation(playthrough: float):
@@ -520,7 +519,7 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 				(not paddle_noderef.position.y >= PAD_Y_BOTTOMLIMIT))
 			set_input(act_prefix + "slow", abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.25))
 
-func reset_ai_inputs(is_plr2: bool):
+func reset_cpu_inputs(is_plr2: bool):
 	if is_plr2:
 		set_input("plr2_up", false)
 		set_input("plr2_down", false)
