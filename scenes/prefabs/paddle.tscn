@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://vis13u150xqs"]
 
-[ext_resource type="PackedScene" uid="uid://c782dk0hf6ul1" path="res://scenes/paddle_char.tscn" id="1_3xiby"]
+[ext_resource type="PackedScene" uid="uid://c782dk0hf6ul1" path="res://scenes/prefabs/paddle_char.tscn" id="1_3xiby"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_3xiby"]
 size = Vector2(5, 25)
