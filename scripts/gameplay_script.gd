@@ -762,7 +762,7 @@ func handle_ball_collision_movement(delta: float):
 	rem_add_ballshapecast_coll_exceptions(%CeilingCollider)
 	rem_add_ballshapecast_coll_exceptions(%FloorCollider)
 	
-	# Re-serve the ball if it goes out-of-bounds, else update its data.
+	# Re-serve the ball if it goes out-of-bounds to the left/right, else update its data.
 	if abs(ball_curr_position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + 20):
 		if ball_curr_position.x < Globals.GAME_SIZE.x / 2.0:
 			Globals.plr2_score += 1
@@ -774,6 +774,15 @@ func handle_ball_collision_movement(delta: float):
 			Globals.plr2_streak = 0
 		temptest_reserve_ball()
 	else:
+		# Ensure that the ball can never end up beyond a wall, in case of innacurate collision:
+		if ball_curr_position.y < BALL_Y_TOPLIMIT:
+			ball_curr_position.y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - ball_curr_position.y)
+			ball_velocity.y = abs(ball_velocity.y)
+		if ball_curr_position.y > BALL_Y_BOTTOMLIMIT:
+			ball_curr_position.y = BALL_Y_BOTTOMLIMIT - (ball_curr_position.y - BALL_Y_BOTTOMLIMIT)
+			ball_velocity.y = -1.0 * abs(ball_velocity.y)
+		
+		# Ball speed reddening effect:
 		#%Ball.modulate = Color.from_hsv(
 			#0.014, (ball_velocity.length() / Globals.ball_max_speed) * 0.25, 1.004, 1.0)
 		
