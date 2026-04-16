@@ -725,7 +725,7 @@ func handle_ball_collision_movement(delta: float):
 				if collider == %LeftPaddle/PadCollider: # (This would be a match statement, but it errors that the noderefs aren't const.)
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
-					ball_velocity = calc_paddlehit_bounce(ball_curr_position, ball_velocity, false)
+					ball_velocity = calc_paddlehit_bounce(ball_curr_position, false)
 				elif collider == %LeftPaddle/CharCollider:
 					ballshapecast_current_exceptions.append(%LeftPaddle/CharCollider)
 					%BallShapeCast.add_exception(%LeftPaddle/CharCollider)
@@ -735,7 +735,7 @@ func handle_ball_collision_movement(delta: float):
 				elif collider == %RightPaddle/PadCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/PadCollider, %RightPaddle/PadCollider)
-					ball_velocity = calc_paddlehit_bounce(ball_curr_position, ball_velocity, true)
+					ball_velocity = calc_paddlehit_bounce(ball_curr_position, true)
 				elif collider == %RightPaddle/CharCollider:
 					ballshapecast_current_exceptions.append(%RightPaddle/CharCollider)
 					%BallShapeCast.add_exception(%RightPaddle/CharCollider)
@@ -797,7 +797,7 @@ func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D = n
 	for i in range(ballshapecast_current_exceptions.size()):
 		%BallShapeCast.add_exception(ballshapecast_current_exceptions[i])
 
-func calc_paddlehit_bounce(ball_hit_pos: Vector2, ball_velocity: Vector2, is_plr2: bool) -> Vector2:
+func calc_paddlehit_bounce(ball_hit_pos: Vector2, is_plr2: bool) -> Vector2:
 	var paddle_noderef: Node2D = (%RightPaddle if is_plr2 else %LeftPaddle)
 	var padmeshcont_noderef: Node2D = (%RightPaddle/%MeshContainer if is_plr2 else %LeftPaddle/%MeshContainer)
 	var padchar_noderef: AnimatedSprite2D = (%RightPaddle/%AnimChar if is_plr2 else %LeftPaddle/%AnimChar)
