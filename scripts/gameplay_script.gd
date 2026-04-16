@@ -263,7 +263,7 @@ func handle_first_serve_p1_conclusion():
 	%Referee.position.y = Globals.GAME_SIZE.y - 144.0
 	reset_arrow_pointers()
 	reset_ball()
-	ball_velocity = Vector2(-300.0, 10.0)
+	ball_velocity = random_serve_velocity()
 
 const FIRST_SERVE_P2_DURATION: int = 1500
 func handle_first_serve_p2_animation(playthrough: float):
@@ -317,6 +317,8 @@ func temptest_reserve_ball():
 
 # !!! add foul ball detection + animation, and foul ball reserve animations
 
+func random_serve_velocity() -> Vector2:
+	return Vector2(250.0*(((randi()%2)*2)-1), 0.0).rotated(deg_to_rad(randf_range(-22.5, 22.5)))
 
 func should_handle_regular_gameplay() -> bool:
 	return not (
