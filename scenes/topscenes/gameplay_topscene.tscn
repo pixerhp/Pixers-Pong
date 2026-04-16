@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://cc25j0nn47ytn" path="res://assets/art/referee.png" id="5_ks65t"]
 [ext_resource type="StyleBox" uid="uid://ci1vj1icd2vas" path="res://assets/styles/cyan_panel.tres" id="6_hx5ms"]
 [ext_resource type="StyleBox" uid="uid://dqwo7lmx1r506" path="res://assets/styles/button_default.tres" id="7_emnkm"]
+[ext_resource type="PackedScene" uid="uid://dvxs6tdfud5sl" path="res://scenes/prefabs/arrow_pointer.tscn" id="8_iube2"]
 [ext_resource type="StyleBox" uid="uid://r75uu6a6dxcf" path="res://assets/styles/button_pressed.tres" id="8_rfs2g"]
 [ext_resource type="StyleBox" uid="uid://t2qdtndfu2sc" path="res://assets/styles/button_hover.tres" id="9_d18oc"]
 [ext_resource type="StyleBox" uid="uid://d4gh36qf2ytct" path="res://assets/styles/outer_vignette_panel.tres" id="10_d18oc"]
@@ -32,6 +33,17 @@ height = 588.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u55sw"]
 size = Vector2(1260, 200)
+
+[sub_resource type="Curve" id="Curve_pyq0w"]
+_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="SphereMesh" id="SphereMesh_pyq0w"]
+radius = 5.0
+height = 10.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hx5ms"]
+radius = 7.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ks65t"]
 atlas = ExtResource("5_ks65t")
@@ -126,17 +138,6 @@ animations = [{
 "name": &"winner_gesture",
 "speed": 5.0
 }]
-
-[sub_resource type="Curve" id="Curve_pyq0w"]
-_data = [Vector2(0, 0), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="SphereMesh" id="SphereMesh_pyq0w"]
-radius = 5.0
-height = 10.0
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_hx5ms"]
-radius = 7.0
 
 [node name="GameplayTopscene" type="Control" unique_id=1589095980]
 layout_mode = 3
@@ -320,13 +321,6 @@ offset_top = 70.0
 offset_right = 872.308
 offset_bottom = 70.0
 
-[node name="Referee" type="AnimatedSprite2D" parent="CenteringParent/ClippingParent" unique_id=1568092764]
-unique_name_in_owner = true
-position = Vector2(630, 792)
-sprite_frames = SubResource("SpriteFrames_81lo5")
-animation = &"idle"
-autoplay = "idle"
-
 [node name="LeftPaddle" parent="CenteringParent/ClippingParent" unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(120, 324)
@@ -369,6 +363,23 @@ target_position = Vector2(0, 0)
 margin = 2.0
 collide_with_areas = true
 collide_with_bodies = false
+
+[node name="PrimaryArrowPointer" parent="CenteringParent/ClippingParent" unique_id=1333024161 instance=ExtResource("8_iube2")]
+unique_name_in_owner = true
+visible = false
+position = Vector2(630, 324)
+
+[node name="SecondaryArrowPointer" parent="CenteringParent/ClippingParent" unique_id=1059361601 instance=ExtResource("8_iube2")]
+unique_name_in_owner = true
+visible = false
+position = Vector2(630, 324)
+
+[node name="Referee" type="AnimatedSprite2D" parent="CenteringParent/ClippingParent" unique_id=1568092764]
+unique_name_in_owner = true
+position = Vector2(630, 792)
+sprite_frames = SubResource("SpriteFrames_81lo5")
+animation = &"idle"
+autoplay = "idle"
 
 [node name="DebugRect3" type="ColorRect" parent="CenteringParent/ClippingParent" unique_id=1751128402]
 visible = false

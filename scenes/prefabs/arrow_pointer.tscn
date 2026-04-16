@@ -13,12 +13,12 @@ position = Vector2(120, 0)
 texture = ExtResource("1_ykf56")
 
 [node name="QuestionTransformer" type="RemoteTransform2D" parent="RotationContainer" unique_id=766621225]
-position = Vector2(190, 0)
+position = Vector2(200, 0)
 remote_path = NodePath("../../QuestionSprite")
 update_rotation = false
 update_scale = false
 
 [node name="QuestionSprite" type="Sprite2D" parent="." unique_id=237233097]
 unique_name_in_owner = true
-position = Vector2(190, 0)
+position = Vector2(200, 0)
 texture = ExtResource("2_5vkmy")

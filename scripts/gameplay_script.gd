@@ -81,6 +81,7 @@ func reset_all_gameobjects():
 	reset_ball()
 	reset_balltrail()
 	reset_referee()
+	reset_arrow_pointers()
 
 func reset_framing():
 	get_window().set_content_scale_size(Globals.GAME_SIZE)
@@ -152,6 +153,15 @@ func reset_referee():
 	%Referee.position = Vector2(Globals.GAME_SIZE.x/2.0, Globals.GAME_SIZE.y + 144.0)
 	%Referee.scale.x = 1.0
 	%Referee.play("idle")
+func reset_arrow_pointers():
+	%PrimaryArrowPointer.visible = false
+	%PrimaryArrowPointer/%QuestionSprite.visible = false
+	%PrimaryArrowPointer.position = Globals.GAME_SIZE / 2.0
+	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = 0.0
+	%SecondaryArrowPointer.visible = %PrimaryArrowPointer.visible
+	%SecondaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer/%QuestionSprite.visible
+	%SecondaryArrowPointer.position = %PrimaryArrowPointer.position
+	%SecondaryArrowPointer/%RotationContainer.rotation_degrees = 180.0
 
 const STREAK_PREFIX: String = "🗘"
 func update_scores_text():
@@ -229,8 +239,21 @@ func handle_first_serve_p1_animation(playthrough: float):
 		%Referee.play("count_2")
 	else:
 		%Referee.play("count_1")
-	
-	# !!! (add arrows and ?s stuff.)
+	# Arrow pointers fade-in and viwsibility:
+	const ARROWS_FADEIN_START: float = REF_COUNT_START / 2.0
+	const ARROWS_FADEIN_END: float = REF_COUNT_START
+	%PrimaryArrowPointer.visible = playthrough > ARROWS_FADEIN_START
+	%SecondaryArrowPointer.visible = %PrimaryArrowPointer.visible
+	%PrimaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer.visible
+	%SecondaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer/%QuestionSprite.visible
+	%PrimaryArrowPointer.modulate = Color(1.0, 1.0, 1.0, 
+		clampf(proportion_from_range(playthrough, ARROWS_FADEIN_START, ARROWS_FADEIN_END) / 2.0, 0.0, 0.5))
+	%SecondaryArrowPointer.modulate = %PrimaryArrowPointer.modulate
+	# Arrow pointers movement:
+	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (
+		(22.5 * sin(float(Time.get_ticks_msec()) / 324.34)))
+	%SecondaryArrowPointer/%RotationContainer.rotation_degrees = 180 + (
+		(22.5 * sin(float(Time.get_ticks_msec() + 32528437) / 284.83)))
 
 var first_serve_p1_to_conclude: bool = false
 func handle_first_serve_p1_conclusion():
@@ -238,8 +261,7 @@ func handle_first_serve_p1_conclusion():
 	reset_scores_visuals()
 	reset_referee()
 	%Referee.position.y = Globals.GAME_SIZE.y - 144.0
-	# !!! (add stuff for arrows, ?, etc after they're implemented into the animation.)
-	
+	reset_arrow_pointers()
 	reset_ball()
 	ball_velocity = Vector2(-300.0, 10.0)
 
