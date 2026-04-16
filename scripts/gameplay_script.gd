@@ -139,6 +139,8 @@ func reset_paddles():
 	%RightPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time"))
 	%LeftPaddle.set_meta("sidebump_strength", 0.0)
 	%RightPaddle.set_meta("sidebump_strength", %LeftPaddle.get_meta("sidebump_strength"))
+	%LeftPaddle.modulate = Color.WHITE
+	%RightPaddle.modulate = Color.WHITE
 func reset_ball():
 	%Ball.position = Globals.GAME_SIZE / 2.0
 	ball_velocity = Vector2(0.0, 0.0)
@@ -215,6 +217,9 @@ func handle_first_serve_p1_animation(playthrough: float):
 	%LeftPaddle.position.x = -120.0 + (240.0 * 
 		clampf(proportion_from_range(playthrough, PADS_SLIDEIN_START, PADS_SLIDEIN_END), 0.0, 1.0))
 	%RightPaddle.position.x = Globals.GAME_SIZE.x - %LeftPaddle.position.x
+	# Paddles darkening (to help indicate/imply your inability to move):
+	%LeftPaddle.modulate = Color.GRAY
+	%RightPaddle.modulate = Color.GRAY
 	# Scores/streaks ease-in animation:
 	const SCORES_EASEIN_START: float = 0.075
 	const SCORES_EASEIN_END: float = 0.2
