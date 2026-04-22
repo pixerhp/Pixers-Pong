@@ -12,6 +12,7 @@ func _process(delta: float):
 	if is_game_paused:
 		return
 	checkdo_first_serve()
+	checkdo_winloss_reserve()
 	if not should_handle_regular_gameplay():
 		return
 	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
@@ -57,6 +58,7 @@ func initiate_unpause():
 	for i in range(balltrail_times.size()):
 		balltrail_times[i] += paused_duration
 	first_serve_start_time += paused_duration
+	winloss_reserve_start_time == paused_duration
 	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
@@ -291,26 +293,58 @@ var first_serve_p2_to_conclude: bool = false
 func handle_first_serve_p2_conclusion():
 	reset_referee()
 
-# !!! Note: plan is to make the scores opaque, scale them up and move them, 
-# and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
+var winloss_reserve_ball_s_pos: Vector2 = Vector2()
+var winloss_reserve_lpad_s_pos: Vector2 = Vector2()
+var winloss_reserve_rpad_s_pos: Vector2 = Vector2()
+func initiate_winloss_reserve():
+	winloss_reserve_ball_s_pos = %Ball.position
+	winloss_reserve_lpad_s_pos = %LeftPaddle.position
+	winloss_reserve_rpad_s_pos = %RightPaddle.position
+	winloss_reserve_start_time = Time.get_ticks_msec()
+
 var winloss_reserve_start_time: int = -9999999
 func checkdo_winloss_reserve():
-	pass
+	# Winloss reserve part 1 (plays up until when the ball starts moving):
+	var playthrough: float = proportion_from_range(Time.get_ticks_msec(), 
+		winloss_reserve_start_time, 
+		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION)
+	if is_in_range_f(playthrough, 0.0, 1.0):
+		winloss_reserve_p1_to_conclude = true
+		handle_winloss_reserve_p1_animation(playthrough)
+		return
+	if winloss_reserve_p1_to_conclude:
+		winloss_reserve_p1_to_conclude = false
+		handle_winloss_reserve_p1_conclusion()
+	# Winloss reserve part 2 (plays after the ball starts moving):
+	playthrough = proportion_from_range(Time.get_ticks_msec(), 
+		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION, 
+		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION + WINLOSS_RESERVE_P2_DURATION)
+	if is_in_range_f(playthrough, 0.0, 1.0):
+		winloss_reserve_p2_to_conclude = true
+		handle_winloss_reserve_p2_animation(playthrough)
+		return
+	if winloss_reserve_p2_to_conclude:
+		winloss_reserve_p2_to_conclude = false
+		handle_winloss_reserve_p2_conclusion()
 
+# !!! Note: plan is to make the scores opaque, scale them up and move them, 
+# and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
 const WINLOSS_RESERVE_P1_DURATION: int = 1000
 func handle_winloss_reserve_p1_animation(playthrough: float):
+	"playthrough"
 	pass
 
 var winloss_reserve_p1_to_conclude: bool = false
-func handle_winloss_reserve_p1_conclusion(playthrough: float):
+func handle_winloss_reserve_p1_conclusion():
 	pass
+	temptest_reserve_ball()
 
 const WINLOSS_RESERVE_P2_DURATION: int = 1000
 func handle_winloss_reserve_p2_animation(playthrough: float):
 	pass
 
 var winloss_reserve_p2_to_conclude: bool = false
-func handle_winloss_reserve_p2_conclusion(playthrough: float):
+func handle_winloss_reserve_p2_conclusion():
 	pass
 
 # [a temporary placeholder for re-serving the ball, has no animations or variation]
@@ -779,7 +813,7 @@ func handle_ball_collision_movement(delta: float):
 			Globals.plr1_score += 1
 			Globals.plr1_streak += 1
 			Globals.plr2_streak = 0
-		temptest_reserve_ball()
+		initiate_winloss_reserve()
 	else:
 		# Ensure that the ball can never end up beyond a wall, in case of innacurate collision:
 		if ball_curr_position.y < BALL_Y_TOPLIMIT:
