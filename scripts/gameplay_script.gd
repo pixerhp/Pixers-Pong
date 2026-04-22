@@ -60,7 +60,7 @@ func initiate_unpause():
 	for i in range(balltrail_times.size()):
 		balltrail_times[i] += paused_duration
 	first_serve_start_time += paused_duration
-	winloss_reserve_start_time == paused_duration
+	winloss_reserve_start_time += paused_duration
 	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
