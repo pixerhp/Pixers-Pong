@@ -300,6 +300,8 @@ func initiate_winloss_reserve():
 	winloss_reserve_ball_s_pos = %Ball.position
 	winloss_reserve_lpad_s_pos = %LeftPaddle.position
 	winloss_reserve_rpad_s_pos = %RightPaddle.position
+	reset_balltrail()
+	update_scores_text()
 	winloss_reserve_start_time = Time.get_ticks_msec()
 
 var winloss_reserve_start_time: int = -9999999
@@ -329,14 +331,35 @@ func checkdo_winloss_reserve():
 
 # !!! Note: plan is to make the scores opaque, scale them up and move them, 
 # and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
-const WINLOSS_RESERVE_P1_DURATION: int = 1000
+const WINLOSS_RESERVE_P1_DURATION: int = 4000
 func handle_winloss_reserve_p1_animation(playthrough: float):
-	"playthrough"
+	# Paddles slide-to-reset animation:
+	const PADS_SLIDE_START: float = 0.0
+	const PADS_SLIDE_END: float = 0.1
+	var weight: float = clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0)
+	%LeftPaddle.position = ((winloss_reserve_lpad_s_pos * (1.0-weight)) + 
+		(Vector2(120, Globals.GAME_SIZE.y / 2.0) * weight))
+	%RightPaddle.position = ((winloss_reserve_rpad_s_pos * (1.0-weight)) + 
+		(Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0) * weight))
+	# Paddle character animations:
+	if (playthrough < PADS_SLIDE_END):
+		%LeftPaddle/%AnimChar.play("plr_idle" if (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF) else "bot_idle")
+		%RightPaddle/%AnimChar.play("plr_idle" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_idle")
+	else:
+		%LeftPaddle/%AnimChar.play(
+			("plr_win" if (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF) else "bot_win")
+			if (Globals.plr1_streak > 0) else
+			("plr_lose" if (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF) else "bot_lose"))
+		%RightPaddle/%AnimChar.play(
+			("plr_win" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_win")
+			if (Globals.plr2_streak > 0) else
+			("plr_lose" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_lose"))
 	pass
 
 var winloss_reserve_p1_to_conclude: bool = false
 func handle_winloss_reserve_p1_conclusion():
-	pass
+	reset_paddles()
+	
 	temptest_reserve_ball()
 
 const WINLOSS_RESERVE_P2_DURATION: int = 1000
