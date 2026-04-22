@@ -12,6 +12,8 @@ func _process(delta: float):
 	if is_game_paused:
 		return
 	checkdo_first_serve()
+	if not (winloss_reserve_p1_to_conclude):
+		checkdo_winloss_condition()
 	checkdo_winloss_reserve()
 	if not should_handle_regular_gameplay():
 		return
@@ -176,6 +178,7 @@ func update_scores_text():
 	if Globals.plr2_streak == 0: %RightScoreStreak/%StreakContainer/%StreakLabel.text = ""
 	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr2_streak)
 
+# Animations convenience functions:
 func is_in_range_i(value: int, range_min: int, range_max: int) -> bool:
 	return ((range_min <= value) and (value <= range_max))
 func is_in_range_f(value: float, range_min: float, range_max: float) -> bool:
@@ -184,6 +187,14 @@ func proportion_from_range(current: float, range_start: float, range_end: float)
 	return ((current - range_start) / (range_end - range_start))
 func ease_out_back(ratio: float, c: float) -> float:
 	return 1 + ((c + 1) * pow(ratio - 1, 3)) + (c *  pow(ratio - 1, 2))
+func ease_out(ratio: float, power: float) -> float:
+	return 1 - pow(1 - ratio, power);
+func ease_in_out(ratio: float, power: float) -> float:
+	return (
+		(pow(2, power - 1) * pow(ratio, power))
+		if (ratio < 0.5) else
+		(1 - (pow((-2.0 * ratio) + 2, power) / 2.0)))
+
 
 # Constants, variables and code related to the 'first serve' that occurs when you start playing:
 var first_serve_start_time: int = Time.get_ticks_msec()
@@ -246,7 +257,7 @@ func handle_first_serve_p1_animation(playthrough: float):
 		%Referee.play("count_2")
 	else:
 		%Referee.play("count_1")
-	# Arrow pointers fade-in and viwsibility:
+	# Arrow pointers fade-in and visibility:
 	const ARROWS_FADEIN_START: float = REF_COUNT_START / 2.0
 	const ARROWS_FADEIN_END: float = REF_COUNT_START
 	%PrimaryArrowPointer.visible = playthrough > ARROWS_FADEIN_START
@@ -296,13 +307,24 @@ func handle_first_serve_p2_conclusion():
 var winloss_reserve_ball_s_pos: Vector2 = Vector2()
 var winloss_reserve_lpad_s_pos: Vector2 = Vector2()
 var winloss_reserve_rpad_s_pos: Vector2 = Vector2()
-func initiate_winloss_reserve():
+func checkdo_winloss_condition():
+	# Check whether the ball is significantly past the left/right paddle:
+	const EDGE_CLEARANCE: float = 60.0
+	if not (abs(%Ball.position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + EDGE_CLEARANCE)):
+		return
+	# Change player scores/streaks:
+	if (%Ball.position.x < (Globals.GAME_SIZE.x / 2.0)):
+		Globals.plr2_score += 1; Globals.plr2_streak += 1; Globals.plr1_streak = 0;
+	else:
+		Globals.plr1_score += 1; Globals.plr1_streak += 1; Globals.plr2_streak = 0;
+	update_scores_text()
+	# Update other variables in preparation for the winloss animations:
 	winloss_reserve_ball_s_pos = %Ball.position
 	winloss_reserve_lpad_s_pos = %LeftPaddle.position
 	winloss_reserve_rpad_s_pos = %RightPaddle.position
 	reset_balltrail()
-	update_scores_text()
 	winloss_reserve_start_time = Time.get_ticks_msec()
+
 
 var winloss_reserve_start_time: int = -9999999
 func checkdo_winloss_reserve():
@@ -331,18 +353,48 @@ func checkdo_winloss_reserve():
 
 # !!! Note: plan is to make the scores opaque, scale them up and move them, 
 # and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
-const WINLOSS_RESERVE_P1_DURATION: int = 4000
+const WINLOSS_RESERVE_P1_DURATION: int = 5000
 func handle_winloss_reserve_p1_animation(playthrough: float):
-	# Paddles slide-to-reset animation:
+	# Score/streak animation:
+	const SCORE_FADEIN_START: float = 0.0
+	const SCORE_FADEIN_END: float = 0.2
+	%LeftScoreStreak.modulate = Color(1.0, 1.0, 1.0, 0.24 +
+		clampf(proportion_from_range(playthrough, SCORE_FADEIN_START, SCORE_FADEIN_END), 0.0, 1.0) * 0.5)
+	%RightScoreStreak.modulate = %LeftScoreStreak.modulate
+	# Referee slide-in animation:
+	const REF_SLIDEIN_START: float = 0.0
+	const REF_SLIDEIN_END: float = 0.15
+	%Referee.position.y = Globals.GAME_SIZE.y + (144.0 - (288.0 * 
+		clampf(proportion_from_range(playthrough, REF_SLIDEIN_START, REF_SLIDEIN_END), 0.0, 1.0)))
+	# Referee animation:
+	const REF_COUNT_START: float = 0.675
+	const REF_COUNT_END: float = 1.0
+	const REF_COUNT_MID1: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 3.0)
+	const REF_COUNT_MID2: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 1.5)
+	if (playthrough < REF_COUNT_START):
+		%Referee.scale.x = (-1.0 if (Globals.plr1_streak > 0) else 1.0)
+		%Referee.play("winner_gesture")
+	else:
+		%Referee.scale.x = 1.0
+		if (playthrough < REF_COUNT_MID1): 
+			%Referee.play("count_3")
+		elif (playthrough < REF_COUNT_MID2): 
+			%Referee.play("count_2")
+		else:
+			%Referee.play("count_1")
+	# Paddles sliding animation:
 	const PADS_SLIDE_START: float = 0.0
 	const PADS_SLIDE_END: float = 0.1
-	var weight: float = clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0)
+	var weight: float = ease_in_out(clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0), 2.0)
 	%LeftPaddle.position = ((winloss_reserve_lpad_s_pos * (1.0-weight)) + 
 		(Vector2(120, Globals.GAME_SIZE.y / 2.0) * weight))
 	%RightPaddle.position = ((winloss_reserve_rpad_s_pos * (1.0-weight)) + 
 		(Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0) * weight))
 	# Paddle character animations:
-	if (playthrough < PADS_SLIDE_END):
+	if (playthrough > REF_COUNT_START):
+		%LeftPaddle.modulate = Color.GRAY
+		%RightPaddle.modulate = Color.GRAY
+	if ((playthrough < PADS_SLIDE_END) or (playthrough > REF_COUNT_START)):
 		%LeftPaddle/%AnimChar.play("plr_idle" if (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF) else "bot_idle")
 		%RightPaddle/%AnimChar.play("plr_idle" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_idle")
 	else:
@@ -354,13 +406,30 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 			("plr_win" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_win")
 			if (Globals.plr2_streak > 0) else
 			("plr_lose" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_lose"))
-	pass
+	# Arrow pointers fade-in and visibility:
+	const ARROWS_FADEIN_START: float = 0.5
+	const ARROWS_FADEIN_END: float = REF_COUNT_MID1
+	%PrimaryArrowPointer.visible = playthrough > ARROWS_FADEIN_START
+	%SecondaryArrowPointer.visible = %PrimaryArrowPointer.visible
+	%PrimaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer.visible
+	%SecondaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer/%QuestionSprite.visible
+	%PrimaryArrowPointer.modulate = Color(1.0, 1.0, 1.0, 
+		clampf(proportion_from_range(playthrough, ARROWS_FADEIN_START, ARROWS_FADEIN_END) / 2.0, 0.0, 0.5))
+	%SecondaryArrowPointer.modulate = %PrimaryArrowPointer.modulate
+	# Arrow pointers movement:
+	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (
+		(22.5 * sin(float(Time.get_ticks_msec()) / 324.34)))
+	%SecondaryArrowPointer/%RotationContainer.rotation_degrees = 180 + (
+		(22.5 * sin(float(Time.get_ticks_msec() + 32528437) / 284.83)))
 
 var winloss_reserve_p1_to_conclude: bool = false
 func handle_winloss_reserve_p1_conclusion():
+	reset_referee()
 	reset_paddles()
+	reset_arrow_pointers()
 	
-	temptest_reserve_ball()
+	reset_ball()
+	ball_velocity = random_serve_velocity()
 
 const WINLOSS_RESERVE_P2_DURATION: int = 1000
 func handle_winloss_reserve_p2_animation(playthrough: float):
@@ -368,6 +437,8 @@ func handle_winloss_reserve_p2_animation(playthrough: float):
 
 var winloss_reserve_p2_to_conclude: bool = false
 func handle_winloss_reserve_p2_conclusion():
+	reset_scores_visuals()
+	reset_referee()
 	pass
 
 # [a temporary placeholder for re-serving the ball, has no animations or variation]
@@ -826,31 +897,19 @@ func handle_ball_collision_movement(delta: float):
 	rem_add_ballshapecast_coll_exceptions(%CeilingCollider)
 	rem_add_ballshapecast_coll_exceptions(%FloorCollider)
 	
-	# Re-serve the ball if it goes out-of-bounds to the left/right, else update its data.
-	if abs(ball_curr_position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + 20):
-		if ball_curr_position.x < Globals.GAME_SIZE.x / 2.0:
-			Globals.plr2_score += 1
-			Globals.plr2_streak += 1
-			Globals.plr1_streak = 0
-		else:
-			Globals.plr1_score += 1
-			Globals.plr1_streak += 1
-			Globals.plr2_streak = 0
-		initiate_winloss_reserve()
-	else:
-		# Ensure that the ball can never end up beyond a wall, in case of innacurate collision:
-		if ball_curr_position.y < BALL_Y_TOPLIMIT:
-			ball_curr_position.y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - ball_curr_position.y)
-			ball_velocity.y = abs(ball_velocity.y)
-		if ball_curr_position.y > BALL_Y_BOTTOMLIMIT:
-			ball_curr_position.y = BALL_Y_BOTTOMLIMIT - (ball_curr_position.y - BALL_Y_BOTTOMLIMIT)
-			ball_velocity.y = -1.0 * abs(ball_velocity.y)
-		
-		# Ball speed reddening effect:
-		#%Ball.modulate = Color.from_hsv(
-			#0.014, (ball_velocity.length() / Globals.ball_max_speed) * 0.25, 1.004, 1.0)
-		
-		%Ball.position = ball_curr_position
+	# Ensure that the ball can never end up beyond a wall, in case of innacurate collision:
+	if ball_curr_position.y < BALL_Y_TOPLIMIT:
+		ball_curr_position.y = BALL_Y_TOPLIMIT + (BALL_Y_TOPLIMIT - ball_curr_position.y)
+		ball_velocity.y = abs(ball_velocity.y)
+	if ball_curr_position.y > BALL_Y_BOTTOMLIMIT:
+		ball_curr_position.y = BALL_Y_BOTTOMLIMIT - (ball_curr_position.y - BALL_Y_BOTTOMLIMIT)
+		ball_velocity.y = -1.0 * abs(ball_velocity.y)
+	
+	# Ball speed reddening effect:
+	#%Ball.modulate = Color.from_hsv(
+		#0.014, (ball_velocity.length() / Globals.ball_max_speed) * 0.25, 1.004, 1.0)
+	
+	%Ball.position = ball_curr_position
 
 var ballshapecast_current_exceptions: Array[Area2D] = []
 func rem_add_ballshapecast_coll_exceptions(to_remove: Area2D, to_add: Area2D = null):
