@@ -123,3 +123,4 @@ rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.0425, 0.046875, 0.05, 1)
+2d/snap/snap_2d_transforms_to_pixel=true
