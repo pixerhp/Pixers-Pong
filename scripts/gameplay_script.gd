@@ -355,12 +355,7 @@ func checkdo_winloss_reserve():
 # and rotate them back and forth slightly after a win/lose, and then transition them back to normal.
 const WINLOSS_RESERVE_P1_DURATION: int = 5000
 func handle_winloss_reserve_p1_animation(playthrough: float):
-	# Score/streak animation:
-	const SCORE_FADEIN_START: float = 0.0
-	const SCORE_FADEIN_END: float = 0.2
-	%LeftScoreStreak.modulate = Color(1.0, 1.0, 1.0, 0.24 +
-		clampf(proportion_from_range(playthrough, SCORE_FADEIN_START, SCORE_FADEIN_END), 0.0, 1.0) * 0.5)
-	%RightScoreStreak.modulate = %LeftScoreStreak.modulate
+	var weight: float
 	# Referee slide-in animation:
 	const REF_SLIDEIN_START: float = 0.0
 	const REF_SLIDEIN_END: float = 0.15
@@ -382,10 +377,22 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 			%Referee.play("count_2")
 		else:
 			%Referee.play("count_1")
+	# Score/streak color:
+	const SCORE_FADEIN_START: float = 0.0
+	const SCORE_FADEIN_END: float = 0.2
+	const SCORE_FADEOUT_START: float = 0.5
+	const SCORE_FADEOUT_END: float = REF_COUNT_START
+	%LeftScoreStreak.modulate = Color(1.0, 1.0, 1.0, 0.24 +
+		clampf(
+			(proportion_from_range(playthrough, SCORE_FADEIN_START, SCORE_FADEIN_END)
+			if (playthrough < SCORE_FADEOUT_START) else
+			proportion_from_range(playthrough, SCORE_FADEIN_START, SCORE_FADEIN_END)), 
+			0.0, 1.0) * 0.5)
+	%RightScoreStreak.modulate = %LeftScoreStreak.modulate
 	# Paddles sliding animation:
 	const PADS_SLIDE_START: float = 0.0
 	const PADS_SLIDE_END: float = 0.1
-	var weight: float = ease_in_out(clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0), 2.0)
+	weight = ease_in_out(clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0), 2.0)
 	%LeftPaddle.position = ((winloss_reserve_lpad_s_pos * (1.0-weight)) + 
 		(Vector2(120, Globals.GAME_SIZE.y / 2.0) * weight))
 	%RightPaddle.position = ((winloss_reserve_rpad_s_pos * (1.0-weight)) + 
@@ -421,6 +428,11 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 		(22.5 * sin(float(Time.get_ticks_msec()) / 324.34)))
 	%SecondaryArrowPointer/%RotationContainer.rotation_degrees = 180 + (
 		(22.5 * sin(float(Time.get_ticks_msec() + 32528437) / 284.83)))
+	# Return the ball to the center:
+	const BALL_RETURN_START: float = 0.3
+	const BALL_RETURN_END: float = ARROWS_FADEIN_START
+	weight = ease_out(clampf(proportion_from_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
+	%Ball.position = ((winloss_reserve_ball_s_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
 
 var winloss_reserve_p1_to_conclude: bool = false
 func handle_winloss_reserve_p1_conclusion():
