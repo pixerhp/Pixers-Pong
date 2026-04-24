@@ -1045,5 +1045,14 @@ func update_ball_trail():
 func _on_resume_button_pressed():
 	initiate_unpause()
 
+func _on_restart_button_pressed():
+	pass # Replace with function body.
+
+func _on_settings_button_pressed():
+	pass # Replace with function body.
+
+func _on_quit_to_menu_button_pressed():
+	pass # Replace with function body.
+
 func _on_quit_to_desk_button_pressed():
 	get_tree().quit()
