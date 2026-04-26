@@ -502,13 +502,6 @@ func handle_winloss_reserve_p2_conclusion():
 	reset_referee()
 	reset_arrow_pointers()
 
-# [a temporary placeholder for re-serving the ball, has no animations or variation]
-func temptest_reserve_ball():
-	update_scores_text()
-	reset_ball()
-	ball_velocity = Vector2(-400.0, 0.0)
-	reset_balltrail()
-
 # !!! add foul ball detection + animation, and foul ball reserve animations
 
 func random_serve_velocity() -> Vector2:
