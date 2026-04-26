@@ -11,12 +11,18 @@ func _process(delta: float):
 	checkdo_toggle_pause()
 	if is_game_paused:
 		return
+	
+	# Handle first serve, win/loss reserving, foul ball:
 	checkdo_first_serve()
-	if not (winloss_reserve_p1_to_conclude):
+	if first_serve_p1_to_conclude:
+		return
+	if not winloss_reserve_p1_to_conclude:
 		checkdo_winloss_condition()
 	checkdo_winloss_reserve()
-	if not should_handle_regular_gameplay():
+	if winloss_reserve_p1_to_conclude:
 		return
+	
+	# Regular gameplay functionality:
 	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
 	handle_paddle_cpu(true, Globals.plr2_cpu_mode)
 	if Globals.plr1_force_slow: set_input("plr1_slow", true)
@@ -502,16 +508,19 @@ func handle_winloss_reserve_p2_conclusion():
 	reset_referee()
 	reset_arrow_pointers()
 
-# !!! add foul ball detection + animation, and foul ball reserve animations
+func detect_foul_ball_state() -> bool:
+	pass
+	
+	
+	return false
+
+func checkdo_foul_ball_initiation():
+	pass
+
+
 
 func random_serve_velocity() -> Vector2:
 	return Vector2(250.0*(((randi()%2)*2)-1), 0.0).rotated(deg_to_rad(randf_range(-22.5, 22.5)))
-
-func should_handle_regular_gameplay() -> bool:
-	return not (
-		first_serve_p1_to_conclude or
-		winloss_reserve_p1_to_conclude # !!! or foul ball serving animation
-	)
 
 var RANDOM_MOVEMENT_SEED_OFFSET: int = randi()
 var total_paused_time: int = 0
