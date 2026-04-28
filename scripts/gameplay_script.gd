@@ -21,6 +21,9 @@ func _process(delta: float):
 	checkdo_winloss_reserve()
 	if winloss_reserve_p1_to_conclude:
 		return
+	checkdo_foul_ball_initiation()
+	if foul_ball_reserve_p1_to_conclude:
+		return
 	
 	# Regular gameplay functionality:
 	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
@@ -508,15 +511,51 @@ func handle_winloss_reserve_p2_conclusion():
 	reset_referee()
 	reset_arrow_pointers()
 
+
+func checkdo_foul_ball_initiation():
+	
+	
+	pass
+	
+
 func detect_foul_ball_state() -> bool:
 	if (first_serve_p1_to_conclude or winloss_reserve_p1_to_conclude):
 		return false
-	return ( #(horizontal speed is too slow or angle is too sharp)
-		(ball_velocity.x < (Globals.ball_min_speed / 4.0)) or 
+	return ( #(true if ball horizontal speed is too slow or angle is too vertical)
+		(ball_velocity.x < (Globals.ball_min_speed / 2.0)) or 
 		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.95))
 	)
 
-func checkdo_foul_ball_initiation():
+const FOUL_BALL_SUSPICION_DURATION: int = 1000
+func handle_foul_ball_suspicion_animation():
+	pass
+
+var foul_ball_suspicion_to_conclude: bool = false
+func handle_foul_ball_suspicion_conclusion():
+	pass
+
+const FOUL_BALL_NEVERMIND_DURATION: int = 1000
+func handle_foul_ball_nevermind_animation():
+	pass
+
+var foul_ball_nevermind_to_conclude: bool = false
+func handle_foul_ball_nevermind_conclusion():
+	pass
+
+const FOUL_BALL_RESERVE_P1_DURATION: int = 1000
+func handle_foul_ball_reserve_p1_animation():
+	pass
+
+var foul_ball_reserve_p1_to_conclude: bool = false
+func handle_foul_ball_reserve_p1_conclusion():
+	pass
+
+const FOUL_BALL_RESERVE_P2_DURATION: int = 1000
+func handle_foul_ball_reserve_p2_animation():
+	pass
+
+var foul_ball_reserve_p2_to_conclude: bool = false
+func handle_foul_ball_reserve_p2_conclusion():
 	pass
 
 
