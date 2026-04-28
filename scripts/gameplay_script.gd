@@ -509,10 +509,12 @@ func handle_winloss_reserve_p2_conclusion():
 	reset_arrow_pointers()
 
 func detect_foul_ball_state() -> bool:
-	pass
-	
-	
-	return false
+	if (first_serve_p1_to_conclude or winloss_reserve_p1_to_conclude):
+		return false
+	return ( #(horizontal speed is too slow or angle is too sharp)
+		(ball_velocity.x < (Globals.ball_min_speed / 4.0)) or 
+		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.95))
+	)
 
 func checkdo_foul_ball_initiation():
 	pass
@@ -997,6 +999,8 @@ func calc_paddlehit_bounce(ball_hit_pos: Vector2, is_plr2: bool) -> Vector2:
 	ball_velocity = ball_velocity.bounce(bounce_angle)
 	
 	ball_velocity *= ((ball_velocity.length() + Globals.ball_padhit_speedup) / ball_velocity.length()) # (Speedup)
+	if ball_velocity.length() < Globals.ball_min_speed:
+		ball_velocity = ball_velocity.normalized() * Globals.ball_min_speed
 	if ball_velocity.length() > Globals.ball_max_speed:
 		ball_velocity = ball_velocity.normalized() * Globals.ball_max_speed
 	
