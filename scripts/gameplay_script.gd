@@ -170,6 +170,9 @@ func reset_referee():
 	%Referee.position = Vector2(Globals.GAME_SIZE.x/2.0, Globals.GAME_SIZE.y + 144.0)
 	%Referee.scale.x = 1.0
 	%Referee.play("idle")
+	%EllipsisDot1.visible = false
+	%EllipsisDot2.visible = false
+	%EllipsisDot3.visible = false
 func reset_arrow_pointers():
 	%PrimaryArrowPointer.visible = false
 	%PrimaryArrowPointer/%QuestionSprite.visible = false
@@ -510,7 +513,7 @@ func handle_winloss_reserve_p2_conclusion():
 	reset_referee()
 	reset_arrow_pointers()
 
-var foul_ball_inspect_start_time: int = -9999999
+var foul_ball_inspect_start_time: int = 8000 # !!! temp' not far negative for ease of testing purposes
 var foul_ball_reserve_start_time: int = -9999999
 func checkdo_foul_ball():
 	# Foul ball reserve part 1 (plays up until regular gameplay resumes):
@@ -572,16 +575,26 @@ func detect_foul_ball() -> bool:
 		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.95))
 	)
 
-const FOUL_BALL_SUSPICION_DURATION: int = 1000
+const FOUL_BALL_SUSPICION_DURATION: int = 2000
 func handle_foul_ball_suspicion_animation(playthrough: float):
-	pass
+	const REF_RISE_START: float = 0.0
+	const REF_RISE_END: float = 0.5
+	%Referee.position.y = Globals.GAME_SIZE.y + (144.0 - (180.0 * 
+		clampf(proportion_from_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0)))
+	const ELLIPSIS_START: float = 0.0
+	const ELLIPSIS_END: float = 1.0
+	const ELLIPSIS_MID1: float = ELLIPSIS_START + ((ELLIPSIS_END - ELLIPSIS_START) / 3.0)
+	const ELLIPSIS_MID2: float = ELLIPSIS_START + ((ELLIPSIS_END - ELLIPSIS_START) / 1.5)
+	%EllipsisDot1.visible = playthrough > ELLIPSIS_START
+	%EllipsisDot2.visible = playthrough > ELLIPSIS_MID1
+	%EllipsisDot3.visible = playthrough > ELLIPSIS_MID2
 
 var foul_ball_suspicion_to_conclude: bool = false
 func handle_foul_ball_suspicion_conclusion():
 	pass
 	# !!! [remember to check/proceed into the reserve or nevermind animation from here]
 
-const FOUL_BALL_NEVERMIND_DURATION: int = 1000
+const FOUL_BALL_NEVERMIND_DURATION: int = 750
 func handle_foul_ball_nevermind_animation(playthrough: float):
 	pass
 

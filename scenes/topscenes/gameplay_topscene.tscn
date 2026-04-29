@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://dvxs6tdfud5sl" path="res://scenes/prefabs/arrow_pointer.tscn" id="8_iube2"]
 [ext_resource type="StyleBox" uid="uid://r75uu6a6dxcf" path="res://assets/styles/button_pressed.tres" id="8_rfs2g"]
 [ext_resource type="StyleBox" uid="uid://t2qdtndfu2sc" path="res://assets/styles/button_hover.tres" id="9_d18oc"]
+[ext_resource type="Texture2D" uid="uid://dmaca2nx1aq03" path="res://assets/art/ellipsis_dot.png" id="9_vgafc"]
 [ext_resource type="StyleBox" uid="uid://d4gh36qf2ytct" path="res://assets/styles/outer_vignette_panel.tres" id="10_d18oc"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_emnkm"]
@@ -380,6 +381,24 @@ position = Vector2(630, 792)
 sprite_frames = SubResource("SpriteFrames_81lo5")
 animation = &"idle"
 autoplay = "idle"
+
+[node name="EllipsisDot1" type="Sprite2D" parent="CenteringParent/ClippingParent/Referee" unique_id=138857424]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("9_vgafc")
+offset = Vector2(-25, -150)
+
+[node name="EllipsisDot2" type="Sprite2D" parent="CenteringParent/ClippingParent/Referee" unique_id=75532592]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("9_vgafc")
+offset = Vector2(0, -150)
+
+[node name="EllipsisDot3" type="Sprite2D" parent="CenteringParent/ClippingParent/Referee" unique_id=1006321494]
+unique_name_in_owner = true
+visible = false
+texture = ExtResource("9_vgafc")
+offset = Vector2(25, -150)
 
 [node name="DebugRect3" type="ColorRect" parent="CenteringParent/ClippingParent" unique_id=1751128402]
 visible = false
