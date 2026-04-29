@@ -208,11 +208,13 @@ func ease_in_out(ratio: float, power: float) -> float:
 
 
 var arrow_serve_angle: float = 0.0 # (Used in animations for the arrow to point in the serve direction.)
+var generic_anim_ball_start_pos: Vector2 = Vector2()
+var generic_anim_lpad_start_pos: Vector2 = Vector2()
+var generic_anim_rpad_start_pos: Vector2 = Vector2()
 
-# Constants, variables and code related to the 'first serve' that occurs when you start playing:
 var first_serve_start_time: int = Time.get_ticks_msec()
 func checkdo_first_serve():
-	# First serve part 1 (plays up until when the ball starts moving):
+	# First serve part 1 (plays up until regular gameplay resumes):
 	var playthrough: float = proportion_from_range(
 		Time.get_ticks_msec(), first_serve_start_time, first_serve_start_time + FIRST_SERVE_P1_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
@@ -222,7 +224,7 @@ func checkdo_first_serve():
 	if first_serve_p1_to_conclude:
 		first_serve_p1_to_conclude = false
 		handle_first_serve_p1_conclusion()
-	# First serve part 2 (plays after the ball starts moving):
+	# First serve part 2 (plays after regular gameplay resumes):
 	playthrough = proportion_from_range(
 		Time.get_ticks_msec(), 
 		first_serve_start_time + FIRST_SERVE_P1_DURATION, 
@@ -331,7 +333,7 @@ var winloss_reserve_start_time: int = -9999999
 func checkdo_winloss_reserve():
 	if not winloss_reserve_p1_to_conclude:
 		checkdo_winloss_condition()
-	# Winloss reserve part 1 (plays up until when the ball starts moving):
+	# Winloss reserve part 1 (plays up until regular gameplay resumes):
 	var playthrough: float = proportion_from_range(Time.get_ticks_msec(), 
 		winloss_reserve_start_time, 
 		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION)
@@ -342,7 +344,7 @@ func checkdo_winloss_reserve():
 	if winloss_reserve_p1_to_conclude:
 		winloss_reserve_p1_to_conclude = false
 		handle_winloss_reserve_p1_conclusion()
-	# Winloss reserve part 2 (plays after the ball starts moving):
+	# Winloss reserve part 2 (plays after regular gameplay resumes):
 	playthrough = proportion_from_range(Time.get_ticks_msec(), 
 		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION, 
 		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION + WINLOSS_RESERVE_P2_DURATION)
@@ -354,9 +356,6 @@ func checkdo_winloss_reserve():
 		winloss_reserve_p2_to_conclude = false
 		handle_winloss_reserve_p2_conclusion()
 
-var winloss_reserve_ball_start_pos: Vector2 = Vector2()
-var winloss_reserve_lpad_start_pos: Vector2 = Vector2()
-var winloss_reserve_rpad_start_pos: Vector2 = Vector2()
 func checkdo_winloss_condition():
 	# Check whether the ball is significantly past the left/right paddle:
 	const SECONDS_OFFSCREEN_BEFORE_RESERVE: float = 0.25
@@ -370,9 +369,9 @@ func checkdo_winloss_condition():
 		Globals.plr1_score += 1; Globals.plr1_streak += 1; Globals.plr2_streak = 0;
 	update_scores_text()
 	# Update other variables in preparation for the winloss animations:
-	winloss_reserve_ball_start_pos = %Ball.position
-	winloss_reserve_lpad_start_pos = %LeftPaddle.position
-	winloss_reserve_rpad_start_pos = %RightPaddle.position
+	generic_anim_ball_start_pos = %Ball.position
+	generic_anim_lpad_start_pos = %LeftPaddle.position
+	generic_anim_rpad_start_pos = %RightPaddle.position
 	reset_balltrail()
 	winloss_reserve_start_time = Time.get_ticks_msec()
 
@@ -427,9 +426,9 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	const PADS_SLIDE_START: float = 0.0
 	const PADS_SLIDE_END: float = 0.1
 	weight = ease_in_out(clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0), 2.0)
-	%LeftPaddle.position = ((winloss_reserve_lpad_start_pos * (1.0-weight)) + 
+	%LeftPaddle.position = ((generic_anim_lpad_start_pos * (1.0-weight)) + 
 		(Vector2(120, Globals.GAME_SIZE.y / 2.0) * weight))
-	%RightPaddle.position = ((winloss_reserve_rpad_start_pos * (1.0-weight)) + 
+	%RightPaddle.position = ((generic_anim_rpad_start_pos * (1.0-weight)) + 
 		(Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0) * weight))
 	# Paddle character animations:
 	if (playthrough > REF_COUNT_START):
@@ -466,7 +465,7 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	const BALL_RETURN_START: float = 0.3
 	const BALL_RETURN_END: float = ARROWS_FADEIN_START
 	weight = ease_out(clampf(proportion_from_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
-	%Ball.position = ((winloss_reserve_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
+	%Ball.position = ((generic_anim_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
 	# Use ball trail:
 	balltrail_positions.append(%Ball.position)
 	balltrail_times.append(Time.get_ticks_msec())
@@ -511,22 +510,10 @@ func handle_winloss_reserve_p2_conclusion():
 	reset_referee()
 	reset_arrow_pointers()
 
-
-
-func detect_foul_ball_state() -> bool:
-	if (first_serve_p1_to_conclude or 
-	winloss_reserve_p1_to_conclude or
-	foul_ball_reserve_p1_to_conclude):
-		return false
-	return (
-		#(ball_velocity.x < (Globals.ball_min_speed / 2.0)) or 
-		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.95))
-	)
-
 var foul_ball_inspect_start_time: int = -9999999
 var foul_ball_reserve_start_time: int = -9999999
 func checkdo_foul_ball():
-	# Foul ball reserve part 1:
+	# Foul ball reserve part 1 (plays up until regular gameplay resumes):
 	var playthrough: float = proportion_from_range(Time.get_ticks_msec(),
 		foul_ball_reserve_start_time,
 		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION)
@@ -537,7 +524,7 @@ func checkdo_foul_ball():
 	if foul_ball_reserve_p1_to_conclude:
 		foul_ball_reserve_p1_to_conclude = false
 		handle_foul_ball_reserve_p1_conclusion()
-	# Foul ball reserve part 2:
+	# Foul ball reserve part 2 (plays after regular gameplay resumes):
 	playthrough = proportion_from_range(Time.get_ticks_msec(),
 		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION,
 		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION + FOUL_BALL_RESERVE_P2_DURATION)
@@ -549,8 +536,9 @@ func checkdo_foul_ball():
 		foul_ball_reserve_p2_to_conclude = false
 		handle_foul_ball_reserve_p2_conclusion()
 	# Foul ball initiation check:
-	if not foul_ball_suspicion_to_conclude:
-		checkdo_foul_ball_suspicion_initiation()
+	if not (foul_ball_suspicion_to_conclude or foul_ball_nevermind_to_conclude):
+		if detect_foul_ball():
+			foul_ball_inspect_start_time = Time.get_ticks_msec()
 	# Foul ball inspect part 1:
 	playthrough = proportion_from_range(Time.get_ticks_msec(),
 		foul_ball_inspect_start_time,
@@ -574,16 +562,20 @@ func checkdo_foul_ball():
 		foul_ball_nevermind_to_conclude = false
 		handle_foul_ball_nevermind_conclusion()
 
-func checkdo_foul_ball_suspicion_initiation():
-	pass
+func detect_foul_ball() -> bool:
+	if (first_serve_p1_to_conclude or 
+	winloss_reserve_p1_to_conclude or
+	foul_ball_reserve_p1_to_conclude):
+		return false
+	return (
+		#(ball_velocity.x < (Globals.ball_min_speed / 2.0)) or 
+		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.95))
+	)
 
 const FOUL_BALL_SUSPICION_DURATION: int = 1000
 func handle_foul_ball_suspicion_animation(playthrough: float):
 	pass
 
-var foul_ball_reserve_ball_start_pos: Vector2 = Vector2()
-var foul_ball_reserve_lpad_start_pos: Vector2 = Vector2()
-var foul_ball_reserve_rpad_start_pos: Vector2 = Vector2()
 var foul_ball_suspicion_to_conclude: bool = false
 func handle_foul_ball_suspicion_conclusion():
 	pass
