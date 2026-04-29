@@ -27,6 +27,9 @@ func _process(delta: float):
 	if foul_ball_reserve_p1_to_conclude:
 		return
 	
+	if Input.is_action_just_pressed("TEMP_TEST_FOUL"):
+		ball_velocity = Vector2(0.0, ball_velocity.length())
+	
 	# Regular gameplay functionality:
 	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
 	handle_paddle_cpu(true, Globals.plr2_cpu_mode)
@@ -524,7 +527,7 @@ func handle_winloss_reserve_p2_conclusion():
 	reset_referee()
 	reset_arrow_pointers()
 
-var foul_ball_inspect_start_time: int = 8000 # !!! temp' not far negative for ease of testing purposes
+var foul_ball_inspect_start_time: int = -9999999
 var foul_ball_reserve_start_time: int = -9999999
 func checkdo_foul_ball():
 	# Foul ball reserve part 1 (plays up until regular gameplay resumes):
@@ -619,25 +622,47 @@ func handle_foul_ball_suspicion_conclusion():
 
 const FOUL_BALL_NEVERMIND_DURATION: int = 500
 func handle_foul_ball_nevermind_animation(playthrough: float):
-	%Referee.position.y = Globals.GAME_SIZE.y + (-36.0 + (180.0 * 
-		clampf(proportion_from_range(playthrough, 0.0, 1.0), 0.0, 1.0)))
+	%Referee.position.y = Globals.GAME_SIZE.y + -36.0 + (180.0 * 
+		clampf(proportion_from_range(playthrough, 0.0, 1.0), 0.0, 1.0))
 
 var foul_ball_nevermind_to_conclude: bool = false
 func handle_foul_ball_nevermind_conclusion():
 	reset_referee()
 
-const FOUL_BALL_RESERVE_P1_DURATION: int = 1000
+const FOUL_BALL_RESERVE_P1_DURATION: int = 6000
+var foul_ball_guilt_is_plr2: bool = false
 func handle_foul_ball_reserve_p1_animation(playthrough: float):
-	pass
-	print("ANIMATION")
+	const REF_RISE_START: float = 0.0
+	const REF_RISE_END: float = 0.1
+	%Referee.position.y = Globals.GAME_SIZE.y + -36.0 - (108.0 * 
+		clampf(proportion_from_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0))
+	const REF_FOUL_GESTURE_START: float = REF_RISE_START
+	const REF_FOUL_GESTURE_END: float = 0.2
+	const REF_SERVE_GESTURE_START: float = 0.8
+	const REF_SERVE_GESTURE_END: float = 1.0
+	if is_in_range_f(playthrough, REF_FOUL_GESTURE_START, REF_FOUL_GESTURE_END):
+		%Referee.scale.x = (-1.0 if foul_ball_guilt_is_plr2 else 1.0)
+		%Referee.play("foulball_gesture")
+	elif is_in_range_f(playthrough, REF_SERVE_GESTURE_START, REF_SERVE_GESTURE_END):
+		%Referee.scale.x = (1.0 if foul_ball_guilt_is_plr2 else -1.0)
+		%Referee.play("serve_gesture")
+	else:
+		%Referee.scale.x = 1.0
+		%Referee.play("idle")
+	
+	
+	
+	
 
 var foul_ball_reserve_p1_to_conclude: bool = false
 func handle_foul_ball_reserve_p1_conclusion():
 	pass
 
-const FOUL_BALL_RESERVE_P2_DURATION: int = 1000
+const FOUL_BALL_RESERVE_P2_DURATION: int = 750
 func handle_foul_ball_reserve_p2_animation(playthrough: float):
-	pass
+	# !!! temp just descends, remember to add serve point stuff.
+	%Referee.position.y = Globals.GAME_SIZE.y - (144.0 - (288.0 * 
+		clampf(proportion_from_range(playthrough, 0.0, 1.0), 0.0, 1.0)))
 
 var foul_ball_reserve_p2_to_conclude: bool = false
 func handle_foul_ball_reserve_p2_conclusion():
@@ -1036,22 +1061,26 @@ func handle_ball_collision_movement(delta: float):
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
 					ball_velocity = calc_paddlehit_bounce(ball_curr_position, false)
+					foul_ball_guilt_is_plr2 = false
 				elif collider == %LeftPaddle/CharCollider:
 					ballshapecast_current_exceptions.append(%LeftPaddle/CharCollider)
 					%BallShapeCast.add_exception(%LeftPaddle/CharCollider)
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
 					ball_velocity = calc_charthrow(ball_velocity, false)
+					foul_ball_guilt_is_plr2 = false
 				elif collider == %RightPaddle/PadCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/PadCollider, %RightPaddle/PadCollider)
 					ball_velocity = calc_paddlehit_bounce(ball_curr_position, true)
+					foul_ball_guilt_is_plr2 = true
 				elif collider == %RightPaddle/CharCollider:
 					ballshapecast_current_exceptions.append(%RightPaddle/CharCollider)
 					%BallShapeCast.add_exception(%RightPaddle/CharCollider)
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/PadCollider, %RightPaddle/PadCollider)
 					ball_velocity = calc_charthrow(ball_velocity, true)
+					foul_ball_guilt_is_plr2 = true
 				elif collider == %CeilingCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%FloorCollider, %CeilingCollider)
