@@ -1166,7 +1166,7 @@ func _on_resume_button_pressed():
 	initiate_unpause()
 
 func _on_restart_button_pressed():
-	pass # Replace with function body.
+	get_tree().reload_current_scene()
 
 func _on_settings_button_pressed():
 	pass # Replace with function body.
