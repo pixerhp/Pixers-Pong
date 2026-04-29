@@ -557,11 +557,11 @@ func checkdo_foul_ball():
 	playthrough = proportion_from_range(Time.get_ticks_msec(),
 		foul_ball_inspect_start_time + FOUL_BALL_SUSPICION_DURATION,
 		foul_ball_inspect_start_time + FOUL_BALL_SUSPICION_DURATION + FOUL_BALL_NEVERMIND_DURATION)
-	if is_in_range_f(playthrough, 0.0, 1.0):
+	if is_in_range_f(playthrough, 0.0, 1.0) or foul_ball_reserve_p1_to_conclude:
 		foul_ball_nevermind_to_conclude = true
 		handle_foul_ball_nevermind_animation(playthrough)
 		return
-	if foul_ball_nevermind_to_conclude:
+	if foul_ball_nevermind_to_conclude and not foul_ball_reserve_p1_to_conclude:
 		foul_ball_nevermind_to_conclude = false
 		handle_foul_ball_nevermind_conclusion()
 
@@ -572,7 +572,7 @@ func detect_foul_ball() -> bool:
 		return false
 	return (
 		#(ball_velocity.x < (Globals.ball_min_speed / 2.0)) or 
-		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.95))
+		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.925))
 	)
 
 const FOUL_BALL_SUSPICION_DURATION: int = 2000
@@ -591,20 +591,35 @@ func handle_foul_ball_suspicion_animation(playthrough: float):
 
 var foul_ball_suspicion_to_conclude: bool = false
 func handle_foul_ball_suspicion_conclusion():
-	pass
-	# !!! [remember to check/proceed into the reserve or nevermind animation from here]
+	%EllipsisDot1.visible = false
+	%EllipsisDot2.visible = false
+	%EllipsisDot3.visible = false
+	reset_referee()
+	if detect_foul_ball():
+		foul_ball_reserve_p1_to_conclude = true
+		foul_ball_inspect_start_time = -999999
+		foul_ball_reserve_start_time = Time.get_ticks_msec()
+		generic_anim_ball_start_pos = %Ball.position
+		generic_anim_lpad_start_pos = %LeftPaddle.position
+		generic_anim_rpad_start_pos = %RightPaddle.position
+	else:
+		foul_ball_reserve_p1_to_conclude = false
+		foul_ball_reserve_start_time = -999999
+	
 
-const FOUL_BALL_NEVERMIND_DURATION: int = 750
+const FOUL_BALL_NEVERMIND_DURATION: int = 500
 func handle_foul_ball_nevermind_animation(playthrough: float):
-	pass
+	%Referee.position.y = Globals.GAME_SIZE.y + (-36.0 + (180.0 * 
+		clampf(proportion_from_range(playthrough, 0.0, 1.0), 0.0, 1.0)))
 
 var foul_ball_nevermind_to_conclude: bool = false
 func handle_foul_ball_nevermind_conclusion():
-	pass
+	reset_referee()
 
 const FOUL_BALL_RESERVE_P1_DURATION: int = 1000
 func handle_foul_ball_reserve_p1_animation(playthrough: float):
 	pass
+	print("ANIMATION")
 
 var foul_ball_reserve_p1_to_conclude: bool = false
 func handle_foul_ball_reserve_p1_conclusion():
