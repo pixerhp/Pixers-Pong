@@ -1,5 +1,9 @@
 extends Node
 
+################################################################
+## Primary functions & Pausing:
+################################################################
+
 func _ready():
 	reset_all_gameobjects()
 	update_scores_text()
@@ -71,6 +75,10 @@ func initiate_unpause():
 	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
+
+################################################################
+## Object resetting/updating:
+################################################################
 
 func set_court_size(new_court_size: Vector2 = Vector2(
 	ProjectSettings.get_setting("display/window/size/viewport_width"),
@@ -192,6 +200,10 @@ func update_scores_text():
 	if Globals.plr2_streak == 0: %RightScoreStreak/%StreakContainer/%StreakLabel.text = ""
 	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr2_streak)
 
+################################################################
+## Animations related:
+################################################################
+
 # Animations convenience functions:
 func is_in_range_i(value: int, range_min: int, range_max: int) -> bool:
 	return ((range_min <= value) and (value <= range_max))
@@ -209,11 +221,11 @@ func ease_in_out(ratio: float, power: float) -> float:
 		if (ratio < 0.5) else
 		(1 - (pow((-2.0 * ratio) + 2, power) / 2.0)))
 
-
-var arrow_serve_angle: float = 0.0 # (Used in animations for the arrow to point in the serve direction.)
-var generic_anim_ball_start_pos: Vector2 = Vector2()
-var generic_anim_lpad_start_pos: Vector2 = Vector2()
-var generic_anim_rpad_start_pos: Vector2 = Vector2()
+# (Generic-use animation variables)
+var anim_arrow_serve_angle: float = 0.0
+var anim_ball_start_pos: Vector2 = Vector2()
+var anim_lpad_start_pos: Vector2 = Vector2()
+var anim_rpad_start_pos: Vector2 = Vector2()
 
 var first_serve_start_time: int = Time.get_ticks_msec()
 func checkdo_first_serve():
@@ -300,7 +312,7 @@ func handle_first_serve_p1_conclusion():
 	reset_arrow_pointers()
 	reset_ball()
 	ball_velocity = random_serve_velocity()
-	arrow_serve_angle = ball_velocity.angle()
+	anim_arrow_serve_angle = ball_velocity.angle()
 
 const FIRST_SERVE_P2_DURATION: int = 1500
 func handle_first_serve_p2_animation(playthrough: float):
@@ -324,13 +336,12 @@ func handle_first_serve_p2_animation(playthrough: float):
 	%PrimaryArrowPointer.visible = true
 	%PrimaryArrowPointer.modulate = Color(1.0,1.0,1.0, 
 		(1.0 - clampf(ease_out(proportion_from_range(playthrough, ARROW_FADEOUT_START, ARROW_FADEOUT_END), 0.25), 0.0, 1.0)))
-	%PrimaryArrowPointer/%RotationContainer.rotation = arrow_serve_angle
+	%PrimaryArrowPointer/%RotationContainer.rotation = anim_arrow_serve_angle
 
 var first_serve_p2_to_conclude: bool = false
 func handle_first_serve_p2_conclusion():
 	reset_referee()
 	reset_arrow_pointers()
-
 
 var winloss_reserve_start_time: int = -9999999
 func checkdo_winloss_reserve():
@@ -372,9 +383,9 @@ func checkdo_winloss_condition():
 		Globals.plr1_score += 1; Globals.plr1_streak += 1; Globals.plr2_streak = 0;
 	update_scores_text()
 	# Update other variables in preparation for the winloss animations:
-	generic_anim_ball_start_pos = %Ball.position
-	generic_anim_lpad_start_pos = %LeftPaddle.position
-	generic_anim_rpad_start_pos = %RightPaddle.position
+	anim_ball_start_pos = %Ball.position
+	anim_lpad_start_pos = %LeftPaddle.position
+	anim_rpad_start_pos = %RightPaddle.position
 	reset_balltrail()
 	winloss_reserve_start_time = Time.get_ticks_msec()
 
@@ -429,9 +440,9 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	const PADS_SLIDE_START: float = 0.0
 	const PADS_SLIDE_END: float = 0.1
 	weight = ease_in_out(clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0), 2.0)
-	%LeftPaddle.position = ((generic_anim_lpad_start_pos * (1.0-weight)) + 
+	%LeftPaddle.position = ((anim_lpad_start_pos * (1.0-weight)) + 
 		(Vector2(120, Globals.GAME_SIZE.y / 2.0) * weight))
-	%RightPaddle.position = ((generic_anim_rpad_start_pos * (1.0-weight)) + 
+	%RightPaddle.position = ((anim_rpad_start_pos * (1.0-weight)) + 
 		(Vector2(Globals.GAME_SIZE.x - 120, Globals.GAME_SIZE.y / 2.0) * weight))
 	# Paddle character animations:
 	if (playthrough > REF_COUNT_START):
@@ -468,7 +479,7 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	const BALL_RETURN_START: float = 0.3
 	const BALL_RETURN_END: float = ARROWS_FADEIN_START
 	weight = ease_out(clampf(proportion_from_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
-	%Ball.position = ((generic_anim_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
+	%Ball.position = ((anim_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
 	# Use ball trail:
 	balltrail_positions.append(%Ball.position)
 	balltrail_times.append(Time.get_ticks_msec())
@@ -482,7 +493,7 @@ func handle_winloss_reserve_p1_conclusion():
 	reset_balltrail()
 	reset_ball()
 	ball_velocity = random_serve_velocity()
-	arrow_serve_angle = ball_velocity.angle()
+	anim_arrow_serve_angle = ball_velocity.angle()
 
 const WINLOSS_RESERVE_P2_DURATION: int = 1250
 func handle_winloss_reserve_p2_animation(playthrough: float):
@@ -506,7 +517,7 @@ func handle_winloss_reserve_p2_animation(playthrough: float):
 	%PrimaryArrowPointer.visible = true
 	%PrimaryArrowPointer.modulate = Color(1.0,1.0,1.0, 
 		(1.0 - clampf(ease_out(proportion_from_range(playthrough, ARROW_FADEOUT_START, ARROW_FADEOUT_END), 0.25), 0.0, 1.0)))
-	%PrimaryArrowPointer/%RotationContainer.rotation = arrow_serve_angle
+	%PrimaryArrowPointer/%RotationContainer.rotation = anim_arrow_serve_angle
 
 var winloss_reserve_p2_to_conclude: bool = false
 func handle_winloss_reserve_p2_conclusion():
@@ -599,13 +610,12 @@ func handle_foul_ball_suspicion_conclusion():
 		foul_ball_reserve_p1_to_conclude = true
 		foul_ball_inspect_start_time = -999999
 		foul_ball_reserve_start_time = Time.get_ticks_msec()
-		generic_anim_ball_start_pos = %Ball.position
-		generic_anim_lpad_start_pos = %LeftPaddle.position
-		generic_anim_rpad_start_pos = %RightPaddle.position
+		anim_ball_start_pos = %Ball.position
+		anim_lpad_start_pos = %LeftPaddle.position
+		anim_rpad_start_pos = %RightPaddle.position
 	else:
 		foul_ball_reserve_p1_to_conclude = false
 		foul_ball_reserve_start_time = -999999
-	
 
 const FOUL_BALL_NEVERMIND_DURATION: int = 500
 func handle_foul_ball_nevermind_animation(playthrough: float):
@@ -633,7 +643,9 @@ var foul_ball_reserve_p2_to_conclude: bool = false
 func handle_foul_ball_reserve_p2_conclusion():
 	pass
 
-
+################################################################
+## Gameplay functionality & CPU bot:
+################################################################
 
 func random_serve_velocity() -> Vector2:
 	return Vector2(250.0*(((randi()%2)*2)-1), 0.0).rotated(deg_to_rad(randf_range(-22.5, 22.5)))
@@ -644,18 +656,15 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 	var paddle_noderef: Node2D = %RightPaddle if is_plr2 else %LeftPaddle
 	var act_prefix: String = "plr2_" if is_plr2 else "plr1_"
 	var alt_act_prefix: String = "plr1_" if is_plr2 else "plr2_"
-	
 	match ai_mode:
 		Globals.CPU_MODES.OFF, Globals.CPU_MODES.OFF_BUT_YOURE_A_ROBOT:
 			return
-		
 		Globals.CPU_MODES.COPYCAT:
 			set_input(act_prefix + "up", Input.is_action_pressed(alt_act_prefix + "up"))
 			set_input(act_prefix + "down", Input.is_action_pressed(alt_act_prefix + "down"))
 			set_input(act_prefix + "slow", Input.is_action_pressed(alt_act_prefix + "slow"))
 			set_input(act_prefix + "bump_left", Input.is_action_pressed(alt_act_prefix + "bump_right"))
 			set_input(act_prefix + "bump_right", Input.is_action_pressed(alt_act_prefix + "bump_left"))
-		
 		Globals.CPU_MODES.RANDOM_MASH:
 			const RANDOM_MOVEMENT_DURATION: int = 32
 			var rng = RandomNumberGenerator.new()
@@ -683,7 +692,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 			else:
 				set_input(act_prefix + "bump_left", false)
 				set_input(act_prefix + "bump_right", false)
-		
 		Globals.CPU_MODES.ZIGZAGGER:
 			if paddle_noderef.get_meta("velocity") == 0.0:
 				if paddle_noderef.position.y < Globals.GAME_SIZE.y / 2.0:
@@ -692,7 +700,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 				else:
 					set_input(act_prefix + "up", true)
 					set_input(act_prefix + "down", false)
-		
 		Globals.CPU_MODES.CHASER:
 			var vert_diff: float = %Ball.position.y - paddle_noderef.position.y
 			if (
@@ -708,13 +715,11 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 			elif (vert_diff > (0.5 * PAD_Y_TOPLIMIT)):
 				set_input(act_prefix + "up", false)
 				set_input(act_prefix + "down", (paddle_noderef.position.y < PAD_Y_BOTTOMLIMIT))
-		
 		Globals.CPU_MODES.CONVERGER:
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
 			set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 			set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
-		
 		Globals.CPU_MODES.PATIENT_CONVERGER:
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
@@ -727,7 +732,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 			else: # Else move to the predicted ball location:
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
-		
 		Globals.CPU_MODES.BOUNCE_PREDICTOR:
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
@@ -741,7 +745,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 			else:
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
-		
 		Globals.CPU_MODES.DOUBLE_PREDICTOR:
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
@@ -763,7 +766,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 			else:
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
-		
 		Globals.CPU_MODES.DEEP_PREDICTOR:
 			var predicted_ball_y: float = %Ball.position.y + ((ball_velocity.y / ball_velocity.x) * (
 				(%RightPaddle.position.x if (ball_velocity.x > 0.0) else %LeftPaddle.position.x) - %Ball.position.x))
@@ -785,10 +787,8 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 			else:
 				set_input(act_prefix + "up", paddle_noderef.position.y > predicted_ball_y + (PAD_Y_TOPLIMIT * 0.5))
 				set_input(act_prefix + "down", paddle_noderef.position.y < predicted_ball_y - (PAD_Y_TOPLIMIT * 0.5))
-		
 		Globals.CPU_MODES.MASTER:
 			var PAD_HIT_TOL: float = 8.0 + BALL_Y_TOPLIMIT
-			
 			# Dive backwards to the ball if it's behind the paddle:
 			if ((%Ball.position.x > (%RightPaddle.position.x + PAD_HIT_TOL)) if is_plr2 else (%Ball.position.x < (%LeftPaddle.position.x - PAD_HIT_TOL))):
 				set_input(act_prefix + "up", (paddle_noderef.position.y > %Ball.position.y))
@@ -798,7 +798,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 				return
 			else:
 				set_input(act_prefix + ("bump_right" if is_plr2 else "bump_left"), false)
-			
 			var WALL_HIT_TOL: float = clamp(-2.5 * log(0.004 * abs(ball_velocity.y)), 0, 25) # (Based on weak empirically determined data.)
 			var ball_x_distance_to_hit: float = (
 				(
@@ -822,10 +821,8 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 					predicted_ball_y = (BALL_Y_BOTTOMLIMIT - WALL_HIT_TOL) - (predicted_ball_y - (BALL_Y_BOTTOMLIMIT - WALL_HIT_TOL))
 				else:
 					break
-			
 			var targ_y: float = predicted_ball_y
 			set_input(act_prefix + ("bump_left" if is_plr2 else "bump_right"), false)
-			
 			# Random trajectory angling movement:
 			if ((ball_velocity.x > 0.0) if (is_plr2) else (ball_velocity.x < 0.0)):
 				const DECISION_DURATION: int = 628
@@ -844,7 +841,6 @@ func handle_paddle_cpu(is_plr2: bool, ai_mode):
 					(abs(ball_velocity.x) < (1750.0 * 0.43922 * ((%RightPaddle.position.x - %LeftPaddle.position.x) / (PAD_Y_BOTTOMLIMIT - PAD_Y_TOPLIMIT))))
 				):
 					set_input(act_prefix + ("bump_left" if is_plr2 else "bump_right"), true)
-			
 			set_input(act_prefix + "up", 
 				(paddle_noderef.position.y > targ_y) and 
 				(not (abs(paddle_noderef.position.y - targ_y) < (PAD_Y_TOPLIMIT * 0.05))) and 
@@ -1161,6 +1157,9 @@ func update_ball_trail():
 	# Update ball-trail node's internal array.
 	%BallTrail.points = balltrail_positions
 
+################################################################
+## Pause menu:
+################################################################
 
 func _on_resume_button_pressed():
 	initiate_unpause()
