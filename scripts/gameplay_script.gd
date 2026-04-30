@@ -24,11 +24,9 @@ func _process(delta: float):
 	if winloss_reserve_p1_to_conclude:
 		return
 	checkdo_foul_ball()
-	if foul_ball_reserve_p1_to_conclude:
-		return
 	
 	if Input.is_action_just_pressed("TEMP_TEST_FOUL"):
-		ball_velocity = Vector2(0.0, ball_velocity.length())
+		foul_ball_reserve_start_time = Time.get_ticks_msec()
 	
 	# Regular gameplay functionality:
 	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
@@ -37,8 +35,9 @@ func _process(delta: float):
 	if Globals.plr2_force_slow: set_input("plr2_slow", true)
 	handle_paddle_controls(false, delta)
 	handle_paddle_controls(true, delta)
-	handle_ball_collision_movement(delta)
-	update_ball_trail()
+	if not foul_ball_reserve_p1_to_conclude:
+		handle_ball_collision_movement(delta)
+		update_ball_trail()
 	handle_paddle_sidebump_animation(false)
 	handle_paddle_sidebump_animation(true)
 	handle_paddle_knockback_anim(false)
@@ -629,29 +628,41 @@ var foul_ball_nevermind_to_conclude: bool = false
 func handle_foul_ball_nevermind_conclusion():
 	reset_referee()
 
-const FOUL_BALL_RESERVE_P1_DURATION: int = 6000
+const FOUL_BALL_RESERVE_P1_DURATION: int = 5000
 var foul_ball_guilt_is_plr2: bool = false
 func handle_foul_ball_reserve_p1_animation(playthrough: float):
+	# Referee:
 	const REF_RISE_START: float = 0.0
 	const REF_RISE_END: float = 0.1
 	%Referee.position.y = Globals.GAME_SIZE.y + -36.0 - (108.0 * 
 		clampf(proportion_from_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0))
 	const REF_FOUL_GESTURE_START: float = REF_RISE_START
 	const REF_FOUL_GESTURE_END: float = 0.2
-	const REF_SERVE_GESTURE_START: float = 0.8
-	const REF_SERVE_GESTURE_END: float = 1.0
+	const REF_COUNT_START: float = 0.6
+	const REF_COUNT_END: float = 1.0
+	const REF_COUNT_MID1: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 3.0)
+	const REF_COUNT_MID2: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 1.5)
 	if is_in_range_f(playthrough, REF_FOUL_GESTURE_START, REF_FOUL_GESTURE_END):
-		%Referee.scale.x = (-1.0 if foul_ball_guilt_is_plr2 else 1.0)
-		%Referee.play("foulball_gesture")
-	elif is_in_range_f(playthrough, REF_SERVE_GESTURE_START, REF_SERVE_GESTURE_END):
 		%Referee.scale.x = (1.0 if foul_ball_guilt_is_plr2 else -1.0)
-		%Referee.play("serve_gesture")
+		%Referee.play("foulball_gesture")
 	else:
 		%Referee.scale.x = 1.0
-		%Referee.play("idle")
-	
-	
-	
+		if is_in_range_f(playthrough, REF_FOUL_GESTURE_END, REF_COUNT_START):
+			%Referee.play("idle")
+		elif playthrough < REF_COUNT_MID1:
+			%Referee.play("count_3")
+		elif playthrough < REF_COUNT_MID2:
+			%Referee.play("count_2")
+		elif playthrough < REF_COUNT_END:
+			%Referee.play("count_1")
+	# Arrow pointer:
+	const ARROW_FADEIN_START: float = REF_FOUL_GESTURE_END
+	const ARROW_FADEIN_END: float = REF_FOUL_GESTURE_END + 0.1
+	%PrimaryArrowPointer.visible = playthrough > ARROW_FADEIN_START
+	%PrimaryArrowPointer/%QuestionSprite.visible = false
+	%PrimaryArrowPointer.modulate = Color(1.0, 1.0, 1.0, 
+		clampf(proportion_from_range(playthrough, ARROW_FADEIN_START, ARROW_FADEIN_END), 0.0, 1.0))
+	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (180.0 if foul_ball_guilt_is_plr2 else 0.0)
 	
 
 var foul_ball_reserve_p1_to_conclude: bool = false
