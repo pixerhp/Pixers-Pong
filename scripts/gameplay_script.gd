@@ -4,12 +4,14 @@ extends Node
 ## Primary functions & Pausing:
 ################################################################
 
+const BAD_TIME: int = -99999999999
+
 func _ready():
 	reset_all_gameobjects()
 	update_scores_text()
 	reset_cpu_inputs(false)
 	reset_cpu_inputs(true)
-	first_serve_start_time = Time.get_ticks_msec()
+	firstserve_start_time = Time.get_ticks_msec()
 
 func _process(delta: float):
 	checkdo_toggle_pause()
@@ -17,16 +19,16 @@ func _process(delta: float):
 		return
 	
 	# Handle first serve, win/loss reserving, foul ball:
-	checkdo_first_serve()
-	if first_serve_p1_to_conclude:
+	handle_firstserve()
+	if firstserve_anim_to_conclude:
 		return
-	checkdo_winloss_reserve()
-	if winloss_reserve_p1_to_conclude:
+	handle_winloss()
+	if winloss_anim_to_conclude:
 		return
-	checkdo_foul_ball()
+	handle_foulball()
 	
 	if Input.is_action_just_pressed("TEMP_TEST_FOUL"):
-		foul_ball_inspect_start_time = Time.get_ticks_msec()
+		foulball_suspicion_start_time = Time.get_ticks_msec()
 		ball_velocity = Vector2(0,0)
 	
 	# Regular gameplay functionality:
@@ -36,7 +38,7 @@ func _process(delta: float):
 	if Globals.plr2_force_slow: set_input("plr2_slow", true)
 	handle_paddle_controls(false, delta)
 	handle_paddle_controls(true, delta)
-	if not foul_ball_reserve_p1_to_conclude:
+	if not foulball_reserve_anim_to_conclude:
 		handle_ball_collision_movement(delta)
 		update_ball_trail()
 	handle_paddle_sidebump_animation(false)
@@ -73,8 +75,8 @@ func initiate_unpause():
 	%Referee.play()
 	for i in range(balltrail_times.size()):
 		balltrail_times[i] += paused_duration
-	first_serve_start_time += paused_duration
-	winloss_reserve_start_time += paused_duration
+	firstserve_start_time += paused_duration
+	winloss_start_time += paused_duration
 	total_paused_time += paused_duration
 	is_game_paused = false
 	%PauseMenuContainer.visible = false
@@ -103,7 +105,7 @@ func reset_all_gameobjects():
 	reset_ball()
 	reset_balltrail()
 	reset_referee()
-	reset_arrow_pointers()
+	reset_arrow_pointers_and_line()
 
 func reset_framing():
 	get_window().set_content_scale_size(Globals.GAME_SIZE)
@@ -161,7 +163,7 @@ func reset_paddles():
 		("plr_" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_") + "idle")
 	%LeftPaddle.set_meta("velocity", 0.0)
 	%RightPaddle.set_meta("sidebump_strength", %LeftPaddle.get_meta("velocity"))
-	%LeftPaddle.set_meta("sidebump_time", -99999999)
+	%LeftPaddle.set_meta("sidebump_time", BAD_TIME)
 	%RightPaddle.set_meta("sidebump_time", %LeftPaddle.get_meta("sidebump_time"))
 	%LeftPaddle.set_meta("sidebump_strength", 0.0)
 	%RightPaddle.set_meta("sidebump_strength", %LeftPaddle.get_meta("sidebump_strength"))
@@ -184,7 +186,7 @@ func reset_referee():
 	%EllipsisDot1.visible = false
 	%EllipsisDot2.visible = false
 	%EllipsisDot3.visible = false
-func reset_arrow_pointers():
+func reset_arrow_pointers_and_line():
 	%PrimaryArrowPointer.visible = false
 	%PrimaryArrowPointer/%QuestionSprite.visible = false
 	%PrimaryArrowPointer.position = Globals.GAME_SIZE / 2.0
@@ -210,11 +212,9 @@ func update_scores_text():
 ################################################################
 
 # Animations convenience functions:
-func is_in_range_i(value: int, range_min: int, range_max: int) -> bool:
-	return ((range_min <= value) and (value <= range_max))
 func is_in_range_f(value: float, range_min: float, range_max: float) -> bool:
 	return ((range_min <= value) and (value <= range_max))
-func proportion_from_range(current: float, range_start: float, range_end: float) -> float:
+func prop_through_range(current: float, range_start: float, range_end: float) -> float:
 	return ((current - range_start) / (range_end - range_start))
 func ease_out_back(ratio: float, c: float) -> float:
 	return 1 + ((c + 1) * pow(ratio - 1, 3)) + (c *  pow(ratio - 1, 2))
@@ -226,44 +226,45 @@ func ease_in_out(ratio: float, power: float) -> float:
 		if (ratio < 0.5) else
 		(1 - (pow((-2.0 * ratio) + 2, power) / 2.0)))
 
-# (Generic-use animation variables)
+# Generic-use animation variables:
 var anim_arrow_serve_angle: float = 0.0
 var anim_ball_start_pos: Vector2 = Vector2()
 var anim_lpad_start_pos: Vector2 = Vector2()
 var anim_rpad_start_pos: Vector2 = Vector2()
 
-var first_serve_start_time: int = Time.get_ticks_msec()
-func checkdo_first_serve():
-	# First serve part 1 (plays up until regular gameplay resumes):
-	var playthrough: float = proportion_from_range(
-		Time.get_ticks_msec(), first_serve_start_time, first_serve_start_time + FIRST_SERVE_P1_DURATION)
+# The first serve that occurs at the start of gameplay:
+var firstserve_start_time: int = Time.get_ticks_msec()
+func handle_firstserve():
+	# Serving animation:
+	var playthrough: float = prop_through_range(Time.get_ticks_msec(), 
+		firstserve_start_time, 
+		firstserve_start_time + FIRSTSERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		first_serve_p1_to_conclude = true
-		handle_first_serve_p1_animation(playthrough)
+		firstserve_anim_to_conclude = true
+		firstserve_animation(playthrough)
 		return
-	if first_serve_p1_to_conclude:
-		first_serve_p1_to_conclude = false
-		handle_first_serve_p1_conclusion()
-	# First serve part 2 (plays after regular gameplay resumes):
-	playthrough = proportion_from_range(
-		Time.get_ticks_msec(), 
-		first_serve_start_time + FIRST_SERVE_P1_DURATION, 
-		first_serve_start_time + FIRST_SERVE_P1_DURATION + POSTSERVE_ANIM_DURATION)
+	if firstserve_anim_to_conclude:
+		firstserve_anim_to_conclude = false
+		firstserve_anim_conclusion()
+	# Postserve animation:
+	playthrough = prop_through_range(Time.get_ticks_msec(), 
+		firstserve_start_time + FIRSTSERVE_ANIM_DURATION, 
+		firstserve_start_time + FIRSTSERVE_ANIM_DURATION + POSTSERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		postserve_anim_to_conclude = "first_serve"
-		handle_postserve_animation(playthrough)
+		postserve_anim_to_conclude = "firstserve"
+		postserve_animation(playthrough)
 		return
-	if postserve_anim_to_conclude == "first_serve":
+	if postserve_anim_to_conclude == "firstserve":
 		postserve_anim_to_conclude = ""
-		handle_postserve_anim_conclusion()
+		postserve_anim_conclusion()
 
-const FIRST_SERVE_P1_DURATION: int = 5000
-func handle_first_serve_p1_animation(playthrough: float):
+const FIRSTSERVE_ANIM_DURATION: int = 5000
+func firstserve_animation(playthrough: float):
 	# Paddles slide-in animation:
 	const PADS_SLIDEIN_START: float = 0.0
 	const PADS_SLIDEIN_END: float = 0.15
 	%LeftPaddle.position.x = -120.0 + (240.0 * 
-		clampf(proportion_from_range(playthrough, PADS_SLIDEIN_START, PADS_SLIDEIN_END), 0.0, 1.0))
+		clampf(prop_through_range(playthrough, PADS_SLIDEIN_START, PADS_SLIDEIN_END), 0.0, 1.0))
 	%RightPaddle.position.x = Globals.GAME_SIZE.x - %LeftPaddle.position.x
 	# Paddles darkening (to help indicate/imply your inability to move):
 	%LeftPaddle.modulate = Color.GRAY
@@ -272,19 +273,19 @@ func handle_first_serve_p1_animation(playthrough: float):
 	const SCORES_EASEIN_START: float = 0.075
 	const SCORES_EASEIN_END: float = 0.2
 	%LeftScoreStreak.position.y = -70.0 + (140.0 * ease_out_back(clampf(
-		proportion_from_range(playthrough, SCORES_EASEIN_START, SCORES_EASEIN_END), 0.0, 1.0), 1.1))
+		prop_through_range(playthrough, SCORES_EASEIN_START, SCORES_EASEIN_END), 0.0, 1.0), 1.1))
 	%RightScoreStreak.position.y = %LeftScoreStreak.position.y
 	# Referee slide-in animation:
 	const REF_SLIDEIN_START: float = 0.1
 	const REF_SLIDEIN_END: float = 0.2
 	%Referee.position.y = Globals.GAME_SIZE.y + (144.0 - (288.0 * 
-		clampf(proportion_from_range(playthrough, REF_SLIDEIN_START, REF_SLIDEIN_END), 0.0, 1.0)))
+		clampf(prop_through_range(playthrough, REF_SLIDEIN_START, REF_SLIDEIN_END), 0.0, 1.0)))
 	# Referee countdown:
 	const REF_COUNT_START: float = 0.4
 	const REF_COUNT_END: float = 1.0
 	const REF_COUNT_MID1: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 3.0)
 	const REF_COUNT_MID2: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 1.5)
-	if (playthrough < REF_COUNT_START) or (playthrough > REF_COUNT_END): 
+	if (playthrough < REF_COUNT_START): 
 		%Referee.play("idle")
 	elif (playthrough < REF_COUNT_MID1): 
 		%Referee.play("count_3")
@@ -300,7 +301,7 @@ func handle_first_serve_p1_animation(playthrough: float):
 	%PrimaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer.visible
 	%SecondaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer/%QuestionSprite.visible
 	%PrimaryArrowPointer.modulate = Color(1.0, 1.0, 1.0, 
-		clampf(proportion_from_range(playthrough, ARROWS_FADEIN_START, ARROWS_FADEIN_END) * 0.5, 0.0, 0.5))
+		clampf(prop_through_range(playthrough, ARROWS_FADEIN_START, ARROWS_FADEIN_END) * 0.5, 0.0, 0.5))
 	%SecondaryArrowPointer.modulate = %PrimaryArrowPointer.modulate
 	# Arrow pointers movement:
 	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (
@@ -308,70 +309,75 @@ func handle_first_serve_p1_animation(playthrough: float):
 	%SecondaryArrowPointer/%RotationContainer.rotation_degrees = 180 + (
 		(22.5 * sin(float(Time.get_ticks_msec() + 32528437) / 284.83)))
 
-var first_serve_p1_to_conclude: bool = false
-func handle_first_serve_p1_conclusion():
+var firstserve_anim_to_conclude: bool = false
+func firstserve_anim_conclusion():
 	reset_paddles()
 	reset_scores_visuals()
 	reset_ball()
 	ball_velocity = random_serve_velocity()
 	anim_arrow_serve_angle = ball_velocity.angle()
-	foul_ball_guilt_is_plr2 = ball_velocity.x > 0.0
+	foulball_cause_is_plr2 = ball_velocity.x > 0.0
 	postserve_point_towards_plr2 = ball_velocity.x > 0.0
 
-var winloss_reserve_start_time: int = -9999999
-func checkdo_winloss_reserve():
-	if not winloss_reserve_p1_to_conclude:
-		checkdo_winloss_condition()
-	# Winloss reserve part 1 (plays up until regular gameplay resumes):
-	var playthrough: float = proportion_from_range(Time.get_ticks_msec(), 
-		winloss_reserve_start_time, 
-		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION)
+# The reserve that occurs when one player wins against another:
+var winloss_start_time: int = BAD_TIME
+func handle_winloss():
+	# Initiate winloss stuff if a winloss state is reached:
+	if detect_winloss_state():
+		initiate_winloss()
+	# Serving animation:
+	var playthrough: float = prop_through_range(Time.get_ticks_msec(), 
+		winloss_start_time, 
+		winloss_start_time + WINLOSS_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		winloss_reserve_p1_to_conclude = true
-		handle_winloss_reserve_p1_animation(playthrough)
+		winloss_anim_to_conclude = true
+		winloss_animation(playthrough)
 		return
-	if winloss_reserve_p1_to_conclude:
-		winloss_reserve_p1_to_conclude = false
-		handle_winloss_reserve_p1_conclusion()
-	# Winloss reserve part 2 (plays after regular gameplay resumes):
-	playthrough = proportion_from_range(Time.get_ticks_msec(), 
-		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION, 
-		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION + POSTSERVE_ANIM_DURATION)
+	if winloss_anim_to_conclude:
+		winloss_anim_to_conclude = false
+		winloss_anim_conclusion()
+	# Postserve animation:
+	playthrough = prop_through_range(Time.get_ticks_msec(), 
+		winloss_start_time + WINLOSS_ANIM_DURATION, 
+		winloss_start_time + WINLOSS_ANIM_DURATION + POSTSERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
 		postserve_anim_to_conclude = "winloss"
-		handle_postserve_animation(playthrough)
+		postserve_animation(playthrough)
 		return
 	if postserve_anim_to_conclude == "winloss":
 		postserve_anim_to_conclude = ""
-		handle_postserve_anim_conclusion()
+		postserve_anim_conclusion()
 
-func checkdo_winloss_condition():
-	# Check whether the ball is significantly past the left/right paddle:
+func detect_winloss_state() -> bool:
+	if (firstserve_anim_to_conclude or 
+	winloss_anim_to_conclude or
+	foulball_reserve_anim_to_conclude):
+		return false
 	const SECONDS_OFFSCREEN_BEFORE_RESERVE: float = 0.25
 	var edge_clearance: float = BALL_Y_TOPLIMIT + (abs(ball_velocity.x) * SECONDS_OFFSCREEN_BEFORE_RESERVE)
-	if not (abs(%Ball.position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + edge_clearance)):
-		return
+	return abs(%Ball.position.x - (Globals.GAME_SIZE.x / 2.0)) > ((Globals.GAME_SIZE.x / 2.0) + edge_clearance)
+
+func initiate_winloss():
 	# Change player scores/streaks:
 	if (%Ball.position.x < (Globals.GAME_SIZE.x / 2.0)):
 		Globals.plr2_score += 1; Globals.plr2_streak += 1; Globals.plr1_streak = 0;
 	else:
 		Globals.plr1_score += 1; Globals.plr1_streak += 1; Globals.plr2_streak = 0;
 	update_scores_text()
-	# Update other variables in preparation for the winloss animations:
+	# Update other variables in preparation for winloss animations:
 	anim_ball_start_pos = %Ball.position
 	anim_lpad_start_pos = %LeftPaddle.position
 	anim_rpad_start_pos = %RightPaddle.position
 	reset_balltrail()
-	winloss_reserve_start_time = Time.get_ticks_msec()
+	winloss_start_time = Time.get_ticks_msec()
 
-const WINLOSS_RESERVE_P1_DURATION: int = 4500
-func handle_winloss_reserve_p1_animation(playthrough: float):
-	var weight: float
+const WINLOSS_ANIM_DURATION: int = 4500
+func winloss_animation(playthrough: float):
 	# Referee slide-in animation:
 	const REF_SLIDEIN_START: float = 0.0
 	const REF_SLIDEIN_END: float = 0.15
 	%Referee.position.y = Globals.GAME_SIZE.y + (144.0 - (288.0 * 
-		clampf(proportion_from_range(playthrough, REF_SLIDEIN_START, REF_SLIDEIN_END), 0.0, 1.0)))
+		clampf(prop_through_range(playthrough, REF_SLIDEIN_START, REF_SLIDEIN_END), 0.0, 1.0)))
 	# Referee animation:
 	const REF_COUNT_START: float = 0.675
 	const REF_COUNT_END: float = 1.0
@@ -393,10 +399,10 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	const SCORE_FADEIN_END: float = 0.2
 	const SCORE_FADEOUT_START: float = REF_COUNT_START
 	const SCORE_FADEOUT_END: float = REF_COUNT_MID2
-	weight = (
-		(proportion_from_range(playthrough, SCORE_FADEIN_START, SCORE_FADEIN_END)
+	var weight: float = (
+		(prop_through_range(playthrough, SCORE_FADEIN_START, SCORE_FADEIN_END)
 		if (playthrough < SCORE_FADEOUT_START) else
-		(1.0 - proportion_from_range(playthrough, SCORE_FADEOUT_START, SCORE_FADEOUT_END))))
+		(1.0 - prop_through_range(playthrough, SCORE_FADEOUT_START, SCORE_FADEOUT_END))))
 	%LeftScoreStreak.modulate = Color(1.0,1.0,1.0, 0.24 + ((0.6 if (Globals.plr1_streak > 0) else 0.4) * clampf(weight, 0.0, 1.0)))
 	%RightScoreStreak.modulate = Color(1.0,1.0,1.0, 0.24 + ((0.6 if (Globals.plr2_streak > 0) else 0.4) * clampf(weight, 0.0, 1.0)))
 	%LeftScoreStreak.position.y = 70.0 + (55.0 * ease_out(clampf(weight, 0.0, 1.0), 2.0))
@@ -414,7 +420,7 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	# Paddles sliding animation:
 	const PADS_SLIDE_START: float = 0.0
 	const PADS_SLIDE_END: float = 0.1
-	weight = ease_in_out(clampf(proportion_from_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0), 2.0)
+	weight = ease_in_out(clampf(prop_through_range(playthrough, PADS_SLIDE_START, PADS_SLIDE_END), 0.0, 1.0), 2.0)
 	%LeftPaddle.position = ((anim_lpad_start_pos * (1.0-weight)) + 
 		(Vector2(120, Globals.GAME_SIZE.y / 2.0) * weight))
 	%RightPaddle.position = ((anim_rpad_start_pos * (1.0-weight)) + 
@@ -443,7 +449,7 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	%PrimaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer.visible
 	%SecondaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer/%QuestionSprite.visible
 	%PrimaryArrowPointer.modulate = Color(1.0, 1.0, 1.0, 
-		clampf(proportion_from_range(playthrough, ARROWS_FADEIN_START, ARROWS_FADEIN_END) / 2.0, 0.0, 0.5))
+		clampf(prop_through_range(playthrough, ARROWS_FADEIN_START, ARROWS_FADEIN_END) / 2.0, 0.0, 0.5))
 	%SecondaryArrowPointer.modulate = %PrimaryArrowPointer.modulate
 	# Arrow pointers movement:
 	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (
@@ -453,80 +459,81 @@ func handle_winloss_reserve_p1_animation(playthrough: float):
 	# Return the ball to the center:
 	const BALL_RETURN_START: float = 0.3
 	const BALL_RETURN_END: float = ARROWS_FADEIN_START
-	weight = ease_out(clampf(proportion_from_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
+	weight = ease_out(clampf(prop_through_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
 	%Ball.position = ((anim_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
 	# Use ball trail:
 	balltrail_positions.append(%Ball.position)
 	balltrail_times.append(Time.get_ticks_msec())
 	update_ball_trail()
 
-var winloss_reserve_p1_to_conclude: bool = false
-func handle_winloss_reserve_p1_conclusion():
+var winloss_anim_to_conclude: bool = false
+func winloss_anim_conclusion():
 	reset_scores_visuals()
 	reset_paddles()
 	reset_balltrail()
 	reset_ball()
 	ball_velocity = random_serve_velocity()
 	anim_arrow_serve_angle = ball_velocity.angle()
-	foul_ball_guilt_is_plr2 = ball_velocity.x > 0.0
+	foulball_cause_is_plr2 = ball_velocity.x > 0.0
 	postserve_point_towards_plr2 = ball_velocity.x > 0.0
 
-var foul_ball_inspect_start_time: int = -9999999
-var foul_ball_reserve_start_time: int = -9999999
-func checkdo_foul_ball():
-	# Foul ball reserve part 1 (plays up until regular gameplay resumes):
-	var playthrough: float = proportion_from_range(Time.get_ticks_msec(),
-		foul_ball_reserve_start_time,
-		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION)
+# The reserve that occurs when the referee calls a foul ball:
+var foulball_suspicion_start_time: int = BAD_TIME
+var foulball_reserve_start_time: int = BAD_TIME
+func handle_foulball():
+	# Serving animation:
+	var playthrough: float = prop_through_range(Time.get_ticks_msec(),
+		foulball_reserve_start_time,
+		foulball_reserve_start_time + FOULBALL_RESERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		foul_ball_reserve_p1_to_conclude = true
-		handle_foul_ball_reserve_p1_animation(playthrough)
+		foulball_reserve_anim_to_conclude = true
+		foulball_reserve_animation(playthrough)
 		return
-	if foul_ball_reserve_p1_to_conclude:
-		foul_ball_reserve_p1_to_conclude = false
-		handle_foul_ball_reserve_p1_conclusion()
-	# Foul ball reserve part 2 (plays after regular gameplay resumes):
-	playthrough = proportion_from_range(Time.get_ticks_msec(),
-		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION,
-		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION + POSTSERVE_ANIM_DURATION)
+	if foulball_reserve_anim_to_conclude:
+		foulball_reserve_anim_to_conclude = false
+		foulball_reserve_anim_conclusion()
+	# Postserve animation:
+	playthrough = prop_through_range(Time.get_ticks_msec(),
+		foulball_reserve_start_time + FOULBALL_RESERVE_ANIM_DURATION,
+		foulball_reserve_start_time + FOULBALL_RESERVE_ANIM_DURATION + POSTSERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		postserve_anim_to_conclude = "foul_ball"
-		handle_postserve_animation(playthrough)
+		postserve_anim_to_conclude = "foulball"
+		postserve_animation(playthrough)
 		return
-	if postserve_anim_to_conclude == "foul_ball":
+	if postserve_anim_to_conclude == "foulball":
 		postserve_anim_to_conclude = ""
-		handle_postserve_anim_conclusion()
-	# Foul ball initiation check:
-	if not (foul_ball_suspicion_to_conclude or foul_ball_nevermind_to_conclude):
-		if detect_foul_ball():
-			foul_ball_inspect_start_time = Time.get_ticks_msec()
-	# Foul ball inspect part 1:
-	playthrough = proportion_from_range(Time.get_ticks_msec(),
-		foul_ball_inspect_start_time,
-		foul_ball_inspect_start_time + FOUL_BALL_SUSPICION_DURATION)
+		postserve_anim_conclusion()
+	# Foul-ball state/initiation check:
+	if not (foulball_suspicion_anim_to_conclude or foulball_nevermind_anim_to_conclude):
+		if detect_foulball_state():
+			foulball_suspicion_start_time = Time.get_ticks_msec()
+	# Foul-ball suspicion animation:
+	playthrough = prop_through_range(Time.get_ticks_msec(),
+		foulball_suspicion_start_time,
+		foulball_suspicion_start_time + FOULBALL_SUSPICION_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		foul_ball_suspicion_to_conclude = true
-		handle_foul_ball_suspicion_animation(playthrough)
+		foulball_suspicion_anim_to_conclude = true
+		foulball_suspicion_animation(playthrough)
 		return
-	if foul_ball_suspicion_to_conclude:
-		foul_ball_suspicion_to_conclude = false
-		handle_foul_ball_suspicion_conclusion()
-	# Foul ball inspect part 2:
-	playthrough = proportion_from_range(Time.get_ticks_msec(),
-		foul_ball_inspect_start_time + FOUL_BALL_SUSPICION_DURATION,
-		foul_ball_inspect_start_time + FOUL_BALL_SUSPICION_DURATION + FOUL_BALL_NEVERMIND_DURATION)
-	if is_in_range_f(playthrough, 0.0, 1.0) or foul_ball_reserve_p1_to_conclude:
-		foul_ball_nevermind_to_conclude = true
-		handle_foul_ball_nevermind_animation(playthrough)
+	if foulball_suspicion_anim_to_conclude:
+		foulball_suspicion_anim_to_conclude = false
+		foulball_suspicion_anim_conclusion()
+	# Foul-ball nevermind animation:
+	playthrough = prop_through_range(Time.get_ticks_msec(),
+		foulball_suspicion_start_time + FOULBALL_SUSPICION_ANIM_DURATION,
+		foulball_suspicion_start_time + FOULBALL_SUSPICION_ANIM_DURATION + FOULBALL_NEVERMIND_ANIM_DURATION)
+	if is_in_range_f(playthrough, 0.0, 1.0) or foulball_reserve_anim_to_conclude:
+		foulball_nevermind_anim_to_conclude = true
+		foulball_nevermind_animation(playthrough)
 		return
-	if foul_ball_nevermind_to_conclude and not foul_ball_reserve_p1_to_conclude:
-		foul_ball_nevermind_to_conclude = false
-		handle_foul_ball_nevermind_conclusion()
+	if foulball_nevermind_anim_to_conclude and not foulball_reserve_anim_to_conclude:
+		foulball_nevermind_anim_to_conclude = false
+		foulball_nevermind_anim_conclusion()
 
-func detect_foul_ball() -> bool:
-	if (first_serve_p1_to_conclude or 
-	winloss_reserve_p1_to_conclude or
-	foul_ball_reserve_p1_to_conclude):
+func detect_foulball_state() -> bool:
+	if (firstserve_anim_to_conclude or 
+	winloss_anim_to_conclude or
+	foulball_reserve_anim_to_conclude):
 		return false
 	return (
 		(abs(ball_velocity.x) < (Globals.ball_min_speed / 3.0)) or # (aka ~66.42 deg at min speed)
@@ -534,12 +541,12 @@ func detect_foul_ball() -> bool:
 		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > rad_to_deg(84.0))
 	)
 
-const FOUL_BALL_SUSPICION_DURATION: int = 2000
-func handle_foul_ball_suspicion_animation(playthrough: float):
+const FOULBALL_SUSPICION_ANIM_DURATION: int = 2000
+func foulball_suspicion_animation(playthrough: float):
 	const REF_RISE_START: float = 0.0
 	const REF_RISE_END: float = 0.5
 	%Referee.position.y = Globals.GAME_SIZE.y + (144.0 - (180.0 * 
-		clampf(proportion_from_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0)))
+		clampf(prop_through_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0)))
 	const ELLIPSIS_START: float = 0.0
 	const ELLIPSIS_END: float = 1.0
 	const ELLIPSIS_MID1: float = ELLIPSIS_START + ((ELLIPSIS_END - ELLIPSIS_START) / 3.0)
@@ -548,40 +555,40 @@ func handle_foul_ball_suspicion_animation(playthrough: float):
 	%EllipsisDot2.visible = playthrough > ELLIPSIS_MID1
 	%EllipsisDot3.visible = playthrough > ELLIPSIS_MID2
 
-var foul_ball_suspicion_to_conclude: bool = false
-func handle_foul_ball_suspicion_conclusion():
+var foulball_suspicion_anim_to_conclude: bool = false
+func foulball_suspicion_anim_conclusion():
 	%EllipsisDot1.visible = false
 	%EllipsisDot2.visible = false
 	%EllipsisDot3.visible = false
 	reset_referee()
-	if detect_foul_ball():
-		foul_ball_reserve_p1_to_conclude = true
-		foul_ball_inspect_start_time = -999999
-		foul_ball_reserve_start_time = Time.get_ticks_msec()
+	if detect_foulball_state():
+		foulball_reserve_anim_to_conclude = true
+		foulball_suspicion_start_time = BAD_TIME
+		foulball_reserve_start_time = Time.get_ticks_msec()
 		anim_ball_start_pos = %Ball.position
 		anim_lpad_start_pos = %LeftPaddle.position
 		anim_rpad_start_pos = %RightPaddle.position
 	else:
-		foul_ball_reserve_p1_to_conclude = false
-		foul_ball_reserve_start_time = -999999
+		foulball_reserve_anim_to_conclude = false
+		foulball_reserve_start_time = BAD_TIME
 
-const FOUL_BALL_NEVERMIND_DURATION: int = 500
-func handle_foul_ball_nevermind_animation(playthrough: float):
+const FOULBALL_NEVERMIND_ANIM_DURATION: int = 500
+func foulball_nevermind_animation(playthrough: float):
 	%Referee.position.y = Globals.GAME_SIZE.y + -36.0 + (180.0 * 
-		clampf(proportion_from_range(playthrough, 0.0, 1.0), 0.0, 1.0))
+		clampf(prop_through_range(playthrough, 0.0, 1.0), 0.0, 1.0))
 
-var foul_ball_nevermind_to_conclude: bool = false
-func handle_foul_ball_nevermind_conclusion():
+var foulball_nevermind_anim_to_conclude: bool = false
+func foulball_nevermind_anim_conclusion():
 	reset_referee()
 
-const FOUL_BALL_RESERVE_P1_DURATION: int = 4500
-var foul_ball_guilt_is_plr2: bool = false
-func handle_foul_ball_reserve_p1_animation(playthrough: float):
+const FOULBALL_RESERVE_ANIM_DURATION: int = 4500
+var foulball_cause_is_plr2: bool = false
+func foulball_reserve_animation(playthrough: float):
 	# Referee animation:
 	const REF_RISE_START: float = 0.0
 	const REF_RISE_END: float = 0.15
 	%Referee.position.y = Globals.GAME_SIZE.y + -36.0 - (108.0 * 
-		clampf(proportion_from_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0))
+		clampf(prop_through_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0))
 	const REF_FOUL_GESTURE_START: float = REF_RISE_START
 	const REF_FOUL_GESTURE_END: float = 0.25
 	const REF_COUNT_START: float = 0.5
@@ -589,7 +596,7 @@ func handle_foul_ball_reserve_p1_animation(playthrough: float):
 	const REF_COUNT_MID1: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 3.0)
 	const REF_COUNT_MID2: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 1.5)
 	if is_in_range_f(playthrough, REF_FOUL_GESTURE_START, REF_FOUL_GESTURE_END):
-		%Referee.scale.x = (1.0 if foul_ball_guilt_is_plr2 else -1.0)
+		%Referee.scale.x = (1.0 if foulball_cause_is_plr2 else -1.0)
 		%Referee.play("foulball_gesture")
 	else:
 		%Referee.scale.x = 1.0
@@ -607,21 +614,21 @@ func handle_foul_ball_reserve_p1_animation(playthrough: float):
 	%PrimaryArrowPointer.visible = playthrough > ARROW_FADEIN_START
 	%PrimaryArrowPointer/%QuestionSprite.visible = false
 	%PrimaryArrowPointer.modulate = Color(1.0, 1.0, 1.0, 
-		clampf(proportion_from_range(playthrough, ARROW_FADEIN_START, ARROW_FADEIN_END), 0.0, 1.0))
-	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (180.0 if foul_ball_guilt_is_plr2 else 0.0)
+		clampf(prop_through_range(playthrough, ARROW_FADEIN_START, ARROW_FADEIN_END), 0.0, 1.0))
+	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (180.0 if foulball_cause_is_plr2 else 0.0)
 	# Reserve line:
 	%FoulReserveLine.visible = true
 	%FoulReserveLine.modulate = %PrimaryArrowPointer.modulate 
 	%FoulReserveLine.points = PackedVector2Array([
-		Vector2((Globals.GAME_SIZE.x / 2.0) + (170.0 * (-1.0 if foul_ball_guilt_is_plr2 else 1.0)), Globals.GAME_SIZE.y / 2.0),
-		Vector2((0.0 if foul_ball_guilt_is_plr2 else Globals.GAME_SIZE.x), Globals.GAME_SIZE.y / 2.0),
+		Vector2((Globals.GAME_SIZE.x / 2.0) + (170.0 * (-1.0 if foulball_cause_is_plr2 else 1.0)), Globals.GAME_SIZE.y / 2.0),
+		Vector2((0.0 if foulball_cause_is_plr2 else Globals.GAME_SIZE.x), Globals.GAME_SIZE.y / 2.0),
 	])
 	# Ball animation and velocity (set for the sake of CPU behavior):
 	const BALL_RETURN_START: float = 0.0
 	const BALL_RETURN_END: float = ARROW_FADEIN_START
-	var weight: float = ease_out(clampf(proportion_from_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
+	var weight: float = ease_out(clampf(prop_through_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
 	%Ball.position = ((anim_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
-	ball_velocity = Vector2(Globals.ball_max_speed * 0.6 * (-1.0 if foul_ball_guilt_is_plr2 else 1.0), 0.0) 
+	ball_velocity = Vector2(Globals.ball_max_speed * 0.6 * (-1.0 if foulball_cause_is_plr2 else 1.0), 0.0) 
 	postserve_point_towards_plr2 = ball_velocity.x > 0.0
 	anim_arrow_serve_angle = ball_velocity.angle()
 	# Use ball trail:
@@ -629,17 +636,15 @@ func handle_foul_ball_reserve_p1_animation(playthrough: float):
 	balltrail_times.append(Time.get_ticks_msec())
 	update_ball_trail()
 
-var foul_ball_reserve_p1_to_conclude: bool = false
-func handle_foul_ball_reserve_p1_conclusion():
+var foulball_reserve_anim_to_conclude: bool = false
+func foulball_reserve_anim_conclusion():
 	pass
-
-
 
 const POSTSERVE_ANIM_DURATION: int = 1250
 var postserve_point_towards_plr2: bool = false
-func handle_postserve_animation(playthrough: float):
-	const REF_POINTING_LOWERING_SPLIT: float = 0.5
+func postserve_animation(playthrough: float):
 	# Referee animation handling:
+	const REF_POINTING_LOWERING_SPLIT: float = 0.5
 	if (playthrough > REF_POINTING_LOWERING_SPLIT) or is_zero_approx(ball_velocity.x):
 		%Referee.scale.x = 1.0
 		%Referee.play("idle")
@@ -650,24 +655,22 @@ func handle_postserve_animation(playthrough: float):
 	if (playthrough > REF_POINTING_LOWERING_SPLIT):
 		%Referee.position.y = (
 			(Globals.GAME_SIZE.y - 144.0) +
-			288.0 * proportion_from_range(playthrough, REF_POINTING_LOWERING_SPLIT, 1.0)
+			288.0 * prop_through_range(playthrough, REF_POINTING_LOWERING_SPLIT, 1.0)
 		)
 	# Arrow point and fadeout:
 	const ARROW_FADEOUT_START: float = 0.0
 	const ARROW_FADEOUT_END: float = 0.5
 	%SecondaryArrowPointer.visible = false
 	%PrimaryArrowPointer/%QuestionSprite.visible = false
-	%PrimaryArrowPointer.modulate = Color(1.0,1.0,1.0, 
-		(1.0 - clampf(ease_out(proportion_from_range(playthrough, ARROW_FADEOUT_START, ARROW_FADEOUT_END), 0.25), 0.0, 1.0)))
+	%PrimaryArrowPointer.modulate = Color(1.0,1.0,1.0, (1.0 - 
+		clampf(ease_out(prop_through_range(playthrough, ARROW_FADEOUT_START, ARROW_FADEOUT_END), 0.25), 0.0, 1.0)))
 	%PrimaryArrowPointer/%RotationContainer.rotation = anim_arrow_serve_angle
 	%FoulReserveLine.modulate = %PrimaryArrowPointer.modulate
 
 var postserve_anim_to_conclude: String = ""
-func handle_postserve_anim_conclusion():
+func postserve_anim_conclusion():
 	reset_referee()
-	reset_arrow_pointers()
-
-
+	reset_arrow_pointers_and_line()
 
 ################################################################
 ## Gameplay functionality & CPU bot:
@@ -1062,26 +1065,26 @@ func handle_ball_collision_movement(delta: float):
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
 					ball_velocity = calc_paddlehit_bounce(ball_curr_position, false)
-					foul_ball_guilt_is_plr2 = false
+					foulball_cause_is_plr2 = false
 				elif collider == %LeftPaddle/CharCollider:
 					ballshapecast_current_exceptions.append(%LeftPaddle/CharCollider)
 					%BallShapeCast.add_exception(%LeftPaddle/CharCollider)
 					rem_add_ballshapecast_coll_exceptions(
 						%RightPaddle/PadCollider, %LeftPaddle/PadCollider)
 					ball_velocity = calc_charthrow(ball_velocity, false)
-					foul_ball_guilt_is_plr2 = false
+					foulball_cause_is_plr2 = false
 				elif collider == %RightPaddle/PadCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/PadCollider, %RightPaddle/PadCollider)
 					ball_velocity = calc_paddlehit_bounce(ball_curr_position, true)
-					foul_ball_guilt_is_plr2 = true
+					foulball_cause_is_plr2 = true
 				elif collider == %RightPaddle/CharCollider:
 					ballshapecast_current_exceptions.append(%RightPaddle/CharCollider)
 					%BallShapeCast.add_exception(%RightPaddle/CharCollider)
 					rem_add_ballshapecast_coll_exceptions(
 						%LeftPaddle/PadCollider, %RightPaddle/PadCollider)
 					ball_velocity = calc_charthrow(ball_velocity, true)
-					foul_ball_guilt_is_plr2 = true
+					foulball_cause_is_plr2 = true
 				elif collider == %CeilingCollider:
 					rem_add_ballshapecast_coll_exceptions(
 						%FloorCollider, %CeilingCollider)
