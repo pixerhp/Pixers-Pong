@@ -248,14 +248,14 @@ func checkdo_first_serve():
 	playthrough = proportion_from_range(
 		Time.get_ticks_msec(), 
 		first_serve_start_time + FIRST_SERVE_P1_DURATION, 
-		first_serve_start_time + FIRST_SERVE_P1_DURATION + FIRST_SERVE_P2_DURATION)
+		first_serve_start_time + FIRST_SERVE_P1_DURATION + POSTSERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		first_serve_p2_to_conclude = true
-		handle_first_serve_p2_animation(playthrough)
+		postserve_anim_to_conclude = "first_serve"
+		handle_postserve_animation(playthrough)
 		return
-	if first_serve_p2_to_conclude:
-		first_serve_p2_to_conclude = false
-		handle_first_serve_p2_conclusion()
+	if postserve_anim_to_conclude == "first_serve":
+		postserve_anim_to_conclude = ""
+		handle_postserve_anim_conclusion()
 
 const FIRST_SERVE_P1_DURATION: int = 5000
 func handle_first_serve_p1_animation(playthrough: float):
@@ -312,42 +312,11 @@ var first_serve_p1_to_conclude: bool = false
 func handle_first_serve_p1_conclusion():
 	reset_paddles()
 	reset_scores_visuals()
-	reset_referee()
-	%Referee.position.y = Globals.GAME_SIZE.y - 144.0
-	reset_arrow_pointers()
 	reset_ball()
 	ball_velocity = random_serve_velocity()
 	anim_arrow_serve_angle = ball_velocity.angle()
 	foul_ball_guilt_is_plr2 = ball_velocity.x > 0.0
-
-const FIRST_SERVE_P2_DURATION: int = 1500
-func handle_first_serve_p2_animation(playthrough: float):
-	const REF_POINTING_LOWERING_SPLIT: float = 0.666666
-	# Referee animation handling:
-	if (playthrough > REF_POINTING_LOWERING_SPLIT) or is_equal_approx(ball_velocity.x, 0.0):
-		%Referee.scale.x = 1.0
-		%Referee.play("idle")
-	else:
-		%Referee.play("serve_gesture")
-		%Referee.scale.x = (-1.0 if (ball_velocity.x < 0.0) else 1.0)
-	# Referee position handling:
-	if (playthrough > REF_POINTING_LOWERING_SPLIT):
-		%Referee.position.y = (
-			(Globals.GAME_SIZE.y - 144.0) +
-			288.0 * proportion_from_range(playthrough, REF_POINTING_LOWERING_SPLIT, 1.0)
-		)
-	# Arrow point and fadeout:
-	const ARROW_FADEOUT_START: float = 0.0
-	const ARROW_FADEOUT_END: float = 0.5
-	%PrimaryArrowPointer.visible = true
-	%PrimaryArrowPointer.modulate = Color(1.0,1.0,1.0, 
-		(1.0 - clampf(ease_out(proportion_from_range(playthrough, ARROW_FADEOUT_START, ARROW_FADEOUT_END), 0.25), 0.0, 1.0)))
-	%PrimaryArrowPointer/%RotationContainer.rotation = anim_arrow_serve_angle
-
-var first_serve_p2_to_conclude: bool = false
-func handle_first_serve_p2_conclusion():
-	reset_referee()
-	reset_arrow_pointers()
+	postserve_point_towards_plr2 = ball_velocity.x > 0.0
 
 var winloss_reserve_start_time: int = -9999999
 func checkdo_winloss_reserve():
@@ -367,14 +336,14 @@ func checkdo_winloss_reserve():
 	# Winloss reserve part 2 (plays after regular gameplay resumes):
 	playthrough = proportion_from_range(Time.get_ticks_msec(), 
 		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION, 
-		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION + WINLOSS_RESERVE_P2_DURATION)
+		winloss_reserve_start_time + WINLOSS_RESERVE_P1_DURATION + POSTSERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		winloss_reserve_p2_to_conclude = true
-		handle_winloss_reserve_p2_animation(playthrough)
+		postserve_anim_to_conclude = "winloss"
+		handle_postserve_animation(playthrough)
 		return
-	if winloss_reserve_p2_to_conclude:
-		winloss_reserve_p2_to_conclude = false
-		handle_winloss_reserve_p2_conclusion()
+	if postserve_anim_to_conclude == "winloss":
+		postserve_anim_to_conclude = ""
+		handle_postserve_anim_conclusion()
 
 func checkdo_winloss_condition():
 	# Check whether the ball is significantly past the left/right paddle:
@@ -495,41 +464,12 @@ var winloss_reserve_p1_to_conclude: bool = false
 func handle_winloss_reserve_p1_conclusion():
 	reset_scores_visuals()
 	reset_paddles()
-	reset_arrow_pointers()
 	reset_balltrail()
 	reset_ball()
 	ball_velocity = random_serve_velocity()
 	anim_arrow_serve_angle = ball_velocity.angle()
 	foul_ball_guilt_is_plr2 = ball_velocity.x > 0.0
-
-const WINLOSS_RESERVE_P2_DURATION: int = 1250
-func handle_winloss_reserve_p2_animation(playthrough: float):
-	const REF_POINTING_LOWERING_SPLIT: float = 0.5
-	# Referee animation handling:
-	if (playthrough > REF_POINTING_LOWERING_SPLIT) or is_equal_approx(ball_velocity.x, 0.0):
-		%Referee.scale.x = 1.0
-		%Referee.play("idle")
-	else:
-		%Referee.play("serve_gesture")
-		%Referee.scale.x = (-1.0 if (ball_velocity.x < 0.0) else 1.0)
-	# Referee position handling:
-	if (playthrough > REF_POINTING_LOWERING_SPLIT):
-		%Referee.position.y = (
-			(Globals.GAME_SIZE.y - 144.0) +
-			288.0 * proportion_from_range(playthrough, REF_POINTING_LOWERING_SPLIT, 1.0)
-		)
-	# Arrow point and fadeout:
-	const ARROW_FADEOUT_START: float = 0.0
-	const ARROW_FADEOUT_END: float = 0.5
-	%PrimaryArrowPointer.visible = true
-	%PrimaryArrowPointer.modulate = Color(1.0,1.0,1.0, 
-		(1.0 - clampf(ease_out(proportion_from_range(playthrough, ARROW_FADEOUT_START, ARROW_FADEOUT_END), 0.25), 0.0, 1.0)))
-	%PrimaryArrowPointer/%RotationContainer.rotation = anim_arrow_serve_angle
-
-var winloss_reserve_p2_to_conclude: bool = false
-func handle_winloss_reserve_p2_conclusion():
-	reset_referee()
-	reset_arrow_pointers()
+	postserve_point_towards_plr2 = ball_velocity.x > 0.0
 
 var foul_ball_inspect_start_time: int = -9999999
 var foul_ball_reserve_start_time: int = -9999999
@@ -548,14 +488,14 @@ func checkdo_foul_ball():
 	# Foul ball reserve part 2 (plays after regular gameplay resumes):
 	playthrough = proportion_from_range(Time.get_ticks_msec(),
 		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION,
-		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION + FOUL_BALL_RESERVE_P2_DURATION)
+		foul_ball_reserve_start_time + FOUL_BALL_RESERVE_P1_DURATION + POSTSERVE_ANIM_DURATION)
 	if is_in_range_f(playthrough, 0.0, 1.0):
-		foul_ball_reserve_p2_to_conclude = true
-		handle_foul_ball_reserve_p2_animation(playthrough)
+		postserve_anim_to_conclude = "foul_ball"
+		handle_postserve_animation(playthrough)
 		return
-	if foul_ball_reserve_p2_to_conclude:
-		foul_ball_reserve_p2_to_conclude = false
-		handle_foul_ball_reserve_p2_conclusion()
+	if postserve_anim_to_conclude == "foul_ball":
+		postserve_anim_to_conclude = ""
+		handle_postserve_anim_conclusion()
 	# Foul ball initiation check:
 	if not (foul_ball_suspicion_to_conclude or foul_ball_nevermind_to_conclude):
 		if detect_foul_ball():
@@ -589,9 +529,9 @@ func detect_foul_ball() -> bool:
 	foul_ball_reserve_p1_to_conclude):
 		return false
 	return (
-		#(ball_velocity.x < (Globals.ball_min_speed / 2.0)) or 
+		(abs(ball_velocity.x) < (Globals.ball_min_speed / 3.0)) or # (aka ~66.42 deg at min speed)
 		is_zero_approx(ball_velocity.length()) or
-		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.925))
+		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > rad_to_deg(84.0))
 	)
 
 const FOUL_BALL_SUSPICION_DURATION: int = 2000
@@ -634,7 +574,7 @@ var foul_ball_nevermind_to_conclude: bool = false
 func handle_foul_ball_nevermind_conclusion():
 	reset_referee()
 
-const FOUL_BALL_RESERVE_P1_DURATION: int = 4000
+const FOUL_BALL_RESERVE_P1_DURATION: int = 4500
 var foul_ball_guilt_is_plr2: bool = false
 func handle_foul_ball_reserve_p1_animation(playthrough: float):
 	# Referee animation:
@@ -681,21 +621,53 @@ func handle_foul_ball_reserve_p1_animation(playthrough: float):
 	const BALL_RETURN_END: float = ARROW_FADEIN_START
 	var weight: float = ease_out(clampf(proportion_from_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
 	%Ball.position = ((anim_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
-	ball_velocity = Vector2(Globals.ball_max_speed * 0.75 * (-1.0 if foul_ball_guilt_is_plr2 else 1.0), 0.0) 
+	ball_velocity = Vector2(Globals.ball_max_speed * 0.6 * (-1.0 if foul_ball_guilt_is_plr2 else 1.0), 0.0) 
+	postserve_point_towards_plr2 = ball_velocity.x > 0.0
+	anim_arrow_serve_angle = ball_velocity.angle()
+	# Use ball trail:
+	balltrail_positions.append(%Ball.position)
+	balltrail_times.append(Time.get_ticks_msec())
+	update_ball_trail()
 
 var foul_ball_reserve_p1_to_conclude: bool = false
 func handle_foul_ball_reserve_p1_conclusion():
 	pass
 
-const FOUL_BALL_RESERVE_P2_DURATION: int = 750
-func handle_foul_ball_reserve_p2_animation(playthrough: float):
-	# !!! temp just descends, remember to add serve point stuff.
-	%Referee.position.y = Globals.GAME_SIZE.y - (144.0 - (288.0 * 
-		clampf(proportion_from_range(playthrough, 0.0, 1.0), 0.0, 1.0)))
 
-var foul_ball_reserve_p2_to_conclude: bool = false
-func handle_foul_ball_reserve_p2_conclusion():
-	pass
+
+const POSTSERVE_ANIM_DURATION: int = 1250
+var postserve_point_towards_plr2: bool = false
+func handle_postserve_animation(playthrough: float):
+	const REF_POINTING_LOWERING_SPLIT: float = 0.5
+	# Referee animation handling:
+	if (playthrough > REF_POINTING_LOWERING_SPLIT) or is_zero_approx(ball_velocity.x):
+		%Referee.scale.x = 1.0
+		%Referee.play("idle")
+	else:
+		%Referee.play("serve_gesture")
+		%Referee.scale.x = (1.0 if postserve_point_towards_plr2 else -1.0)
+	# Referee position handling:
+	if (playthrough > REF_POINTING_LOWERING_SPLIT):
+		%Referee.position.y = (
+			(Globals.GAME_SIZE.y - 144.0) +
+			288.0 * proportion_from_range(playthrough, REF_POINTING_LOWERING_SPLIT, 1.0)
+		)
+	# Arrow point and fadeout:
+	const ARROW_FADEOUT_START: float = 0.0
+	const ARROW_FADEOUT_END: float = 0.5
+	%SecondaryArrowPointer.visible = false
+	%PrimaryArrowPointer/%QuestionSprite.visible = false
+	%PrimaryArrowPointer.modulate = Color(1.0,1.0,1.0, 
+		(1.0 - clampf(ease_out(proportion_from_range(playthrough, ARROW_FADEOUT_START, ARROW_FADEOUT_END), 0.25), 0.0, 1.0)))
+	%PrimaryArrowPointer/%RotationContainer.rotation = anim_arrow_serve_angle
+	%FoulReserveLine.modulate = %PrimaryArrowPointer.modulate
+
+var postserve_anim_to_conclude: String = ""
+func handle_postserve_anim_conclusion():
+	reset_referee()
+	reset_arrow_pointers()
+
+
 
 ################################################################
 ## Gameplay functionality & CPU bot:

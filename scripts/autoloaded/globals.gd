@@ -11,7 +11,7 @@ var prevent_ball_backhits: bool = true
 
 var plr1_cpu_mode: int = CPU_MODES.OFF
 var plr1_force_slow: bool = false
-var plr2_cpu_mode: int = CPU_MODES.MASTER
+var plr2_cpu_mode: int = CPU_MODES.OFF
 var plr2_force_slow: bool = false
 
 var plr1_score: int = 0
