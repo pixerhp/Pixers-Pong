@@ -14,11 +14,6 @@ var plr1_force_slow: bool = false
 var plr2_cpu_mode: int = CPU_MODES.OFF
 var plr2_force_slow: bool = false
 
-var plr1_score: int = 0
-var plr1_streak: int = 0
-var plr2_score: int = 0
-var plr2_streak: int = 0
-
 enum CPU_MODES {
 	OFF,
 	OFF_BUT_YOURE_A_ROBOT, # Beep boop.

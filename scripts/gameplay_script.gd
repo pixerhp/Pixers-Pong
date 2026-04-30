@@ -5,10 +5,14 @@ extends Node
 ################################################################
 
 const BAD_TIME: int = -99999999999
+var plr1_score: int = 0
+var plr1_streak: int = 0
+var plr2_score: int = 0
+var plr2_streak: int = 0
 
 func _ready():
 	reset_all_gameobjects()
-	update_scores_text()
+	reset_scores()
 	reset_cpu_inputs(false)
 	reset_cpu_inputs(true)
 	firstserve_start_time = Time.get_ticks_msec()
@@ -200,14 +204,21 @@ func reset_arrow_pointers_and_line():
 	%FoulReserveLine.clear_points()
 	%FoulReserveLine.visible = false
 
+func reset_scores():
+	plr1_score = 0
+	plr2_score = 0
+	plr1_streak = 0
+	plr2_streak = 0
+	update_scores_text()
+
 const STREAK_PREFIX: String = "🗘"
 func update_scores_text():
-	%LeftScoreStreak/%ScoreContainer/%ScoreLabel.text = str(Globals.plr1_score)
-	if Globals.plr1_streak == 0: %LeftScoreStreak/%StreakContainer/%StreakLabel.text = ""
-	else: %LeftScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr1_streak)
-	%RightScoreStreak/%ScoreContainer/%ScoreLabel.text = str(Globals.plr2_score)
-	if Globals.plr2_streak == 0: %RightScoreStreak/%StreakContainer/%StreakLabel.text = ""
-	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(Globals.plr2_streak)
+	%LeftScoreStreak/%ScoreContainer/%ScoreLabel.text = str(plr1_score)
+	if plr1_streak == 0: %LeftScoreStreak/%StreakContainer/%StreakLabel.text = ""
+	else: %LeftScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(plr1_streak)
+	%RightScoreStreak/%ScoreContainer/%ScoreLabel.text = str(plr2_score)
+	if plr2_streak == 0: %RightScoreStreak/%StreakContainer/%StreakLabel.text = ""
+	else: %RightScoreStreak/%StreakContainer/%StreakLabel.text = STREAK_PREFIX + str(plr2_streak)
 
 ################################################################
 ## Animations related:
@@ -362,9 +373,9 @@ func detect_winloss_state() -> bool:
 func initiate_winloss():
 	# Change player scores/streaks:
 	if (%Ball.position.x < (Globals.GAME_SIZE.x / 2.0)):
-		Globals.plr2_score += 1; Globals.plr2_streak += 1; Globals.plr1_streak = 0;
+		plr2_score += 1; plr2_streak += 1; plr1_streak = 0;
 	else:
-		Globals.plr1_score += 1; Globals.plr1_streak += 1; Globals.plr2_streak = 0;
+		plr1_score += 1; plr1_streak += 1; plr2_streak = 0;
 	update_scores_text()
 	# Update other variables in preparation for winloss animations:
 	anim_ball_start_pos = %Ball.position
@@ -386,7 +397,7 @@ func winloss_animation(playthrough: float):
 	const REF_COUNT_MID1: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 3.0)
 	const REF_COUNT_MID2: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 1.5)
 	if (playthrough < REF_COUNT_START):
-		%Referee.scale.x = (-1.0 if (Globals.plr1_streak > 0) else 1.0)
+		%Referee.scale.x = (-1.0 if (plr1_streak > 0) else 1.0)
 		%Referee.play("winner_gesture")
 	else:
 		%Referee.scale.x = 1.0
@@ -405,15 +416,15 @@ func winloss_animation(playthrough: float):
 		(prop_through_range(playthrough, SCORE_FADEIN_START, SCORE_FADEIN_END)
 		if (playthrough < SCORE_FADEOUT_START) else
 		(1.0 - prop_through_range(playthrough, SCORE_FADEOUT_START, SCORE_FADEOUT_END))))
-	%LeftScoreStreak.modulate = Color(1.0,1.0,1.0, 0.24 + ((0.6 if (Globals.plr1_streak > 0) else 0.4) * clampf(weight, 0.0, 1.0)))
-	%RightScoreStreak.modulate = Color(1.0,1.0,1.0, 0.24 + ((0.6 if (Globals.plr2_streak > 0) else 0.4) * clampf(weight, 0.0, 1.0)))
+	%LeftScoreStreak.modulate = Color(1.0,1.0,1.0, 0.24 + ((0.6 if (plr1_streak > 0) else 0.4) * clampf(weight, 0.0, 1.0)))
+	%RightScoreStreak.modulate = Color(1.0,1.0,1.0, 0.24 + ((0.6 if (plr2_streak > 0) else 0.4) * clampf(weight, 0.0, 1.0)))
 	%LeftScoreStreak.position.y = 70.0 + (55.0 * ease_out(clampf(weight, 0.0, 1.0), 2.0))
 	%RightScoreStreak.position.y = %LeftScoreStreak.position.y
 	%LeftScoreStreak.scale.x = 0.2 + (0.1 * ease_out(clampf(weight, 0.0, 1.0), 0.75))
 	%LeftScoreStreak.scale.y = %LeftScoreStreak.scale.x
 	%RightScoreStreak.scale = %LeftScoreStreak.scale
 	var rot: float = ((8.0 * clampf(weight, 0.0, 1.0)) * sin(float(Time.get_ticks_msec()) / (1000.0 / TAU)))
-	if (Globals.plr1_streak > 0):
+	if (plr1_streak > 0):
 		%LeftScoreStreak/%ScoreContainer.rotation_degrees = rot
 		%LeftScoreStreak/%StreakContainer.rotation = %LeftScoreStreak/%ScoreContainer.rotation
 	else:
@@ -437,11 +448,11 @@ func winloss_animation(playthrough: float):
 	else:
 		%LeftPaddle/%AnimChar.play(
 			("plr_win" if (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF) else "bot_win")
-			if (Globals.plr1_streak > 0) else
+			if (plr1_streak > 0) else
 			("plr_lose" if (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF) else "bot_lose"))
 		%RightPaddle/%AnimChar.play(
 			("plr_win" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_win")
-			if (Globals.plr2_streak > 0) else
+			if (plr2_streak > 0) else
 			("plr_lose" if (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF) else "bot_lose"))
 	# Arrow pointers fade-in and visibility:
 	const ARROWS_FADEIN_START: float = 0.5
@@ -1216,6 +1227,7 @@ func _on_resume_button_pressed():
 	initiate_unpause()
 
 func _on_restart_button_pressed():
+	reset_scores()
 	get_tree().reload_current_scene()
 
 func _on_settings_button_pressed():
