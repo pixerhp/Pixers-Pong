@@ -26,7 +26,8 @@ func _process(delta: float):
 	checkdo_foul_ball()
 	
 	if Input.is_action_just_pressed("TEMP_TEST_FOUL"):
-		foul_ball_reserve_start_time = Time.get_ticks_msec()
+		foul_ball_inspect_start_time = Time.get_ticks_msec()
+		ball_velocity = Vector2(0,0)
 	
 	# Regular gameplay functionality:
 	handle_paddle_cpu(false, Globals.plr1_cpu_mode)
@@ -175,7 +176,7 @@ func reset_ball():
 func reset_balltrail():
 	balltrail_positions.clear()
 	balltrail_times.clear()
-	%BallTrail.points = PackedVector2Array([])
+	%BallTrail.clear_points()
 func reset_referee():
 	%Referee.position = Vector2(Globals.GAME_SIZE.x/2.0, Globals.GAME_SIZE.y + 144.0)
 	%Referee.scale.x = 1.0
@@ -192,6 +193,8 @@ func reset_arrow_pointers():
 	%SecondaryArrowPointer/%QuestionSprite.visible = %PrimaryArrowPointer/%QuestionSprite.visible
 	%SecondaryArrowPointer.position = %PrimaryArrowPointer.position
 	%SecondaryArrowPointer/%RotationContainer.rotation_degrees = 180.0
+	%FoulReserveLine.clear_points()
+	%FoulReserveLine.visible = false
 
 const STREAK_PREFIX: String = "🗘"
 func update_scores_text():
@@ -315,6 +318,7 @@ func handle_first_serve_p1_conclusion():
 	reset_ball()
 	ball_velocity = random_serve_velocity()
 	anim_arrow_serve_angle = ball_velocity.angle()
+	foul_ball_guilt_is_plr2 = ball_velocity.x > 0.0
 
 const FIRST_SERVE_P2_DURATION: int = 1500
 func handle_first_serve_p2_animation(playthrough: float):
@@ -496,6 +500,7 @@ func handle_winloss_reserve_p1_conclusion():
 	reset_ball()
 	ball_velocity = random_serve_velocity()
 	anim_arrow_serve_angle = ball_velocity.angle()
+	foul_ball_guilt_is_plr2 = ball_velocity.x > 0.0
 
 const WINLOSS_RESERVE_P2_DURATION: int = 1250
 func handle_winloss_reserve_p2_animation(playthrough: float):
@@ -585,6 +590,7 @@ func detect_foul_ball() -> bool:
 		return false
 	return (
 		#(ball_velocity.x < (Globals.ball_min_speed / 2.0)) or 
+		is_zero_approx(ball_velocity.length()) or
 		(abs(Vector2(abs(ball_velocity.x), abs(ball_velocity.y)).angle()) > ((TAU/4.0) * 0.925))
 	)
 
@@ -628,17 +634,17 @@ var foul_ball_nevermind_to_conclude: bool = false
 func handle_foul_ball_nevermind_conclusion():
 	reset_referee()
 
-const FOUL_BALL_RESERVE_P1_DURATION: int = 5000
+const FOUL_BALL_RESERVE_P1_DURATION: int = 4000
 var foul_ball_guilt_is_plr2: bool = false
 func handle_foul_ball_reserve_p1_animation(playthrough: float):
-	# Referee:
+	# Referee animation:
 	const REF_RISE_START: float = 0.0
-	const REF_RISE_END: float = 0.1
+	const REF_RISE_END: float = 0.15
 	%Referee.position.y = Globals.GAME_SIZE.y + -36.0 - (108.0 * 
 		clampf(proportion_from_range(playthrough, REF_RISE_START, REF_RISE_END), 0.0, 1.0))
 	const REF_FOUL_GESTURE_START: float = REF_RISE_START
-	const REF_FOUL_GESTURE_END: float = 0.2
-	const REF_COUNT_START: float = 0.6
+	const REF_FOUL_GESTURE_END: float = 0.25
+	const REF_COUNT_START: float = 0.5
 	const REF_COUNT_END: float = 1.0
 	const REF_COUNT_MID1: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 3.0)
 	const REF_COUNT_MID2: float = REF_COUNT_START + ((REF_COUNT_END - REF_COUNT_START) / 1.5)
@@ -663,7 +669,19 @@ func handle_foul_ball_reserve_p1_animation(playthrough: float):
 	%PrimaryArrowPointer.modulate = Color(1.0, 1.0, 1.0, 
 		clampf(proportion_from_range(playthrough, ARROW_FADEIN_START, ARROW_FADEIN_END), 0.0, 1.0))
 	%PrimaryArrowPointer/%RotationContainer.rotation_degrees = (180.0 if foul_ball_guilt_is_plr2 else 0.0)
-	
+	# Reserve line:
+	%FoulReserveLine.visible = true
+	%FoulReserveLine.modulate = %PrimaryArrowPointer.modulate 
+	%FoulReserveLine.points = PackedVector2Array([
+		Vector2((Globals.GAME_SIZE.x / 2.0) + (170.0 * (-1.0 if foul_ball_guilt_is_plr2 else 1.0)), Globals.GAME_SIZE.y / 2.0),
+		Vector2((0.0 if foul_ball_guilt_is_plr2 else Globals.GAME_SIZE.x), Globals.GAME_SIZE.y / 2.0),
+	])
+	# Ball animation and velocity (set for the sake of CPU behavior):
+	const BALL_RETURN_START: float = 0.0
+	const BALL_RETURN_END: float = ARROW_FADEIN_START
+	var weight: float = ease_out(clampf(proportion_from_range(playthrough, BALL_RETURN_START, BALL_RETURN_END), 0.0, 1.0), 3.0)
+	%Ball.position = ((anim_ball_start_pos * (1.0 - weight)) + ((Globals.GAME_SIZE / 2.0) * weight))
+	ball_velocity = Vector2(Globals.ball_max_speed * 0.75 * (-1.0 if foul_ball_guilt_is_plr2 else 1.0), 0.0) 
 
 var foul_ball_reserve_p1_to_conclude: bool = false
 func handle_foul_ball_reserve_p1_conclusion():

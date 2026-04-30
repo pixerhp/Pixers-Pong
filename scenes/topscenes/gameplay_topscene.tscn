@@ -322,6 +322,14 @@ offset_top = 70.0
 offset_right = 872.308
 offset_bottom = 70.0
 
+[node name="FoulReserveLine" type="Line2D" parent="CenteringParent/ClippingParent" unique_id=516523413]
+unique_name_in_owner = true
+points = PackedVector2Array(0, 0, 0, 0, 736, 181, 890, 365, 713, 438, 442, 388, 427, 501, 638, 573)
+width = 2.0
+default_color = Color(1, 1, 1, 0.12156863)
+begin_cap_mode = 2
+end_cap_mode = 2
+
 [node name="LeftPaddle" parent="CenteringParent/ClippingParent" unique_id=340420252 instance=ExtResource("3_ks65t")]
 unique_name_in_owner = true
 position = Vector2(120, 324)
@@ -333,6 +341,16 @@ position = Vector2(1140, 324)
 rotation = 3.1415927
 scale = Vector2(1, -1)
 metadata/sidebump_time = -99999999
+
+[node name="PrimaryArrowPointer" parent="CenteringParent/ClippingParent" unique_id=1333024161 instance=ExtResource("8_iube2")]
+unique_name_in_owner = true
+visible = false
+position = Vector2(630, 324)
+
+[node name="SecondaryArrowPointer" parent="CenteringParent/ClippingParent" unique_id=1059361601 instance=ExtResource("8_iube2")]
+unique_name_in_owner = true
+visible = false
+position = Vector2(630, 324)
 
 [node name="BallTrail" type="Line2D" parent="CenteringParent/ClippingParent" unique_id=1365490242]
 unique_name_in_owner = true
@@ -364,16 +382,6 @@ target_position = Vector2(0, 0)
 margin = 2.0
 collide_with_areas = true
 collide_with_bodies = false
-
-[node name="PrimaryArrowPointer" parent="CenteringParent/ClippingParent" unique_id=1333024161 instance=ExtResource("8_iube2")]
-unique_name_in_owner = true
-visible = false
-position = Vector2(630, 324)
-
-[node name="SecondaryArrowPointer" parent="CenteringParent/ClippingParent" unique_id=1059361601 instance=ExtResource("8_iube2")]
-unique_name_in_owner = true
-visible = false
-position = Vector2(630, 324)
 
 [node name="Referee" type="AnimatedSprite2D" parent="CenteringParent/ClippingParent" unique_id=1568092764]
 unique_name_in_owner = true
