@@ -5,6 +5,7 @@ extends Node
 ################################################################
 
 const BAD_TIME: int = -99999999999
+
 var plr1_score: int = 0
 var plr1_streak: int = 0
 var plr2_score: int = 0
@@ -1010,7 +1011,6 @@ func handle_paddle_controls(is_plr2: bool, delta: float):
 	((SURP_EXPR_VARIATION / (1.0 + (ball_velocity.x / SURP_EXPR_FALLOFF))) + SURP_EXPR_BASE)):
 		padchar_noderef.animation = padchar_anim_prefix + "surprised"
 
-
 const SIDEBUMP_DURATION: int = 400
 const SIDEBUMP_STRENGTH_AMOUNT: float = 25.0
 func handle_paddle_sidebump_animation(is_plr2: bool):
@@ -1234,7 +1234,7 @@ func _on_settings_button_pressed():
 	pass # Replace with function body.
 
 func _on_quit_to_menu_button_pressed():
-	pass # Replace with function body.
+	get_tree().change_scene_to_file("res://scenes/topscenes/titlescreen_topscene.tscn")
 
 func _on_quit_to_desk_button_pressed():
 	get_tree().quit()

@@ -505,7 +505,6 @@ theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = ExtResource("7_emnkm")
 theme_override_styles/pressed = ExtResource("8_rfs2g")
 theme_override_styles/hover = ExtResource("9_d18oc")
-disabled = true
 text = "QUIT TO MAIN MENU"
 
 [node name="QuitToDeskButton" type="Button" parent="PauseMenuContainer/BackPanel/VBoxContainer" unique_id=550602696]
