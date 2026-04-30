@@ -34,11 +34,11 @@ enum CPU_MODES {
 	MASTER, # Predicts their opponent's paddle hit, and strategically tries to defeat them. Good luck.
 }
 
+var window_mode_pre_fullscreen: int = ProjectSettings.get_setting("display/window/size/mode")
 func _process(_delta):
-	#if Input.is_action_pressed("pause_escape"):
-		#get_tree().quit()
 	if Input.is_action_just_pressed("fullscreen_toggle"):
 		if not DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
+			window_mode_pre_fullscreen = DisplayServer.window_get_mode()
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		else:
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			DisplayServer.window_set_mode(window_mode_pre_fullscreen)
