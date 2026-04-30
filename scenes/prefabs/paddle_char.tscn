@@ -179,6 +179,5 @@ animations = [{
 
 [node name="PaddleChar" type="AnimatedSprite2D" unique_id=1333835360]
 sprite_frames = SubResource("SpriteFrames_hx5ms")
-animation = &"bot_surprised"
+animation = &"plr_idle"
 autoplay = "plr_idle"
-frame_progress = 0.65233225

@@ -45,6 +45,8 @@ func _process(delta: float):
 	handle_paddle_sidebump_animation(true)
 	handle_paddle_knockback_anim(false)
 	handle_paddle_knockback_anim(true)
+	if foulball_reserve_anim_to_conclude:
+		padchar_foulball_guilt_expression()
 
 # Variables and functions associated with pausing/unpausing functionality:
 var is_game_paused: bool = false
@@ -581,7 +583,7 @@ var foulball_nevermind_anim_to_conclude: bool = false
 func foulball_nevermind_anim_conclusion():
 	reset_referee()
 
-const FOULBALL_RESERVE_ANIM_DURATION: int = 4500
+const FOULBALL_RESERVE_ANIM_DURATION: int = 5000
 var foulball_cause_is_plr2: bool = false
 func foulball_reserve_animation(playthrough: float):
 	# Referee animation:
@@ -639,6 +641,22 @@ func foulball_reserve_animation(playthrough: float):
 var foulball_reserve_anim_to_conclude: bool = false
 func foulball_reserve_anim_conclusion():
 	pass
+
+func padchar_foulball_guilt_expression():
+	if not (Time.get_ticks_msec() < (foulball_reserve_start_time + FOULBALL_RESERVE_ANIM_DURATION)):
+		return
+	var playthrough: float = prop_through_range(Time.get_ticks_msec(), 
+		foulball_reserve_start_time, foulball_reserve_start_time + FOULBALL_RESERVE_ANIM_DURATION)
+	const GUILT_EXPRESSION_START: float = 0.0
+	const GUILT_EXPRESSION_END: float = 0.2
+	if not is_in_range_f(playthrough, GUILT_EXPRESSION_START, GUILT_EXPRESSION_END):
+		return
+	var padchar_noderef: AnimatedSprite2D = (
+		%RightPaddle/%AnimChar if foulball_cause_is_plr2 else %LeftPaddle/%AnimChar)
+	var prefix: String = ("plr" if 
+		(((not foulball_cause_is_plr2) and (Globals.plr1_cpu_mode == Globals.CPU_MODES.OFF)) or 
+		(foulball_cause_is_plr2 and (Globals.plr2_cpu_mode == Globals.CPU_MODES.OFF))) else "bot")
+	padchar_noderef.play(prefix + "_surprised")
 
 const POSTSERVE_ANIM_DURATION: int = 1250
 var postserve_point_towards_plr2: bool = false
