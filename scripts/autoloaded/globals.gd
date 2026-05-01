@@ -1,8 +1,6 @@
 extends Node
 
-var GAME_SIZE: Vector2 = Vector2( # Minimum 300x200?
-	ProjectSettings.get_setting("display/window/size/viewport_width"),
-	ProjectSettings.get_setting("display/window/size/viewport_height"),)
+var GAME_SIZE: Vector2i = Vector2i(1260, 648)
 
 var ball_max_speed: float = 4500
 var ball_min_speed: float = 300

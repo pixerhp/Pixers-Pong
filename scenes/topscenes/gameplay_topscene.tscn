@@ -324,7 +324,6 @@ offset_bottom = 70.0
 
 [node name="FoulReserveLine" type="Line2D" parent="CenteringParent/ClippingParent" unique_id=516523413]
 unique_name_in_owner = true
-points = PackedVector2Array(0, 0, 0, 0, 736, 181, 890, 365, 713, 438, 442, 388, 427, 501, 638, 573)
 width = 2.0
 default_color = Color(1, 1, 1, 0.12156863)
 begin_cap_mode = 2

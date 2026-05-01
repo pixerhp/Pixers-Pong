@@ -1,12 +1,17 @@
 [gd_scene format=3 uid="uid://hlipoo3a81a4"]
 
+[ext_resource type="Script" uid="uid://cvl8uia5vjvs8" path="res://scripts/titlescreen.gd" id="1_lfq86"]
+
 [node name="TitlescreenTopscene" type="Control" unique_id=1092844895]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -460.0
+offset_bottom = -48.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_lfq86")
 
 [node name="CenteringParent" type="Control" parent="." unique_id=75234928]
 unique_name_in_owner = true
@@ -16,10 +21,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -630.0
-offset_top = -324.0
-offset_right = 630.0
-offset_bottom = 324.0
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -35,21 +40,62 @@ grow_vertical = 2
 
 [node name="BackgroundColorRect" type="ColorRect" parent="CenteringParent/ClippingParent" unique_id=940169648]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(1260, 648)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0595, 0.0651, 0.07, 1)
+color = Color(0.17674088, 0.19441009, 0.20147726, 1)
 
-[node name="RichTextLabel" type="RichTextLabel" parent="CenteringParent/ClippingParent" unique_id=1372114320]
-layout_mode = 0
-offset_left = 333.0
-offset_top = 221.0
-offset_right = 552.0
-offset_bottom = 274.0
+[node name="VBoxContainer" type="VBoxContainer" parent="CenteringParent/ClippingParent" unique_id=2048338329]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CenteringParent/ClippingParent/VBoxContainer" unique_id=1372114320]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
 text = "Welcome to the titlescreen!
-(You're stuck here now.)"
+(This is a placeholder design.)"
+fit_content = true
 horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenteringParent/ClippingParent/VBoxContainer" unique_id=1450156029]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="CenteringParent/ClippingParent/VBoxContainer" unique_id=1844914765]
+layout_mode = 2
+text = "play"
+
+[node name="SettingsButton" type="Button" parent="CenteringParent/ClippingParent/VBoxContainer" unique_id=1725853170]
+layout_mode = 2
+disabled = true
+text = "settings
+"
+
+[node name="ExtrasButton" type="Button" parent="CenteringParent/ClippingParent/VBoxContainer" unique_id=1472631322]
+layout_mode = 2
+disabled = true
+text = "extras
+
+"
+
+[node name="QuitButton" type="Button" parent="CenteringParent/ClippingParent/VBoxContainer" unique_id=663610410]
+layout_mode = 2
+text = "quit"
+
+[connection signal="pressed" from="CenteringParent/ClippingParent/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="CenteringParent/ClippingParent/VBoxContainer/SettingsButton" to="." method="_on_settings_button_pressed"]
+[connection signal="pressed" from="CenteringParent/ClippingParent/VBoxContainer/ExtrasButton" to="." method="_on_extras_button_pressed"]
+[connection signal="pressed" from="CenteringParent/ClippingParent/VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]

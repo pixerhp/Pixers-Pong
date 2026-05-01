@@ -119,7 +119,7 @@ func reset_framing():
 	%CenteringParent.set_size(Globals.GAME_SIZE)
 	%CenteringParent.set_position(
 		(get_viewport().get_visible_rect().size / 2.0) - (Globals.GAME_SIZE / 2.0))
-	%OuterVignettePanel.set_size(Globals.GAME_SIZE + Vector2(50.0, 50.0))
+	%OuterVignettePanel.set_size(Globals.GAME_SIZE + Vector2i(50.0, 50.0))
 	var outer_vignette_stylebox: StyleBoxFlat = %OuterVignettePanel.get_theme_stylebox("panel")
 	%OuterVignettePanel.set_position(Vector2(
 		0.0 - ((outer_vignette_stylebox.border_width_left + outer_vignette_stylebox.border_width_right) / 2.0),
@@ -635,7 +635,7 @@ func foulball_reserve_animation(playthrough: float):
 	%FoulReserveLine.modulate = %PrimaryArrowPointer.modulate 
 	%FoulReserveLine.points = PackedVector2Array([
 		Vector2((Globals.GAME_SIZE.x / 2.0) + (170.0 * (-1.0 if foulball_cause_is_plr2 else 1.0)), Globals.GAME_SIZE.y / 2.0),
-		Vector2((0.0 if foulball_cause_is_plr2 else Globals.GAME_SIZE.x), Globals.GAME_SIZE.y / 2.0),
+		Vector2((0.0 if foulball_cause_is_plr2 else float(Globals.GAME_SIZE.x)), float(Globals.GAME_SIZE.y) / 2.0),
 	])
 	# Ball animation and velocity (set for the sake of CPU behavior):
 	const BALL_RETURN_START: float = 0.0
@@ -1017,7 +1017,7 @@ func handle_paddle_sidebump_animation(is_plr2: bool):
 	var paddle_noderef: Node2D = (%RightPaddle if is_plr2 else %LeftPaddle)
 	var time_since: int = Time.get_ticks_msec() - paddle_noderef.get_meta("sidebump_time")
 	if time_since > SIDEBUMP_DURATION:
-		paddle_noderef.position.x = (Globals.GAME_SIZE.x - 120) if is_plr2 else 120.0
+		paddle_noderef.position.x = (float(Globals.GAME_SIZE.x) - 120.0) if is_plr2 else 120.0
 		return
 	var bump_strength: float = paddle_noderef.get_meta("sidebump_strength")
 	var parabola_weight: float = parabola_arc_weight(time_since, SIDEBUMP_DURATION)
