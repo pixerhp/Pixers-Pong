@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://fsgd8copevej" path="res://scripts/bonus_area.gd" id="1_vypj0"]
 [ext_resource type="Texture2D" uid="uid://dhsc1gvgbgl4t" path="res://assets/art/bonus_artwork.png" id="2_mqykk"]
+[ext_resource type="Texture2D" uid="uid://dijm2r4tvteio" path="res://assets/art/bunball.png" id="3_otiun"]
 
 [node name="BonusTopscene" type="Control" unique_id=1380357261]
 layout_mode = 3
@@ -103,3 +104,9 @@ grow_vertical = 2
 position = Vector2(-496, 0)
 scale = Vector2(0.75, 0.75)
 texture = ExtResource("2_mqykk")
+
+[node name="Bunball" type="Sprite2D" parent="CenteringParent/ClippingParent" unique_id=449218673]
+visible = false
+position = Vector2(1000, 775)
+scale = Vector2(4, 4)
+texture = ExtResource("3_otiun")
